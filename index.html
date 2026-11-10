@@ -2405,7 +2405,7 @@ const HA_SKEN = [
   {k:"kaksi", t:"Kaksivuoro klo 6–22", lyh:"Kaksivuoro 6–22", ikk:[6,22], ilta:4},
   {k:"yo", t:"Yötyö klo 22–06", lyh:"Yötyö 22–06", ikk:[22,30], yo:8},
 ];
-const HA_OLETUS = {hlo:4, eur:42, ilta:15, yo:30, maksu:446, auki:true};
+const HA_OLETUS = {hlo:4, eur:42, ilta:15, yo:30, maksu:0, auki:true};
 function haAsetukset(){ let o = {}; try{ o = JSON.parse(localStorage.getItem("tt_kust")||"{}"); }catch(e){} return {...HA_OLETUS, ...o}; }
 function haTallenna(o){ try{ localStorage.setItem("tt_kust", JSON.stringify(o)); }catch(e){} }
 const haLeikkaus = (a,b,c,d) => Math.max(0, Math.min(b,d) - Math.max(a,c));
@@ -2430,14 +2430,15 @@ function haLaske(ohitJ, s, kesto, as){
 }
 const haEur = v => nf(Math.round(v)) + " €";
 const haEro = v => Math.abs(v) < 0.5 ? "±0 €" : (v>0?"+":"−") + nf(Math.round(Math.abs(v))) + " €";
-function haTaulukko(K){
+function haTaulukko(K, pitka){
   return `<table class="t hat"><thead><tr><th>Vaihtoehto</th><th class="r">Kesto</th><th class="r">Lisäaika / vrk</th><th class="r">Haitta yht.</th><th class="r">Työn lisäkulu</th><th class="r">Alueen&shy;käyttömaksu</th><th class="r">Ero</th></tr></thead><tbody>
-  ${K.rivit.map(r=>`<tr class="${r===K.paras?"best":""}"><td>${esc(r.t)}${r===K.pohja?' <span class="note">(lähtökohta)</span>':""}${r===K.paras?` <span class="vchip tod">${esc(r.tag)}</span>`:""}</td>
-    <td class="r">${nf(r.pv)} pv</td><td class="r">${nf(r.vrk,1)} h</td><td class="r"><b>${nf(r.yht,0)} h</b></td><td class="r">${r.lisa?"+"+haEur(r.lisa):"–"}</td><td class="r">${haEur(r.maksu)}</td><td class="r">${r===K.pohja?"–":`<b>${haEro(r.ero)}</b>`}</td></tr>`).join("")}</tbody></table>`;
+  ${K.rivit.map(r=>`<tr class="${r===K.paras?"best":""}"><td>${esc(pitka?r.t:r.lyh)}${r===K.pohja?' <span class="note">(lähtökohta)</span>':""}${r===K.paras?` <span class="vchip tod">${esc(r.tag)}</span>`:""}</td>
+    <td class="r">${nf(r.pv)} pv</td><td class="r">${nf(r.vrk,1)} h</td><td class="r"><b>${nf(r.yht,0)} h</b></td><td class="r">${r.lisa?"+"+haEur(r.lisa):"–"}</td><td class="r">${r.maksu?haEur(r.maksu):"–"}</td><td class="r">${r===K.pohja?"–":`<b>${haEro(r.ero)}</b>`}</td></tr>`).join("")}</tbody></table>`;
 }
 function haLomake(as){
   const f = (k,t,u,st) => `<label>${t}<span><input type="number" min="0" step="${st||1}" data-ha="${k}" value="${as[k]}">${u}</span></label>`;
   return `<div class="halom">${f("hlo","Työntekijöitä","hlö")}${f("eur","Tuntikustannus","€/h")}${f("ilta","Iltalisä klo 18–22","%")}${f("yo","Yölisä klo 22–06","%")}${f("maksu","Alueenkäyttömaksu","€/vrk",10)}</div>
+  <div class="note" style="margin:-2px 0 6px">Alueenkäyttömaksu löytyy kaivupäätöksen maksuarviosta. Helsingissä se on enintään 446 €/vrk ydinkeskustassa ja pienempi muualla. Jos maksu jätetään nollaksi, säästöä ei lasketa.</div>
   <label class="hachk"><input type="checkbox" data-ha="auki" ${as.auki?"checked":""}> Kaista avataan liikenteelle työajan ulkopuolella (esim. ajolevyt)</label>`;
 }
 /* Kaavio tulosteeseen: työalue ja pysäkkivälit ilman karttatiiliä */
@@ -2485,8 +2486,8 @@ function haAvaa(){
         <div><b>${nf(bus.length+tram.length)}</b><small>linjaa: ${esc(bus.slice(0,8).join(", "))}${tram.length?` · raitiot ${esc(tram.join(", "))}`:""}</small></div>
       </div></div>
     <div class="ha-k">Ajoitusvaihtoehdot ja kustannus</div>
-    ${haTaulukko(K)}
-    <div class="ha-note">Oletukset (urakoitsija voi muuttaa): ${nf(as.hlo)} työntekijää · ${nf(as.eur)} €/h · iltalisä ${nf(as.ilta)} % · yölisä ${nf(as.yo)} % · alueenkäyttömaksu ${nf(as.maksu)} €/vrk · ${as.auki?"kaista auki työajan ulkopuolella":"kaista suljettu koko ajan"}. Sama työtuntimäärä kaikissa vaihtoehdoissa (${nf(9*pohja.pv)} h). Yötyöstä tehdään meluilmoitus.</div>
+    ${haTaulukko(K, true)}
+    <div class="ha-note">Oletukset (urakoitsija voi muuttaa): ${nf(as.hlo)} työntekijää · ${nf(as.eur)} €/h · iltalisä ${nf(as.ilta)} % · yölisä ${nf(as.yo)} % · ${as.maksu?`alueenkäyttömaksu ${nf(as.maksu)} €/vrk`:"alueenkäyttömaksua ei laskettu"} · ${as.auki?"kaista auki työajan ulkopuolella":"kaista suljettu koko ajan"}. Sama työtuntimäärä kaikissa vaihtoehdoissa (${nf(9*pohja.pv)} h). Yötyöstä tehdään meluilmoitus.</div>
     <div class="ha-two"><div><div class="ha-k">Muut työt samoilla linjoilla</div>${calc.kasautumat.length?`<ul>${calc.kasautumat.map(k=>`<li><b>${esc(k.osoite)}</b> · ${nf(k.etaisyys_m)} m · linjat ${esc(k.yhteiset_linjat.join(", "))}${k.alkaa?` · ${esc(k.alkaa)}–${esc(k.paattyy||"")}`:""}</li>`).join("")}</ul>`:'<div class="ha-note">Ei päällekkäisiä töitä samoilla linjoilla alle 1,5 km päässä.</div>'}</div>
       <div><div class="ha-k">Mitä arvio kattaa</div><ul><li>Bussien ja raitiovaunujen lisäaika, mitattu HSL:n avoimesta ajoneuvodatasta</li><li>Ei kata henkilöautoliikennettä, kävelyä eikä pyöräilyä</li><li>Täydentää Haitatonin haittaindeksiä: luokan sijaan tunnit ja ajoitus</li></ul></div></div>
     <div class="ha-foot"><span><b>${id}</b> · ${nyt.toLocaleDateString("fi-FI")}</span><span>Tietutka · tietutka.fi · Itsenäinen palvelu, ei HSL:n eikä kaupungin. Data: HSL, Helsingin kaupunki (CC BY 4.0).</span></div>
