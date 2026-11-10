@@ -789,6 +789,55 @@ html:root #v-home .tp-pal #kpis.strip,html:root #v-home .tp-pal .strip.s3{grid-t
   .tp-ph{cursor:default}.tp-grip{display:none}
   .tp-pal[data-pal="ajo"] .enajo{grid-template-columns:1fr}
 }
+
+/* Palettien sisältö: pienempi fontti, selkeä rakenne */
+.tp-pal{resize:both;min-width:260px;min-height:44px}
+.tp-pal.min{resize:none;height:auto!important}
+.tp-pal::after{content:"";position:absolute;right:3px;bottom:3px;width:9px;height:9px;border-right:2px solid #C3CBD6;border-bottom:2px solid #C3CBD6;pointer-events:none}
+.tp-pal.min::after{display:none}
+.tp-pb{flex:1;min-height:0;font-size:13px;line-height:1.45}
+.tp-pb .note{font-size:11.5px}
+.tp-ph .seg{margin-left:auto;font-size:11.5px}.tp-ph .seg button{padding:2px 8px!important;font-size:11.5px!important}
+.tp-ph b+.seg+.tp-min{margin-left:6px}
+.tp-haittase{margin:-4px 0 10px;line-height:1.4}
+.tp-olot{margin:6px 0 4px}.tp-olot[open]{margin-bottom:10px}
+/* Tilanne nyt */
+#v-home .tp-pal .now-k{font-size:10.5px!important;margin-bottom:2px!important}
+html:root #v-home .tp-pal .nowrow .headline{font-size:15px!important;line-height:1.35!important;font-weight:600!important}
+#v-home .tp-pal .nowctl{display:none!important}
+html:root #v-home .tp-pal .strip.s3{gap:0!important;border-top:1px solid var(--l);border-bottom:1px solid var(--l);margin:6px 0}
+html:root #v-home .tp-pal .strip.s3 .tile{border:0!important;border-radius:0!important;background:none!important;padding:7px 0!important;box-shadow:none!important}
+html:root #v-home .tp-pal .strip.s3 .tile+.tile{border-top:1px solid var(--l2)!important}
+html:root #v-home .tp-pal .strip.s3 .tile b{font-size:19px!important;min-width:76px}
+#v-home .tp-pal .strip.s3 .tile small{font-size:11.5px;line-height:1.35}
+html:root #v-home .tp-pal .h2row h2{font-size:12px!important;letter-spacing:.05em;text-transform:uppercase;color:var(--i2)!important;font-weight:700!important}
+#v-home .tp-pal .h2row{margin:10px 0 2px!important;align-items:baseline}
+#v-home .tp-pal .h2row .h2links a{font-size:12px!important}
+#v-home .tp-pal .cards{gap:0!important}
+html:root #v-home .tp-pal .card{display:grid!important;grid-template-columns:1fr auto;grid-template-areas:"hd big" "ch big";gap:2px 10px;align-items:center;border:0!important;border-top:1px solid var(--l2)!important;border-radius:0!important;background:none!important;box-shadow:none!important;padding:7px 4px!important;text-align:left}
+html:root #v-home .tp-pal .card.sel{background:#FFF6E5!important;box-shadow:inset 3px 0 0 #F5A524!important}
+#v-home .tp-pal .card .hd{grid-area:hd;min-width:0}
+#v-home .tp-pal .card .hd .t{font-size:13px;font-weight:600}
+#v-home .tp-pal .card .w{display:none}
+#v-home .tp-pal .card .crow{display:contents}
+#v-home .tp-pal .card .cbig{grid-area:big;text-align:right}
+#v-home .tp-pal .card .cbig b{font-size:15px!important;white-space:nowrap}
+#v-home .tp-pal .card .cbig .cunit{display:block;font-size:10.5px!important}
+#v-home .tp-pal .card .chips{grid-area:ch;-webkit-mask-image:none!important;mask-image:none!important}
+#v-home .tp-pal .card .chip{font-size:10.5px;padding:0 5px}
+/* Työmaa */
+#v-home .tp-pal #detail{font-size:13px}
+#v-home .tp-pal #detail h2,#v-home .tp-pal #detail h3{font-size:16px}
+#v-home .tp-pal #detail .chip,#v-home .tp-pal #detail .vchip{font-size:11px}
+/* Sää yläpalkissa */
+.top .saa-top{flex:none;margin-left:auto;position:relative}
+.top .saa-top .saa-pill{background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.25)!important;color:#fff!important;font-size:12.5px;padding:4px 10px 4px 8px;border-radius:6px!important}
+.top .saa-top .saa-pill span,.top .saa-top .saa-pill b{color:#fff!important}
+.top .saa-top .saa-pill-l{color:#7FB0FF!important;border-left-color:rgba(255,255,255,.25)!important}
+.top .saa-top .saa-pill.var{background:rgba(245,165,36,.18)!important;border-color:#F5A524!important}
+.top .saa-top .saa-pop{color:var(--i);top:calc(100% + 10px)}
+html.hsl .top .omalinja{margin-left:10px!important}
+@media(max-width:1250px){.top .saa-top .saa-pill-l{display:none}}
 /* Urakoitsijan haitta-arvio */
 .halom{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:2px 0 6px}
 .halom label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--m)}
@@ -1585,6 +1634,7 @@ html.hsl .navn.lC{background:#0F1B2D}
         <label title="kaista kapenee · haitallisin neljännes"><input type="radio" name="haitta" value="kohtalainen" checked> <b>Kohtalainen</b></label>
         <label title="kaistoja suljetaan · haitallisin kymmenesosa"><input type="radio" name="haitta" value="suuri"> <b>Suuri</b></label>
       </div>
+      <div class="note tp-haittase" id="enHaittaSe"></div>
       <div class="enrow"><label>Alkaa<input type="date" id="enA"></label><label>Päättyy<input type="date" id="enP"></label></div></div></div>
   <div class="tp-pal" data-pal="arvio" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Arvio</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enOut"><div class="empty">Valitse lupa tai piirrä työalue, niin arvio lasketaan.</div></div></div></div>
   <div class="tp-pal" data-pal="ajo" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Ajoitus ja kustannus</b><span class="tp-sub" id="enAjoSub"></span><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enAjo"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
@@ -2720,6 +2770,7 @@ function tpLue(ws){ const d = TP_WS[ws].def; let o = {}; try{ o = JSON.parse(loc
 function tpTallenna(ws){ try{ localStorage.setItem(TP_WS[ws].avain, JSON.stringify(TPS[ws])); }catch(e){} }
 function tpPaikka(el, st){
   const pw = el.parentElement.clientWidth; el.style.width = (pw > 400 ? Math.min(st.w, pw - 104) : st.w) + "px";
+  if(st.h){ el.style.height = st.h + "px"; el.style.maxHeight = "none"; } else { el.style.height = ""; el.style.maxHeight = ""; }
   ["left","right","top","bottom"].forEach(x=>el.style[x] = "");
   if(st.x != null){ el.style.left = st.x + "px"; el.style.top = st.y + "px"; }
   else { if(st.l != null) el.style.left = st.l + "px"; if(st.r != null) el.style.right = st.r + "px"; if(st.t != null) el.style.top = st.t + "px"; if(st.b != null) el.style.bottom = st.b + "px"; }
@@ -2774,7 +2825,8 @@ function tpInitWs(ws, paletit, kerrokset){
     if(T.pal[k].auki && !T.pal[k].min){ T.pal[k].auki = false; T.jarj = T.jarj.filter(x=>x!==k); } else tpAukaise(ws, k);
     tpTallenna(ws); tpPiirraWs(ws); if(T.pal[k].auki) tpEteen(sec.querySelector(`:scope > .tp-pal[data-pal="${k}"]`)); });
   sec.querySelectorAll(":scope > .tp-pal").forEach(el=>{ const k = el.dataset.pal, ph = el.querySelector(".tp-ph"), T = ()=>TPS[ws];
-    el.addEventListener("pointerdown", ()=>tpEteen(el), true);
+    el.addEventListener("pointerdown", e=>{ tpEteen(el); const r = el.getBoundingClientRect(); if(e.clientX > r.right - 20 && e.clientY > r.bottom - 20) el.dataset.koko = "1"; }, true);
+    addEventListener("pointerup", ()=>{ if(el.dataset.koko){ delete el.dataset.koko; const T2 = TPS[ws]; T2.pal[k].w = Math.round(el.offsetWidth); T2.pal[k].h = Math.round(el.offsetHeight); tpTallenna(ws); } });
     el.querySelector(".tp-x").onclick = ()=>{ T().pal[k].auki = false; T().jarj = T().jarj.filter(x=>x!==k); tpTallenna(ws); tpPiirraWs(ws); };
     el.querySelector(".tp-min").onclick = ()=>{ T().pal[k].min = !T().pal[k].min; tpTallenna(ws); tpPiirraWs(ws); };
     ph.addEventListener("dblclick", e=>{ if(e.target.closest("button")) return; T().pal[k].min = !T().pal[k].min; tpTallenna(ws); tpPiirraWs(ws); });
@@ -2794,7 +2846,11 @@ function tpInitWs(ws, paletit, kerrokset){
 function tpKerros(k, b){
   if(k==="live" && typeof liveSet==="function"){ liveSet(!LV.on); b.classList.toggle("on", !!LV.on); }
 }
-function tpInit(){ tpInitWs("ennakko", [["tyo","Työalue"],["arvio","Tulos: arvion yhteenveto"],["ajo","Ajoitus ja kustannus"],["lin","Linjat"],["muut","Muut työt"],["vert","Vertailu"],["pdf","PDF: haitta-arvio liitteeksi"]], []); tpAjoSub(); }
+const EN_HAITTA_SE = {pieni:"<b>Pieni:</b> kaistat pysyvät auki, työ on reunalla tai jalkakäytävällä. Vastaa tyypillistä mitattua työtä.",
+  kohtalainen:"<b>Kohtalainen:</b> kaista kapenee tai liikenne ohjataan viereiselle kaistalle. Vastaa mitattujen töiden haitallisinta neljännestä.",
+  suuri:"<b>Suuri:</b> kaistoja suljetaan tai liikenne kulkee vuorotellen. Vastaa mitattujen töiden haitallisinta kymmenesosaa."};
+function enHaittaSe(){ const i = document.querySelector('#enHaitta input:checked'), e = document.getElementById("enHaittaSe"); if(i && e) e.innerHTML = EN_HAITTA_SE[i.value]||""; }
+function tpInit(){ enHaittaSe(); document.querySelectorAll('#enHaitta input').forEach(i=>i.addEventListener("change", enHaittaSe)); tpInitWs("ennakko", [["tyo","Työalue"],["arvio","Tulos: arvion yhteenveto"],["ajo","Ajoitus ja kustannus"],["lin","Linjat"],["muut","Muut työt"],["vert","Vertailu"],["pdf","PDF: haitta-arvio liitteeksi"]], []); tpAjoSub(); }
 /* Tilannekuva karttatyöpöydäksi: olemassa olevat osat siirretään paletteihin, joten kaikki piirtofunktiot toimivat ennallaan */
 function tpPaletti(k, otsikko, sisalto, extra){
   const el = document.createElement("div"); el.className = "tp-pal"; el.dataset.pal = k; el.hidden = true;
@@ -2813,6 +2869,15 @@ function tpRakennaHome(){
   h.appendChild(tpPaletti("tanaan", "Tänään huomioitavaa", [q(".todo-sec")]));
   h.appendChild(tpPaletti("ai", "Tekoälykatsaus ja kysy", [document.getElementById("aiBox"), kysy]));
   h.insertBefore(kartta, h.firstChild); kartta.classList.add("tp-map");
+  // Sää kiinteästi yläpalkkiin linjahaun vasemmalle puolelle
+  const saa = document.getElementById("saaBox"), haku = document.getElementById("omaForm");
+  if(saa && haku && haku.parentElement){ haku.parentElement.insertBefore(saa, haku); saa.classList.add("saa-top"); }
+  // 24 h / 7 vrk Tilanne-paletin otsikkoon
+  const ik = document.getElementById("ikSel"), tph = h.querySelector('.tp-pal[data-pal="tilanne"] .tp-ph b');
+  if(ik && tph) tph.after(ik);
+  // Sään vaikutus avattavaksi osioksi, ettei se vie tilaa
+  const olot = document.getElementById("olot");
+  if(olot){ const d = document.createElement("details"); d.className = "tp-lisa tp-olot"; d.innerHTML = "<summary>Sään vaikutus liikenteeseen</summary>"; olot.before(d); d.appendChild(olot); }
   [split, q(".layer-k"), q(".subnav"), document.getElementById("intro")].forEach(x=>x && x.remove());
   tpInitWs("home", [["tilanne","Tilanne nyt"],["tyomaa","Työmaa: valitun työmaan tiedot"],["tanaan","Tänään huomioitavaa"],["ai","Tekoäly: katsaus ja kysy"]], [["live","Live: bussit ja ratikat livenä"]]);
   // Työmaan valinta avaa Työmaa-paletin
@@ -4608,6 +4673,7 @@ function route(nav){
     if(l==="vahti") setTimeout(()=>{ const h = document.getElementById("vahtiOtsikko"); if(h) window.scrollTo(0, Math.max(0, h.getBoundingClientRect().top + scrollY - 80)); }, 400); }
   if(S.karttaNakyma && (v==="home" || v==="ennakko")){ const kv = S.karttaNakyma, m = v==="home" ? M.home : M.en; if(m){ S.karttaNakyma = null; setTimeout(()=>{ m.invalidateSize(); m.setView(kv.c, kv.z); }, 80); } }
   if(v==="home"){ tpPiirraWs("home"); setTimeout(()=>M.home && M.home.invalidateSize(), 60); }
+  { tpRakennaHome(); const sb = document.getElementById("saaBox"); if(sb && !sb.innerHTML.trim() && typeof renderBrief==="function"){ try{ renderBrief(); }catch(e){} } }
   if(toiseltaSivulta){ const d = document.getElementById("detail"); window.scrollTo(0, 0); if(d) setTimeout(()=>window.scrollTo(0, Math.max(0, d.getBoundingClientRect().top + scrollY - 90)), 350); }
   else if(nav==="hash") window.scrollTo(0,0);
 }
