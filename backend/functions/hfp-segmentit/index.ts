@@ -22,7 +22,7 @@ const BUCKET_MS = 2 * 3600_000;
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 type St = { t: number; stop: number; dl: number | null; trip: string; arr_stop: number | null; arr_t: number | null; arr_dl: number | null; seen: boolean;
-  vp?: Set<string>; vok?: number; vei?: number;
+  vp?: Set<string>; vv?: Set<string>; vok?: number; vei?: number;
   vanha?: boolean;                                        // ladattu edellisestä jaksosta, viimeisin tapahtuma yli 5 min sitten
   k_alku?: number | null; k_trip?: string | null; k_dl?: number | null };  // käynnissä oleva kääntö (edellinen lähtö päättyi)
 type Agg = { bucket: string; from_stop: number; to_stop: number; route: string; dir: number; mode: string;
@@ -88,7 +88,10 @@ async function run() {
         // kentät ovat muotoa "tlp-requestid"; risteys tunnistetaan sid:stä (sama pyyntö lähetetään jopa 4 kertaa)
         const rid = String(p.sid ?? p["tlp-requestid"] ?? p.tst);
         (sv.vp ??= new Set()).add(rid);
-        if (ev === "TLA") { const d = p["tlp-decision"]; if (d === "ACK") sv.vok = (sv.vok ?? 0) + 1; else if (d === "NAK") sv.vei = (sv.vei ?? 0) + 1; }
+        if (ev === "TLA") {   // sama vastaus voi tulla useaan kertaan: lasketaan kukin pyyntö kerran
+          const d = p["tlp-decision"]; sv.vv ??= new Set();
+          if ((d === "ACK" || d === "NAK") && !sv.vv.has(rid)) { sv.vv.add(rid); if (d === "ACK") sv.vok = (sv.vok ?? 0) + 1; else sv.vei = (sv.vei ?? 0) + 1; }
+        }
         return;
       }
       if (!p || p.stop == null || !p.tst || p.oper == null || p.veh == null || !p.route) return;
@@ -96,6 +99,8 @@ async function run() {
       const dl = typeof p.dl === "number" ? p.dl : null;
       const trip = `${p.route}|${p.dir}|${p.oday}|${p.start}`;
       const s = st.get(key);
+      // myöhässä perille tullut vanha viesti ei saa palauttaa tilaa taaksepäin (syntyisi vääriä pysäkkivälejä)
+      if (s && s.trip === trip && (t < s.t || (s.arr_t != null && t < s.arr_t))) return;
       if (ev === "ARS") {
         if (s && s.trip === trip) { s.arr_stop = stop; s.arr_t = t; s.arr_dl = dl; s.seen = true; }  // valolaskurit säilyvät välin loppuun
         else {
@@ -160,7 +165,9 @@ async function run() {
           agg.set(k, a);
           pairs++;
           if (seur.has(`${s.stop}|${stop}`)) obs.push({ t: new Date(t).toISOString(), from_stop: s.stop, to_stop: stop, route: String(p.route), dir: Number(p.dir),
-            tt, ajo, seis, ddl, ddl_ajo: ddlAjo, ddl_seis: ddlSeis, vuoro: trip,
+            tt, ajo, seis: seis != null && seis < 900 ? seis : null, ddl,
+            ddl_ajo: ddlAjo != null && Math.abs(ddlAjo) < 900 ? ddlAjo : null,   // aikataulun uudelleensovitus voi hypäyttää dl:ää
+            ddl_seis: ddlSeis != null && Math.abs(ddlSeis) < 900 ? ddlSeis : null, vuoro: trip,
             valo_pyynto: s.vp ? s.vp.size : 0, valo_ok: s.vok ?? 0, valo_ei: s.vei ?? 0 });
         }
       }
