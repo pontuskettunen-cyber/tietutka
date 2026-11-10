@@ -736,11 +736,19 @@ html.tp-on #v-ennakko.on{position:fixed;left:0;right:0;top:var(--toph,76px);bott
 #v-ennakko .enopt input{display:none}
 #v-ennakko .enrow{margin-bottom:0}
 #v-ennakko .enkp b{font-size:20px}
-.tp-pal[data-pal="ajo"] .enajo{grid-template-columns:220px 1fr;gap:16px}
 .tp-pal[data-pal="ajo"] .hat td,.tp-pal[data-pal="ajo"] .hat th{font-size:12.5px;padding:6px}
 .tp-pal[data-pal="lin"] .enlin td,.tp-pal[data-pal="lin"] .enlin th{font-size:12.5px;padding:6px}
 .tp-muut{display:block}
 #v-ennakko .leaflet-bottom.leaflet-left{left:88px}
+.tp-pal[data-pal="ajo"],.tp-pal[data-pal="lin"]{max-height:52%}
+.tp-sub{cursor:pointer}.tp-sub:hover{color:var(--a);text-decoration:underline}
+.tp-olet,.tp-lisa{margin:4px 0 8px}.tp-olet summary,.tp-lisa summary{cursor:pointer;color:var(--a);font-size:12.5px;font-weight:600}
+.tp-olet .halom{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:8px}
+.tp-olet .note{font-size:11.5px}
+.tp-lisa .note{margin-top:4px}
+.tp-yht{font-size:12.5px;line-height:1.45}
+.tp-yht .note{display:none}
+
 @media(max-width:900px){
   html.tp-on body{overflow:auto}
   html.tp-on #v-ennakko.on{position:static;display:block}
@@ -2471,20 +2479,20 @@ function naytaEn(){
     : `<span class="entila ${r.tila}">${({red:"ylittyy",zero:"ei varaa",amb:"seuraa",ok:"mahtuu",na:"ei tiedossa"})[r.tila]}${r.pros!=null&&r.tila!=="zero"&&(r.tila!=="ok"||r.pros>=10)?" "+nf(Math.round(r.pros))+" %":""}</span>`;
   const NAYTA = 4;
   document.getElementById("enVert").innerHTML = vertailuHTML() || '<div class="note">Tallenna vaihtoehto Arvio-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div>';
-  document.getElementById("enAjo").innerHTML = `    ${kesto ? `<div class="enajo"><div>${haLomake(haAsetukset())}</div><div><div id="haTaul">${haTaulukko(EN.kust, true)}</div>
-      <div class="note" style="margin-top:6px">Vaihtoehtoja verrataan kokonaishaitan mukaan: sama työtuntimäärä (${nf(9*kesto)} h), joten lyhyemmät päivät pidentävät työtä. Päivätyön kesto on valittu ajanjakso; jos työ ei täytä koko lupa-aikaa, muuta päivämäärät. Kaista oletetaan auki työajan ulkopuolella, ellei toisin valita. Ilta–yöjakson liikenne on tasattu klo 18–06, joten yötyön haitta on todellisuudessa tätä pienempi. Alle 15 %:n ero on arvion epävarmuuden sisällä.</div></div></div>`
+  document.getElementById("enAjo").innerHTML = `    ${kesto ? `<details class="tp-olet" id="enOlet"><summary>Muuta kustannusoletuksia</summary>${haLomake(haAsetukset())}</details><div id="haTaul">${haTaulukko(EN.kust)}</div>
+      <details class="tp-lisa"><summary>Miten vaihtoehdot lasketaan</summary><div class="note">Vaihtoehtoja verrataan kokonaishaitan mukaan: sama työtuntimäärä (${nf(9*kesto)} h), joten lyhyemmät päivät pidentävät työtä. Päivätyön kesto on valittu ajanjakso; jos työ ei täytä koko lupa-aikaa, muuta päivämäärät. Kaista oletetaan auki työajan ulkopuolella, ellei toisin valita. Ilta–yöjakson liikenne on tasattu klo 18–06, joten yötyön haitta on todellisuudessa tätä pienempi. Alle 15 %:n ero on arvion epävarmuuden sisällä.</div></details>`
       : `<div class="note">Valitse alkamis- ja päättymispäivä, niin vaihtoehdot ja kustannukset lasketaan.</div>`}`;
-  document.getElementById("enLin").innerHTML = `    ${KR ? `<p class="tiivis" style="margin-top:0">${KR.yhteenveto}</p>` : `<div class="note">Ladataan aikataulun viivevaroja…</div>`}
-    <div class="enscroll"><table class="t enlin"><thead><tr><th>Linja</th><th class="r">Ohituksia / arkip.</th><th class="r">Lisäaika / vrk</th><th class="r">Nyt muista töistä</th><th class="r">+ tämä työ</th><th class="r">Viivevara</th><th>Tila</th><th>Muut työt linjalla</th></tr></thead><tbody>
+  document.getElementById("enLin").innerHTML = `    ${KR ? `<p class="tiivis tp-yht" style="margin-top:0">${KR.yhteenveto}</p>` : `<div class="note">Ladataan aikataulun viivevaroja…</div>`}
+    <div class="enscroll"><table class="t enlin"><thead><tr><th>Linja</th><th class="r">Ohit. / arkip.</th><th class="r">Lisäaika / vrk</th><th class="r">Nyt muista</th><th class="r">+ tämä</th><th class="r">Viivevara</th><th>Tila</th><th></th></tr></thead><tbody>
     ${linRivit.map(({e,r},k)=>{ const lt = linjanTyot(e.n);
       return `<tr class="${k>=NAYTA?"enpiilo":""}"><td style="white-space:nowrap"><span class="lbadge ${e.tram?"tram":""}">${esc(e.n)}</span> <span class="note">suunta ${e.d}</span></td>
         <td class="r">${nf(e.vrk)}</td><td class="r">${nf(H(e.vrk,s)*60,0)} min</td>
         <td class="r">${!r||r.lahde==="ei töitä"?'<span class="note">ei töitä</span>':mm(r.nyt)}</td><td class="r">${r?mm(Math.max(0,s)):"–"}</td>
         <td class="r">${r&&r.vara!=null?nf(r.vara/60)+" min":"–"}</td><td>${tilaHTML(r)}</td>
-        <td>${lt.n ? `${nf(lt.n)} ${lt.n===1?"työ":"työtä"} · ${lt.top.slice(0,1).map(x=>`<a href="#/?l=${encodeURIComponent(x.l.lupa_id)}">${esc(shortStreet(x.l))}</a>${x.vehH>=0.05?` +${nf(x.vehH,1)} h`:""}`).join("")} <button type="button" class="lnk" data-en-linja="${esc(e.n)}">linja kartalla →</button>` : '<span class="note">ei muita töitä</span>'}</td></tr>`; }).join("")}
+        <td style="white-space:nowrap"><button type="button" class="lnk" data-en-linja="${esc(e.n)}" title="${lt.n?`${nf(lt.n)} muuta työtä linjalla`:"ei muita töitä linjalla"}">kartalla →</button></td></tr>`; }).join("")}
     </tbody></table></div>
     ${linRivit.length>NAYTA?`<button type="button" class="lnk" id="enLinKaikki">Näytä kaikki ${nf(linRivit.length)} linjasuuntaa</button>`:""}
-    <div class="note" style="margin-top:6px">Nyt muista töistä = linjan huonoimman 10 %:n vuorojen mitattu lisäaika reitin muista töistä (min:s per vuoro). Viivevara = aikataulun max_delay, päiväajan vuorojen mediaani: kuinka paljon vuoro voi myöhästyä ilman, että saman vaunun seuraava lähtö myöhästyy. Busseilla aikataulun arvoa ei ole vielä tarkistettu autokierroista, joten ylittymistä ei arvioida.</div>`;
+    <details class="tp-lisa"><summary>Mitä sarakkeet tarkoittavat</summary><div class="note">Nyt muista = linjan huonoimman 10 %:n vuorojen mitattu lisäaika reitin muista töistä (min:s per vuoro). Viivevara = aikataulun max_delay, päiväajan vuorojen mediaani: kuinka paljon vuoro voi myöhästyä ilman, että saman vaunun seuraava lähtö myöhästyy. Busseilla aikataulun arvoa ei ole vielä tarkistettu autokierroista, joten ylittymistä ei arvioida.</div></details>`;
   document.getElementById("enMuut").innerHTML = `    <div class="tp-muut"><div><div class="sec" style="margin-top:0">Muut työt samoilla linjoilla</div>
       ${kas.length?`<ul class="kas">${kas.map(o=>`<li><a href="#/?l=${encodeURIComponent(o.x.lupa_id)}">${esc(shortStreet(o.x))}</a> · ${nf(o.d)} m · ${o.yht.length===1?"linja":"linjat"} ${esc(o.yht.slice(0,5).join(", "))}${o.x.alkaa?` · ${fsY(o.x.alkaa)}${o.x.paattyy&&fsY(o.x.paattyy)!==fsY(o.x.alkaa)?"–"+fsY(o.x.paattyy):""}`:""}</li>`).join("")}</ul>`:'<div class="note">Ei päällekkäisiä töitä samoilla linjoilla alle 1,5 km päässä.</div>'}</div>
       <div><div class="sec">Miten arvio lasketaan</div><div class="note" style="font-size:13.5px">Ohitukset ovat työalueen pysäkkiväleiltä mitattuja bussien ja ratikoiden määriä arkipäivinä${S.tila?.keruu_alkoi?" (keruu alkoi "+esc(fmtDate(S.tila.keruu_alkoi))+")":""}. Lisäaika per ohitus on ${esc(kesk)}. Arvio tarkentuu, kun todennettuja lukuja kertyy.</div></div></div>`;
@@ -2664,8 +2672,8 @@ async function haAvaa(){
 const TP_OLETUS = {
   tyo:  {auki:true,  l:88,  t:16, w:330},
   arvio:{auki:true,  r:16,  t:16, w:410},
-  ajo:  {auki:false, l:88,  b:16, w:780},
-  lin:  {auki:false, r:16,  b:16, w:640},
+  ajo:  {auki:false, l:88,  b:16, w:700},
+  lin:  {auki:false, r:16,  b:16, w:600},
   muut: {auki:false, r:440, t:16, w:420},
   vert: {auki:false, l:430, t:16, w:520},
 };
@@ -2692,6 +2700,7 @@ function tpTyhjenna(){ ["enAjo","enLin","enMuut"].forEach(id=>{ const e = docume
   const v = document.getElementById("enVert"); if(v && !EN.alt.length) v.innerHTML = '<div class="note">Tallenna vaihtoehto Arvio-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div>';
   const s = document.getElementById("enAjoSub"); if(s) s.textContent = ""; }
 function tpAjoSub(){ const s = document.getElementById("enAjoSub"); if(!s) return; const a = haAsetukset();
+  s.title = "Muuta kustannusoletuksia"; s.onclick = ()=>{ const d = document.getElementById("enOlet"); if(d) d.open = !d.open; };
   s.textContent = `${nf(a.hlo)} hlö · ${nf(a.eur)} €/h · ilta ${nf(a.ilta)} % · yö ${nf(a.yo)} % · maksu ${nf(a.maksu)} €/vrk`; }
 function tpInit(){
   const sec = document.getElementById("v-ennakko"); if(!sec || sec.dataset.tp) return; sec.dataset.tp = "1";
