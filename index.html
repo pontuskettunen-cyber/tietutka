@@ -2751,7 +2751,8 @@ const TP_IKONI = {tilanne:'M3 12l9-8 9 8M5 10v10h14V10', linja:'M3 12h4l3-8 4 16
   tyo:'M4 20h16M6 16l6-12 6 12', ajo:'M12 7v5l3 3M12 21a9 9 0 110-18 9 9 0 010 18', lin:'M3 12h4l3-8 4 16 3-8h4', muut:'M4 6h16M4 12h16M4 18h10',
   pdf:'M6 3h9l5 5v13H6zM14 3v6h6', vert:'M8 4v16M16 4v16M4 8h8M12 16h8', tyomaa:'M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5',
   tanaan:'M8 3v4M16 3v4M4 9h16M5 5h14v16H5z', ai:'M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z', live:'M5 12a7 7 0 0114 0M8.5 12a3.5 3.5 0 017 0M12 12v.01', palauta:'M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8M3 3v5h5'};
-const tpIk = (k, t, attrs, cls) => `<button type="button" class="tp-ic ${cls||""}" ${attrs} title="${t}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${TP_IKONI[(attrs.includes('data-tp="tilanne"')?'muut':k)]}"/></svg><span>${t.split(":")[0]}</span></button>`;
+const TP_PAL_IKONI = {tilanne:'M4 6h16M4 12h16M4 18h10', arvio:'M4 20h16M4 4v16M8 16l4-6 4 3 4-7'};
+const tpIk = (k, t, attrs, cls) => `<button type="button" class="tp-ic ${cls||""}" ${attrs} title="${t}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${(attrs.includes('data-tp=') && TP_PAL_IKONI[k]) || TP_IKONI[k]}"/></svg><span>${t.split(":")[0]}</span></button>`;
 function tpRail(ws, paletit, kerrokset){
   const nak = [["tilanne","Tilanne: mitä kaupungissa tapahtuu nyt","#/","home"],["linja","Linja: miten linja kulkee ja mikä sitä hidastaa","#/linjat","linjat"],["arvio","Arvio: mitä suunniteltu työ aiheuttaa","#/ennakko","ennakko"]];
   return `<div class="tp-rail" role="toolbar" aria-label="Työkalut"><div class="tp-grp">Näkymä</div>${nak.map(([k,t,h,v])=>tpIk(k,t,`data-nak="${h}"`, (ws==="home"&&v==="home")||(ws===v)?"nak on":"nak")).join("")}
@@ -2793,7 +2794,7 @@ function tpInitWs(ws, paletit, kerrokset){
 function tpKerros(k, b){
   if(k==="live" && typeof liveSet==="function"){ liveSet(!LV.on); b.classList.toggle("on", !!LV.on); }
 }
-function tpInit(){ tpInitWs("ennakko", [["tyo","Työalue"],["arvio","Arvio"],["ajo","Ajoitus ja kustannus"],["lin","Linjat"],["muut","Muut työt"],["vert","Vertailu"],["pdf","PDF: haitta-arvio liitteeksi"]], []); tpAjoSub(); }
+function tpInit(){ tpInitWs("ennakko", [["tyo","Työalue"],["arvio","Tulos: arvion yhteenveto"],["ajo","Ajoitus ja kustannus"],["lin","Linjat"],["muut","Muut työt"],["vert","Vertailu"],["pdf","PDF: haitta-arvio liitteeksi"]], []); tpAjoSub(); }
 /* Tilannekuva karttatyöpöydäksi: olemassa olevat osat siirretään paletteihin, joten kaikki piirtofunktiot toimivat ennallaan */
 function tpPaletti(k, otsikko, sisalto, extra){
   const el = document.createElement("div"); el.className = "tp-pal"; el.dataset.pal = k; el.hidden = true;
