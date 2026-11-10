@@ -3,20 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Työmaatutka · katutöiden vaikutus joukkoliikenteeseen</title>
-<meta name="description" content="Työmaatutka mittaa, paljonko Helsingin katutyöt hidastavat busseja ja ratikoita, ja varoittaa etukäteen töistä, jotka osuvat joukkoliikenteen reiteille.">
-<link rel="canonical" href="https://pontuskettunen-cyber.github.io/tyomaatutka/">
+<title>Tietutka · katutöiden vaikutus liikenteeseen</title>
+<meta name="description" content="Tietutka mittaa, paljonko Helsingin katutyöt hidastavat busseja ja ratikoita, ja varoittaa etukäteen töistä, jotka osuvat joukkoliikenteen reiteille.">
+<link rel="canonical" href="https://tietutka.fi/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Työmaatutka · katutöiden vaikutus joukkoliikenteeseen">
+<meta property="og:title" content="Tietutka · katutöiden vaikutus liikenteeseen">
 <meta property="og:description" content="Mittaa, paljonko Helsingin katutyöt hidastavat busseja ja ratikoita, ja varoittaa etukäteen töistä, jotka osuvat joukkoliikenteen reiteille. Konsepti.">
-<meta property="og:url" content="https://pontuskettunen-cyber.github.io/tyomaatutka/">
+<meta property="og:url" content="https://tietutka.fi/">
 <meta property="og:locale" content="fi_FI">
-<meta name="robots" content="index,follow">
-<meta name="msvalidate.01" content="BF64DF159C58EAE6C980EEA07254E5FF" />
+<meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script>
-/* Teema: HSL-henkinen ilme on oletus. ?teema=oma palauttaa vanhan ilmeen (muistetaan), ?teema=hsl takaisin. */
+/* Teema: Tietutka-ilme on oletus. ?teema=oma palauttaa vanhan ilmeen (muistetaan), ?teema=hsl takaisin. */
 (function(){ var t = "hsl"; try{ var q = new URLSearchParams(location.search).get("teema"); if(q) localStorage.setItem("tt_teema", q); t = q || localStorage.getItem("tt_teema") || "hsl"; }catch(e){}
   if(t !== "oma") document.documentElement.classList.add("hsl"); })();
 (function(){ try{ if(!new URLSearchParams(location.search).has("vanha")) document.documentElement.classList.add("kompakti"); }catch(e){} })();
@@ -509,7 +508,7 @@ tr.best td{background:#F0F8F3}
 @media(max-width:860px){.navk,.navsep{display:none}}
 
 /* ===== HSL-henkinen teema (vain html.hsl) — ei HSL:n logoa eikä lisensoitua fonttia; pyöreä Nunito lähin avoin vastine ===== */
-html.hsl{--g:#F2F5F7;--p:#FFFFFF;--i:#1A1A1A;--i2:#3D4B57;--m:#5C6B78;--l:#DCE3E8;--l2:#EDF1F4;--a:#007AC9;--a-soft:#E6F2FA;--ind:#5C2D91;--r:14px}
+html.hsl{--g:#F2F5F7;--p:#FFFFFF;--i:#1A1A1A;--i2:#3D4B57;--m:#5C6B78;--l:#DCE3E8;--l2:#EDF1F4;--a:#1F5FBF;--a-soft:#E8F0FB;--ind:#5C2D91;--r:14px}
 html.hsl body, html.hsl button, html.hsl input, html.hsl select, html.hsl textarea, html.hsl .leaflet-container{font-family:"Nunito",system-ui,sans-serif}
 html.hsl *{font-family:"Nunito",system-ui,sans-serif !important;font-variant-numeric:tabular-nums}
 html.hsl body{font-size:15.5px}
@@ -518,7 +517,7 @@ html.hsl .brief .k,html.hsl .sec,html.hsl .lcard .k,html.hsl .mleg-g,html.hsl .n
 html.hsl .top{box-shadow:0 1px 0 var(--l)}
 html.hsl nav a{font-weight:700;color:var(--i2)}
 html.hsl nav a.on{color:var(--a);border-bottom-width:3px}
-html.hsl .intro{background:#00385F;color:#fff;border-radius:14px}
+html.hsl .intro{background:#0F1B2D;color:#fff;border-radius:14px}
 html.hsl .intro a{color:#9FD3F5}
 html.hsl .seg{border-radius:999px;padding:3px}
 html.hsl .seg button{border-radius:999px;font-weight:700}
@@ -528,7 +527,7 @@ html.hsl .btn, html.hsl .ask button{background:var(--a)}
 html.hsl .panel, html.hsl .lcard, html.hsl .lcock, html.hsl .tile, html.hsl .card, html.hsl .todo{border-radius:16px}
 html.hsl .search, html.hsl input[type=search], html.hsl input[type=text]{border-radius:999px}
 html.hsl .lbadge{border-radius:8px;font-weight:800}
-html.hsl .livebtn.on{background:#00385F;border-color:#00385F}
+html.hsl .livebtn.on{background:#0F1B2D;border-color:#0F1B2D}
 html.hsl .forpro{background:var(--a-soft);color:var(--a)}
 
 /* ===== Uusi ilme: tiivis tilannekuva (vain html.hsl) — kartta ja työmaat ylemmäs ===== */
@@ -621,35 +620,35 @@ html.hsl #v-home .nowrow{align-items:center}
 .olo-h{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12.5px;color:var(--m)}.olo-h a{display:inline-flex;align-items:center;gap:3px;text-decoration:none;color:var(--i2)}
 .saat td,.saat th{padding:5px 8px}
 
-/* ===== HSL-brändi 2 (vain html.hsl): hsl.fi:n muotokieli 3.11.2026 tarkistettuna =====
-   sininen #0074BF, tummansininen #003456, vaalea sininen #EBF6FD, sivun tausta #F2F5F7, teksti #333,
+/* ===== Tietutka-ilme (html.hsl-luokka säilytetty teknisenä nimenä) =====
+   sininen #1F5FBF, tummansininen #0F1B2D, vaalea sininen #E8F0FB, sivun tausta #F2F5F7, teksti #333,
    kortit valkoiset ilman reunaa r=16px, kentät ja tiilet r=5px ohut harmaa reuna, painikkeet pillereitä (r=48px, 8px 24px, keskilihava). */
-html.hsl{--a:#0074BF;--a-soft:#EBF6FD;--g:#F2F5F7;--i:#333333;--i2:#4A4A4A;--m:#6B6B6B;--l:#DDDDDD;--l2:#EEF1F3;--r:16px}
+html.hsl{--a:#1F5FBF;--a-soft:#E8F0FB;--g:#F2F5F7;--i:#333333;--i2:#4A4A4A;--m:#6B6B6B;--l:#DDDDDD;--l2:#EEF1F3;--r:16px}
 html.hsl body{background:#F2F5F7;color:#333}
 /* yläpalkki: täysleveä sininen palkki, valkoinen valikko */
-html.hsl .top{background:#0074BF;border-bottom:0;box-shadow:none}
+html.hsl .top{background:#1F5FBF;border-bottom:0;box-shadow:none}
 html.hsl .top .in{height:68px}
 html.hsl .brand,html.hsl .brand .txt{color:#fff}
-html.hsl .brand b{color:#BFE3FA}
-html.hsl .brand .mark{background:#fff}html.hsl .brand .mark i{border-color:#0074BF}html.hsl .brand .mark i:after{border-color:#0074BF}
+html.hsl .brand b{color:#7FB0FF}
+html.hsl .brand .mark{background:#fff}html.hsl .brand .mark i{border-color:#1F5FBF}html.hsl .brand .mark i:after{border-color:#1F5FBF}
 html.hsl nav a{color:#fff;font-weight:600;font-size:16px;border-bottom:4px solid transparent;padding:0 18px}
 html.hsl nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
 html.hsl nav a.on{color:#fff;border-bottom-color:#fff}
 html.hsl .top .omarow{background:#fff;border-color:#fff}
-html.hsl .top .omarow .btn{background:#003456}
+html.hsl .top .omarow .btn{background:#0F1B2D}
 html.hsl .top .live{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:#fff}
 html.hsl .top .live::after{color:#fff}
 /* ilmoitusbanneri hsl.fi:n "Uutta!"-laatikon tapaan */
-html.hsl .intro{background:#EBF6FD;color:#333;border:1px solid #0074BF;border-radius:16px;padding:12px 18px;font-size:14.5px}
+html.hsl .intro{background:#E8F0FB;color:#333;border:1px solid #1F5FBF;border-radius:16px;padding:12px 18px;font-size:14.5px}
 html.hsl .intro b{color:#333}
-html.hsl .intro a{color:#0074BF;background:#fff;border:1px solid #888;border-radius:48px;padding:6px 18px;font-weight:600}
-html.hsl .intro button{color:#0074BF}
+html.hsl .intro a{color:#1F5FBF;background:#fff;border:1px solid #888;border-radius:48px;padding:6px 18px;font-weight:600}
+html.hsl .intro button{color:#1F5FBF}
 /* kortit: valkoinen, ei reunaa, r=16 */
 html.hsl .panel,html.hsl .tile,html.hsl .card,html.hsl .todo,html.hsl .ai,html.hsl .olo,html.hsl .wcard,html.hsl .lcock,html.hsl .lcard,html.hsl .bd,html.hsl .warn,html.hsl .tstat,html.hsl .eurobox{border:0!important;border-radius:16px!important;box-shadow:none}
-html.hsl .card.sel{box-shadow:0 0 0 2px #0074BF!important}
+html.hsl .card.sel{box-shadow:0 0 0 2px #1F5FBF!important}
 html.hsl .todo{border-left:5px solid var(--a)!important}html.hsl .todo.red{border-left-color:#B42318!important}html.hsl .todo.ind{border-left-color:#5C2D91!important}html.hsl .todo.warn2{border-left-color:#B45309!important}
 html.hsl .warn{background:#FFF4E5}
-html.hsl .eurobox{background:#EBF6FD}
+html.hsl .eurobox{background:#E8F0FB}
 /* otsikot: keskilihava, ei versaalia */
 html.hsl .h2row h2{text-transform:none;letter-spacing:0;font-size:19px;font-weight:700;color:#333}
 html.hsl .h2row a{font-weight:600}
@@ -658,13 +657,13 @@ html.hsl .headline{font-weight:700;color:#333}
 html.hsl .sec{text-transform:none!important;letter-spacing:0!important;font-size:15px!important;font-weight:700!important;color:#333!important}
 html.hsl .olo-k{text-transform:none;letter-spacing:0;font-size:13.5px;color:#333}
 /* painikkeet: pillerit; ensisijainen tummansininen, toissijainen valkoinen harmaalla reunalla */
-html.hsl .btn{background:#003456;border-radius:48px;font-weight:600;padding:8px 22px}
-html.hsl .btn.ghost{background:#fff;color:#0074BF;border:1px solid #888}
+html.hsl .btn{background:#0F1B2D;border-radius:48px;font-weight:600;padding:8px 22px}
+html.hsl .btn.ghost{background:#fff;color:#1F5FBF;border:1px solid #888}
 html.hsl .seg{background:#fff;border:1px solid #888;border-radius:48px;padding:3px}
-html.hsl .seg button{border-radius:48px;font-weight:600;color:#0074BF}
-html.hsl .seg button.on{background:#003456;color:#fff}
+html.hsl .seg button{border-radius:48px;font-weight:600;color:#1F5FBF}
+html.hsl .seg button.on{background:#0F1B2D;color:#fff}
 html.hsl .share,html.hsl .ai-more,html.hsl .info.txt{border-radius:48px}
-html.hsl .share{border:1px solid #888;color:#0074BF;background:#fff;padding:5px 14px;font-weight:600}
+html.hsl .share{border:1px solid #888;color:#1F5FBF;background:#fff;padding:5px 14px;font-weight:600}
 /* kentät: r=5, harmaa reuna */
 html.hsl .search,html.hsl input[type=search],html.hsl input[type=text],html.hsl select{border-radius:5px!important;border:1px solid #888!important;background:#fff}
 html.hsl .top .omarow input{border:0!important}
@@ -672,9 +671,18 @@ html.hsl .top .omarow input{border:0!important}
 html.hsl .chip{border-radius:5px;background:#EEF1F3}
 html.hsl .st{border-radius:48px}
 html.hsl .lbadge{border-radius:5px;font-weight:700}
-html.hsl .lbadge:not(.tram){background:#007AC9}
-html.hsl .num{background:#0074BF!important}
-html.hsl .subnav a.on{color:#0074BF;border-bottom-color:#0074BF}
+html.hsl .lbadge:not(.tram){background:#1F5FBF}
+html.hsl .num{background:#1F5FBF!important}
+html.hsl .subnav a.on{color:#1F5FBF;border-bottom-color:#1F5FBF}
+
+/* Tietutka: tumma yläpalkki, logo ja tutkapiste */
+html.hsl .top{background:#0F1B2D;border-top:4px solid #F5A524;border-bottom:4px solid #7FB0FF}
+html.hsl nav a.on{border-bottom-color:#7FB0FF}
+html.hsl .brand .tlogo{height:27px;width:auto;display:block}
+.brand .tlogo{height:24px;width:auto;display:block}
+.top .brand{background:none}
+html.hsl .top .omarow .btn{background:#1F5FBF}
+html.hsl .now-k .dot{background:#F5A524;animation:none;box-shadow:0 0 0 3px rgba(245,165,36,.3)}
 
 /* Tekoäly tuotannossa */
 .strip.s5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0 12px}
@@ -690,7 +698,7 @@ html.hsl .subnav a.on{color:#0074BF;border-bottom-color:#0074BF}
 .ts dd{margin:0;font-size:13.5px;line-height:1.5;color:var(--i2)}
 .ai-lappu{display:block;margin-top:8px;font-size:12px;color:var(--m)}
 .ts-yht{max-width:1100px}.ts-yht th{width:170px;text-align:left;vertical-align:top;font-size:13.5px}.ts-yht td{font-size:13.5px;line-height:1.55}
-html.hsl .ts{border:0;border-radius:16px}html.hsl .ts-malli{background:#EBF6FD;color:#003456}
+html.hsl .ts{border:0;border-radius:16px}html.hsl .ts-malli{background:#E8F0FB;color:#0F1B2D}
 @media(max-width:900px){.strip.s5{grid-template-columns:repeat(2,1fr)}}
 .sugarv{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--l)}
 .sugarv .sa-k{font-size:13px;font-weight:700;margin-right:4px}
@@ -701,19 +709,19 @@ html.hsl .ts{border:0;border-radius:16px}html.hsl .ts-malli{background:#EBF6FD;c
 .sugarv button.info{padding:0;width:20px;height:20px;border-radius:50%}
 .sa-tila{font-size:13px;font-weight:700}.sa-tila.hyvaksy{color:#0B7A3E}.sa-tila.hylkaa{color:#B91C1C}
 .sa-virhe{font-size:12.5px;color:#B91C1C}
-html.hsl .sugarv .sa-ok{background:#0074BF;border-color:#0074BF}
+html.hsl .sugarv .sa-ok{background:#1F5FBF;border-color:#1F5FBF}
 .km-scroll{overflow-x:auto}
 .km td,.km th{font-size:13.5px;vertical-align:top}.km td small{display:block;color:var(--m);font-size:12.5px;line-height:1.45;margin-top:2px;font-weight:400}
 .km td:last-child{min-width:300px}.km tr.hslrow td{background:var(--l2)}
 .lv{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
 .lv.l3{background:#DCF2E4;color:#0B5E30}.lv.l2{background:#FFF3D6;color:#7A5200}.lv.l1{background:#FDE2E2;color:#9B1C1C}
 .vaihe{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:6px;white-space:nowrap;background:var(--l2);color:var(--i2)}
-.vaihe.v-pilotti{background:#003456;color:#fff}.vaihe.v-poc{background:#EBF6FD;color:#003456}.vaihe.v-rajattu{background:#F1F1F1;color:#666}
+.vaihe.v-pilotti{background:#0F1B2D;color:#fff}.vaihe.v-poc{background:#E8F0FB;color:#0F1B2D}.vaihe.v-rajattu{background:#F1F1F1;color:#666}
 .km-flow{grid-template-columns:repeat(4,1fr)}.km-flow .kq{display:block;font-weight:600;color:var(--i);margin:2px 0 6px}
 .km-flow .kg{display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--l);font-size:12.5px;color:var(--i)}
 .km2 td,.km2 th{font-size:13.5px;vertical-align:top}
 .bb{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
-.bb.b-r{background:#003456;color:#fff}.bb.b-h{background:#EBF6FD;color:#003456}.bb.b-a{background:#DCF2E4;color:#0B5E30}.bb.b-k{background:#FFF3D6;color:#7A5200}
+.bb.b-r{background:#0F1B2D;color:#fff}.bb.b-h{background:#E8F0FB;color:#0F1B2D}.bb.b-a{background:#DCF2E4;color:#0B5E30}.bb.b-k{background:#FFF3D6;color:#7A5200}
 html.hsl .km-flow div{border:0;border-radius:16px}
 @media(max-width:900px){.km-flow{grid-template-columns:1fr 1fr}}
 .tark .h2row{display:flex;align-items:center;gap:8px}.tark .h2row h4{margin:0}
@@ -721,8 +729,8 @@ html.hsl .km-flow div{border:0;border-radius:16px}
 .tk-syy{display:inline-block;font-size:12px;font-weight:600;background:#FDE2E2;color:#9B1C1C;padding:2px 9px;border-radius:999px;margin:0 4px 4px 0}
 .tark .sugarv{border-top:0;padding-top:0;margin-top:6px}.tark li.kuitattu{opacity:.65}
 .db-amb{color:#B45309;font-weight:700}.db-red{color:#B91C1C;font-weight:700}
-.vahti-nimi{font-size:12px;font-weight:700;background:#003456;color:#fff;padding:2px 9px;border-radius:999px;vertical-align:2px;margin-left:6px}
-.vahti-k{background:#EBF6FD;border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:14px}.vahti-k b{display:block;margin-top:4px}
+.vahti-nimi{font-size:12px;font-weight:700;background:#0F1B2D;color:#fff;padding:2px 9px;border-radius:999px;vertical-align:2px;margin-left:6px}
+.vahti-k{background:#E8F0FB;border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:14px}.vahti-k b{display:block;margin-top:4px}
 .vahti-k ul{margin:6px 0 0;padding-left:18px}.vahti-k li{font-size:13.5px;margin:3px 0}
 .vahti-t{background:var(--p);border-radius:12px;padding:6px 14px}
 .vahti-h{font-size:12.5px;color:var(--m);padding:6px 0;border-bottom:1px solid var(--l)}
@@ -759,20 +767,20 @@ html.uusi #v-home #kpis.strip{grid-template-columns:1.3fr 1fr!important}
 html.tt-lukko{overflow:hidden}
 .tt-card{position:relative;background:#fff;border-radius:20px;max-width:640px;width:100%;max-height:calc(100vh - 40px);overflow:auto;padding:28px 30px 24px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
 .tt-x{position:absolute;top:12px;right:14px;border:0;background:none;font-size:26px;line-height:1;color:var(--m);cursor:pointer;padding:6px}
-.tt-brand{display:flex;align-items:center;gap:8px;font-weight:700;color:#0074BF;font-size:15px}
-.tt-logo{width:22px;height:22px;border-radius:6px;background:#0074BF;box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 7px #0074BF}
+.tt-brand{display:flex;align-items:center;gap:8px;font-weight:700;color:#1F5FBF;font-size:15px}
+.tt-logo{width:22px;height:22px;border-radius:6px;background:#1F5FBF;box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 7px #1F5FBF}
 .tt-card h2{font-size:24px;line-height:1.25;margin:10px 0 8px;font-weight:600}
 .tt-lead{font-size:16px;line-height:1.55;color:var(--i2);margin:0 0 16px}
 .tt-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
-.tt-3 div{background:#EBF6FD;border-radius:12px;padding:12px;font-size:13.5px;line-height:1.45;color:#003456}
+.tt-3 div{background:#E8F0FB;border-radius:12px;padding:12px;font-size:13.5px;line-height:1.45;color:#0F1B2D}
 .tt-3 b{display:block;font-size:15px;margin-bottom:3px}
 .tt-voit{margin:0 0 18px;padding-left:18px}.tt-voit li{font-size:14.5px;line-height:1.5;margin:4px 0;color:var(--i2)}
 .tt-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.tt-go{font:inherit;font-size:15px;font-weight:600;background:#0074BF;color:#fff;border:0;border-radius:999px;padding:11px 24px;cursor:pointer}
+.tt-go{font:inherit;font-size:15px;font-weight:600;background:#1F5FBF;color:#fff;border:0;border-radius:999px;padding:11px 24px;cursor:pointer}
 .tt-go:hover{background:#005A96}
 .tt-go:focus{outline:none}.tt-go:focus-visible{outline:3px solid #9FD3F5;outline-offset:2px}
 .tt-foot .note{flex:1;min-width:200px;font-size:12px}
-.tt-help{position:fixed;right:18px;bottom:18px;z-index:1500;width:40px;height:40px;border-radius:50%;border:0;background:#0074BF;color:#fff;font:700 18px/1 inherit;box-shadow:0 6px 18px rgba(0,0,0,.2);cursor:pointer}
+.tt-help{position:fixed;right:18px;bottom:18px;z-index:1500;width:40px;height:40px;border-radius:50%;border:0;background:#1F5FBF;color:#fff;font:700 18px/1 inherit;box-shadow:0 6px 18px rgba(0,0,0,.2);cursor:pointer}
 .tt-mob{display:none}
 @media(max-width:640px){
 .tt-modal{align-items:flex-end;padding:0}
@@ -781,7 +789,7 @@ html.tt-lukko{overflow:hidden}
 .tt-brand{font-size:14px}
 .tt-card h2{font-size:19px;margin:8px 0 6px}
 .tt-lead{font-size:14.5px;line-height:1.5;margin-bottom:12px}
-.tt-3{grid-template-columns:1fr;gap:0;margin-bottom:12px;background:#EBF6FD;border-radius:12px;padding:4px 12px}
+.tt-3{grid-template-columns:1fr;gap:0;margin-bottom:12px;background:#E8F0FB;border-radius:12px;padding:4px 12px}
 .tt-3 div{background:none;border-radius:0;padding:8px 0;font-size:13.5px;border-bottom:1px solid #D3E8F5}
 .tt-3 div:last-child{border-bottom:0}
 .tt-3 b{display:inline;font-size:13.5px;margin:0 6px 0 0}
@@ -798,9 +806,9 @@ html.tt-lukko{overflow:hidden}
 .hbell svg{width:18px;height:18px}
 .hbell b{position:absolute;top:-5px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#B91C1C;color:#fff;font-size:11px;line-height:18px;text-align:center;font-weight:800;border:2px solid #fff}
 .hbell b:empty{display:none}
-.hbell.lB b{background:#C2410C}.hbell.lC b{background:#007AC9}
+.hbell.lB b{background:#C2410C}.hbell.lC b{background:#1F5FBF}
 html.hsl .top .hbell{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:#fff}
-html.hsl .top .hbell b{border-color:#0074BF}
+html.hsl .top .hbell b{border-color:#1F5FBF}
 #v-halytykset .prose{max-width:1040px}
 #v-halytykset h2{margin-bottom:2px}
 #v-halytykset .h-lead{margin:0 0 12px;color:var(--m);font-size:14px}
@@ -809,13 +817,13 @@ html.hsl .top .hbell b{border-color:#0074BF}
 .h-sum{display:flex;flex-wrap:wrap;gap:6px;margin-right:auto}
 .h-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--p);font-size:13px;font-weight:700;color:var(--i2)}
 .h-chip i{width:9px;height:9px;border-radius:50%;background:var(--neutral)}
-.h-chip.A i{background:#B91C1C}.h-chip.B i{background:#C2410C}.h-chip.C i{background:#007AC9}.h-chip.ok i{background:#0B7A3E}
+.h-chip.A i{background:#B91C1C}.h-chip.B i{background:#C2410C}.h-chip.C i{background:#1F5FBF}.h-chip.ok i{background:#0B7A3E}
 .h-ctl .seg button{white-space:nowrap;font-size:13px;padding:5px 12px}
 .h-ctl .seg button small{opacity:.75;font-weight:600;margin-left:4px}
 .h-list{background:var(--p);border-radius:14px;overflow:hidden}
 .hrow{border-left:4px solid var(--neutral);border-bottom:1px solid var(--l)}
 .hrow:last-child{border-bottom:0}
-.hrow.lA{border-left-color:#B91C1C}.hrow.lB{border-left-color:#C2410C}.hrow.lC{border-left-color:#007AC9}
+.hrow.lA{border-left-color:#B91C1C}.hrow.lB{border-left-color:#C2410C}.hrow.lC{border-left-color:#1F5FBF}
 .hrow.poistunut{border-left-color:#C9D2D9}
 .hrow.fokus{background:#F4F9FD}
 .hrow.lapsi .hr-hd{padding-left:30px}
@@ -824,7 +832,7 @@ html.hsl .top .hbell b{border-color:#0074BF}
 .hr-hd:hover{background:var(--g)}
 .hr-hd:focus-visible{outline:2px solid var(--a);outline-offset:-2px}
 .hr-lk{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-weight:800;font-size:12px;color:#fff;background:var(--neutral)}
-.lA .hr-lk{background:#B91C1C}.lB .hr-lk{background:#C2410C}.lC .hr-lk{background:#007AC9}
+.lA .hr-lk{background:#B91C1C}.lB .hr-lk{background:#C2410C}.lC .hr-lk{background:#1F5FBF}
 .poistunut .hr-lk{background:#E4E9ED;color:#5C6B78}
 .hr-klo{font-family:"IBM Plex Mono",monospace !important;font-size:12.5px;color:var(--m)}
 .hr-main{min-width:0;display:flex;align-items:baseline;gap:8px;overflow:hidden}
@@ -873,7 +881,7 @@ html.hsl .top .hbell b{border-color:#0074BF}
 .hr-aj li.poistui span,.hr-aj li.ajettu span{color:#0B7A3E}
 .hr-aj .yk{display:block;font-family:"IBM Plex Mono",monospace !important;font-size:11px;color:#7A1F1F;word-break:break-word}
 .hr-linjat{display:inline-flex;gap:3px;flex-wrap:wrap;vertical-align:middle}
-.hr-linjat span{background:#007AC9;color:#fff;border-radius:5px;padding:0 5px;font-weight:800;font-size:11.5px}
+.hr-linjat span{background:#1F5FBF;color:#fff;border-radius:5px;padding:0 5px;font-weight:800;font-size:11.5px}
 .h-tyhja{padding:18px;text-align:center;color:var(--m);font-size:13.5px}
 .h-tyhja b{display:block;color:#0B7A3E;font-size:15px}
 .h-kpi{display:flex;flex-wrap:wrap;gap:4px 18px;margin:10px 2px 0;font-size:12.5px;color:var(--m)}
@@ -991,9 +999,9 @@ a.lnk-linja:hover{color:var(--a)}
 /* Valvomo yläpalkissa: työpöydällä välilehti laskurilla, mobiilissa kello */
 .navn{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:#B91C1C;color:#fff;font-size:11px;font-weight:800;line-height:1}
 .navn:empty{display:none}
-.navn.lB{background:#C2410C}.navn.lC{background:#007AC9}
+.navn.lB{background:#C2410C}.navn.lC{background:#1F5FBF}
 html.hsl .navn{border:2px solid #fff}
-html.hsl .navn.lC{background:#003456}
+html.hsl .navn.lC{background:#0F1B2D}
 @media(min-width:861px){.hbell{display:none !important}}
 @media(max-width:860px){nav a.nav-valvomo{display:none}}
 
@@ -1024,16 +1032,16 @@ html.hsl .navn.lC{background:#003456}
 </head>
 <body>
 <div class="top"><div class="in">
-  <a class="brand" href="#/"><span class="mark"><i></i></span><span class="txt">Työmaa<b>tutka</b></span></a>
+  <a class="brand" href="#/" aria-label="Tietutka – etusivu"><svg class="tlogo" role="img" aria-label="Tietutka" xmlns="http://www.w3.org/2000/svg" viewBox="-33 -926 3923 1000"><path transform="translate(0 0) scale(1 -1)" d="M261 0Q213 0 184.5 28.5Q156 57 156 106V399H27V494H156V653H271V494H413V399H271V125Q271 95 299 95H398V0Z" fill="#7FB0FF"></path><path transform="translate(445 0) scale(1 -1)" d="M73 0V494H188V0Z" fill="#7FB0FF"></path><path transform="translate(694 0) scale(1 -1)" d="M299 -14Q225 -14 168.5 17.5Q112 49 80.5 106.5Q49 164 49 241V253Q49 331 80.0 388.0Q111 445 167.0 476.5Q223 508 296 508Q368 508 422.0 476.5Q476 445 506.0 388.0Q536 331 536 255V214H165Q167 156 206.0 121.0Q245 86 302 86Q358 86 385.0 110.5Q412 135 426 166L521 117Q507 90 480.5 59.5Q454 29 410.0 7.5Q366 -14 299 -14ZM166 301H419Q415 350 381.5 379.0Q348 408 295 408Q240 408 207.0 379.0Q174 350 166 301Z" fill="#7FB0FF"></path><path transform="translate(1246 0) scale(1 -1)" d="M261 0Q213 0 184.5 28.5Q156 57 156 106V399H27V494H156V653H271V494H413V399H271V125Q271 95 299 95H398V0Z" fill="#FFFFFF"></path><path transform="translate(1691 0) scale(1 -1)" d="M262 -8Q205 -8 161.0 17.5Q117 43 93.0 89.5Q69 136 69 198V494H183V207Q183 147 212.5 118.0Q242 89 296 89Q357 89 392.5 129.0Q428 169 428 244V494H542V0H430V69H413Q400 42 365.5 17.0Q331 -8 262 -8Z" fill="#FFFFFF"></path><path transform="translate(2294 0) scale(1 -1)" d="M261 0Q213 0 184.5 28.5Q156 57 156 106V399H27V494H156V653H271V494H413V399H271V125Q271 95 299 95H398V0Z" fill="#FFFFFF"></path><path transform="translate(2739 0) scale(1 -1)" d="M73 0V700H188V307H205L383 494H534L295 255L542 0H393L205 201H188V0Z" fill="#FFFFFF"></path><path transform="translate(3275 0) scale(1 -1)" d="M226 -14Q174 -14 132.0 4.5Q90 23 65.5 58.0Q41 93 41 144Q41 194 65.5 228.0Q90 262 133.0 279.5Q176 297 231 297H374V327Q374 366 350.0 390.5Q326 415 275 415Q225 415 199.5 391.5Q174 368 166 331L60 366Q72 405 98.5 437.0Q125 469 169.0 488.5Q213 508 277 508Q374 508 429.5 459.5Q485 411 485 319V125Q485 95 513 95H555V0H474Q438 0 415.0 18.0Q392 36 392 67V69H375Q369 55 354.0 35.0Q339 15 308.5 0.5Q278 -14 226 -14ZM245 80Q302 80 338.0 112.5Q374 145 374 200V210H238Q201 210 178.0 194.0Q155 178 155 147Q155 117 179.0 98.5Q203 80 245 80Z" fill="#FFFFFF"></path><circle cx="575.5" cy="-650" r="72" fill="#F5A524"></circle><circle cx="575.5" cy="-650" r="134" fill="none" stroke="#F5A524" stroke-width="26" opacity="0.6"></circle><circle cx="575.5" cy="-650" r="196" fill="none" stroke="#F5A524" stroke-width="26" opacity="0.28"></circle></svg></a>
   <nav>
     <a href="#/" data-r="">Tilannekuva</a>
     <a href="#/tyot" data-r="tyot">Työmaat</a>
-    <span class="navk" title="Työkalut HSL:n liikennesuunnittelijoille">Suunnittelijoille</span>
+    <span class="navk" title="Työkalut liikennesuunnittelijoille">Suunnittelijoille</span>
     <a href="#/linjat" data-r="linjat">Linjat</a>
     <a href="#/ennakko" data-r="ennakko">Ennakkoarvio</a>
     <a href="#/halytykset" data-r="halytykset" class="nav-valvomo" title="Valvomo: hälytykset ja niiden käsittely">Valvomo<b class="navn" id="navValvomoN"></b></a>
     <span class="navsep"></span>
-    <a href="#/hsl" data-r="hsl">Pilotti HSL:ssä</a>
+    <a href="#/hsl" data-r="hsl">Pilotti</a>
     <a href="#/menetelma" data-r="menetelma">Tietoa</a>
   </nav>
   <a class="hbell" id="hBell" href="#/halytykset" hidden aria-label="Hälytykset" title="Hälytykset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><b id="hBellN"></b></a>
@@ -1043,7 +1051,7 @@ html.hsl .navn.lC{background:#003456}
 <main>
 <!-- ================= TILANNEKUVA ================= -->
 <section class="view" id="v-home">
-  <div class="intro" id="intro"><span><b>Työmaatutka</b> on konsepti HSL:lle: se mittaa avoimesta datasta, paljonko Helsingin katutyöt hidastavat busseja ja ratikoita, ja varoittaa etukäteen töistä, jotka osuvat samoille linjoille. Tekijä Pontus Kettunen.</span><a href="#/menetelma">Miten tämä toimii →</a><button aria-label="Sulje esittely" id="introX">×</button></div>
+  <div class="intro" id="intro"><span><b>Tietutka</b> kertoo etukäteen, miten katutyöt vaikuttavat liikenteeseen ja joukkoliikenteen reitteihin. Itsenäinen palvelu – ei HSL:n eikä kaupungin. Avoin data: HSL ja Helsingin kaupunki.</span><a href="#/menetelma">Miten tämä toimii →</a><button aria-label="Sulje esittely" id="introX">×</button></div>
   <form class="omalinja" id="omaForm" autocomplete="off">
     <label for="omaQ"><b>Mitä linjaa ajat tai käytät?</b> <span class="note">Näe oman linjasi työmaat ja paljonko ne hidastavat.</span></label>
     <div class="omarow"><input id="omaQ" list="omaList" placeholder="esim. 4, 55 tai 550" inputmode="text" maxlength="5"><datalist id="omaList"></datalist><button class="btn" type="submit">Näytä linja →</button></div>
@@ -1109,7 +1117,7 @@ html.hsl .navn.lC{background:#003456}
   nav.querySelectorAll('a[data-r="tyot"], a[data-r="menetelma"], .navk, .navsep').forEach(x=>x.style.display="none");
   const ph = nav.querySelector('a[data-r="hsl"]'); ph.textContent = "Pilotti ja menetelmä";
   const sub = (pairs, cur) => { const d = document.createElement("div"); d.className = "subnav"; d.innerHTML = pairs.map(([href,t,k])=>`<a href="${href}" class="${k===cur?"on":""}">${t}</a>`).join(""); return d; };
-  const A = [["#/","Yleiskuva","home"],["#/tyot","Kaikki työmaat","tyot"]], B = [["#/hsl","Pilotti HSL:ssä","hsl"],["#/kehitys","Tekoäly tuotannossa","kehitys"],["#/menetelma","Menetelmä ja lähteet","menetelma"]];
+  const A = [["#/","Yleiskuva","home"],["#/tyot","Kaikki työmaat","tyot"]], B = [["#/hsl","Pilotti","hsl"],["#/kehitys","Tekoäly tuotannossa","kehitys"],["#/menetelma","Menetelmä ja lähteet","menetelma"]];
   h.prepend(sub(A,"home"));
   document.addEventListener("DOMContentLoaded", ()=>{ document.getElementById("v-tyot").prepend(sub(A,"tyot"));
     document.getElementById("v-hsl").prepend(sub(B,"hsl")); document.getElementById("v-menetelma").prepend(sub(B,"menetelma")); document.getElementById("v-kehitys").prepend(sub(B,"kehitys")); });
@@ -1119,8 +1127,8 @@ html.hsl .navn.lC{background:#003456}
 <!-- ================= PILOTTI HSL:SSÄ ================= -->
 <section class="view" id="v-hsl">
   <div class="prose">
-    <h2>Miten Työmaatutka toimisi HSL:ssä</h2>
-    <p class="lead">Työmaatutka on prototyyppi, ei valmis järjestelmä. Tällä sivulla: mitä on jo löydetty, mitä ei vielä tiedetä ja miten idea testattaisiin HSL:ssä kuudessa viikossa.</p>
+    <h2>Miten Tietutka toimisi HSL:ssä</h2>
+    <p class="lead">Tietutka on prototyyppi, ei valmis järjestelmä. Tällä sivulla: mitä on jo löydetty, mitä ei vielä tiedetä ja miten idea testattaisiin HSL:ssä kuudessa viikossa.</p>
     <p><b>Työnjako lyhyesti:</b> kaikki luvut lasketaan toistettavasti SQL:llä. Kielimalli lukee lupatekstejä ja kirjoittaa katsauksia ja luonnoksia. Ihminen päättää kaikesta. Tarkemmin <a href="#/kehitys">Tekoäly tuotannossa → Tuoteseloste</a>.</p>
 
     <h3>Löydetyt viat ja korjaukset</h3>
@@ -1221,7 +1229,7 @@ html.hsl .navn.lC{background:#003456}
 <section class="view" id="v-kehitys">
   <div class="prose">
     <h2>Tekoäly tuotannossa: käyttö, kustannukset ja vastuu</h2>
-    <p class="lead">Miten tutkan tekoälyä valvotaan, mitä se maksaa ja kuka siitä vastaa. Sama malli toimisi mille tahansa HSL:n tekoälypalvelulle.</p>
+    <p class="lead">Miten tutkan tekoälyä valvotaan, mitä se maksaa ja kuka siitä vastaa. Sama malli toimii mille tahansa tekoälypalvelulle.</p>
 
     <h3 id="vahtiOtsikko">Järjestelmän tila <span class="vahti-nimi">Vahti</span></h3>
     <p style="margin-top:0">Joka aamu: tuleeko data perille, onnistuvatko ajot ja tekoälykutsut, riittääkö tila. Tarkistukset ovat SQL:ää, kielimalli kirjoittaa vain katsauksen. Viasta ja sen korjautumisesta tulee ilmoitus puhelimeen 5 minuutin sisällä. Vahti ei korjaa itse: ilmoituksen napista ihminen voi kuitata vian hoitoon tai käynnistää ennalta hyväksytyn uudelleenajon. Napin tunniste kelpaa kerran ja tunnin, ja jokainen toimenpide kirjataan. Jos uudelleenajo ei auta, ilmoitus kertoo vian vaativan korjauksen koodiin.</p>
@@ -1384,7 +1392,7 @@ html.hsl .navn.lC{background:#003456}
         <tr><th>Luokka</th><th>Milloin</th><th>Ilmoitus</th></tr>
         <tr><td><b style="color:#B91C1C">A · Kriittinen</b></td><td>Palvelu ei toimi: ajoneuvodata pysähtynyt yli 2 h, tietokanta täynnä tai kaatunut.</td><td>Heti, ohittaa äänettömän tilan</td></tr>
         <tr><td><b style="color:#C2410C">B · Vakava</b></td><td>Osa rikki nyt: ajo, funktio tai kielimalli epäonnistuu.</td><td>Heti</td></tr>
-        <tr><td><b style="color:#007AC9">C · Huomio</b></td><td>Tarkista pian: tila yli 70 %, lähdedata vanhentunut, työmaa hidastaa tavallista enemmän.</td><td>Hiljainen ilmoitus</td></tr>
+        <tr><td><b style="color:#1F5FBF">C · Huomio</b></td><td>Tarkista pian: tila yli 70 %, lähdedata vanhentunut, työmaa hidastaa tavallista enemmän.</td><td>Hiljainen ilmoitus</td></tr>
       </table>
       <p><b>Elinkaari.</b> Hälytys on ensin <i>aktiivinen ja kuittaamaton</i>. Kuittaus kertoo, että joku hoitaa asiaa. Kun vika poistuu, hälytys siirtyy historiaan. Kriittinen tai vakava vika jää kuittaamattomana listalle, jotta yölliset viat eivät huku; 7 vuorokauden jälkeen se siirtyy historiaan merkinnällä <i>vanhentunut</i>. Huomio-tason hälytys (esim. työmaa hidastaa) poistuu itsestään eikä vaadi kuittausta, koska ohi menneestä hidastumasta ei ole tehtävää. Jokainen muutos kirjataan aikajanalle.</p>
       <p><b>Melun esto.</b> Ilmoitus lähtee vain, kun luokka nousee. Jos sama vika palaa puolen tunnin sisällä, sama rivi avautuu uudelleen ja toistolaskuri kasvaa. Tunnetun vian voi hiljentää 4 tunniksi. Tietokannan kaatumisen jälkeiset järjestelmähälytykset niputetaan sen alle (juurisyy), ja jos uusia hälytyksiä tulee kerralla yli kolme, puhelimeen lähtee yksi koosteilmoitus.</p>
@@ -1397,7 +1405,7 @@ html.hsl .navn.lC{background:#003456}
 
 <!-- ================= ENNAKKOARVIO ================= -->
 <section class="view" id="v-ennakko">
-  <div class="brief"><div class="k">Ennakkoarvio<span class="forpro">HSL:n suunnittelijoille</span></div><p><b>Mitä jos?</b> Piirrä suunniteltu työ kartalle tai valitse alkava lupa. Tutka arvioi ennen työn alkua, mihin linjoihin se osuu, paljonko lisäaikaa se tuo ja mihin aikaan työ kannattaa tehdä.</p></div>
+  <div class="brief"><div class="k">Ennakkoarvio<span class="forpro">Liikennesuunnittelijoille</span></div><p><b>Mitä jos?</b> Piirrä suunniteltu työ kartalle tai valitse alkava lupa. Tutka arvioi ennen työn alkua, mihin linjoihin se osuu, paljonko lisäaikaa se tuo ja mihin aikaan työ kannattaa tehdä.</p></div>
   <div class="split fit">
     <div class="panel mapp">
       <div class="ph"><h2>Työalue</h2>
@@ -1453,7 +1461,7 @@ html.hsl .navn.lC{background:#003456}
   <div id="sugPanel"></div>
   <div class="lcock" id="lCock"></div>
   <div class="lpick" id="lPick" hidden>
-    <div class="lpick-h"><b>Valitse linja</b><span class="forpro">HSL:n suunnittelijoille</span><button type="button" class="lpick-x" id="lPickX" aria-label="Sulje">×</button></div>
+    <div class="lpick-h"><b>Valitse linja</b><span class="forpro">Liikennesuunnittelijoille</span><button type="button" class="lpick-x" id="lPickX" aria-label="Sulje">×</button></div>
     <p class="note" id="linjatBrief" style="margin:0 16px 8px"></p>
     <p class="note" id="lAgent" style="margin:0 16px 10px"></p>
     <div class="toolbar" style="padding:0 16px;margin:0 0 8px"><input class="search" id="lQ" type="search" placeholder="Hae linjaa, esim. 4, 55 tai 550" inputmode="search"><div class="seg" id="lMode"><button data-m="kaikki" class="on">Kaikki</button><button data-m="ratikka">Ratikat</button><button data-m="bussi">Bussit</button></div></div>
@@ -1473,7 +1481,7 @@ html.hsl .navn.lC{background:#003456}
 <!-- ================= MENETELMÄ ================= -->
 <section class="view" id="v-menetelma">
   <div class="prose">
-    <h2>Tietoa Työmaatutkasta</h2>
+    <h2>Tietoa Tietutkasta</h2>
     <div class="luenae">
       <h3 style="margin-top:0">Lue näin</h3>
       <ol>
@@ -1482,8 +1490,8 @@ html.hsl .navn.lC{background:#003456}
         <li><b>ⓘ</b> luvun vieressä avaa selityksen.</li>
       </ol>
     </div>
-    <p>Itsenäinen konsepti ja toimiva demo HSL:lle: katutöiden vaikutus joukkoliikenteeseen mitattuna toteutuneista ajoajoista, ja varoitus ennen kuin haitta kasautuu samalle linjalle. Lupapäätös ja sen joukkoliikennevaikutus eivät nykyään kohtaa samassa näkymässä. Tämä yhdistää ne.</p>
-    <p class="note">Ei HSL:n eikä Helsingin kaupungin virallinen palvelu. Kaikki data on avointa. Konsepti ja toteutus: Pontus Kettunen · <a href="https://github.com/pontuskettunen-cyber/tyomaatutka">lähdekoodi GitHubissa</a>.</p>
+    <p>Itsenäinen palvelu: katutöiden vaikutus joukkoliikenteeseen mitattuna toteutuneista ajoajoista, ja varoitus ennen kuin haitta kasautuu samalle linjalle. Lupapäätös ja sen joukkoliikennevaikutus eivät nykyään kohtaa samassa näkymässä. Tämä yhdistää ne.</p>
+    <p class="note">Ei HSL:n eikä Helsingin kaupungin virallinen palvelu. Kaikki data on avointa. Tietutka © Pontus Kettunen.</p>
 
     <h2 style="margin-top:30px">Miten se toimii</h2>
     <div class="flow">
@@ -1520,7 +1528,7 @@ html.hsl .navn.lC{background:#003456}
 <div class="sys" id="sys"></div>
 </main>
 
-<footer>Lähteet: HSL HFP v2 · Helsingin kaupunki (kartta.hel.fi) · Fintraffic Digitraffic · © OpenStreetMap-tekijät. Kaikki CC BY 4.0. Sivu näyttää vain koostettua joukkoliikenne- ja lupadataa.<br>Työmaatutka © 2026 Pontus Kettunen. Kaikki oikeudet pidätetään.</footer>
+<footer>Lähteet: HSL HFP v2 · Helsingin kaupunki (kartta.hel.fi) · Fintraffic Digitraffic · © OpenStreetMap-tekijät. Kaikki CC BY 4.0. Sivu näyttää vain koostettua joukkoliikenne- ja lupadataa.<br>Tietutka © 2026 Pontus Kettunen. Kaikki oikeudet pidätetään.</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
@@ -2407,7 +2415,7 @@ function renderRaportti(id){
       ${lin.slice(0,12).map(x=>`<tr><td><span class="chip">${esc(ln(x.route))}</span> <span class="note">suunta ${x.dir}</span></td><td class="r">${nf(x.n)}</td><td class="r ${x.s>10?"slow":""}">${sgn(x.s)}</td></tr>`).join("")}</tbody></table>`:""}
     ${tod && arvioS!=null ? `<h3>Arvio vs. todennettu</h3><p>Ennen todennettua lukua tutka arvioi lisäajaksi ${sgn(arvioS)} per ohitus. Todennettu vaikutus oli ${sgn(tod.vaikutus_s)}. ${Math.abs(arvioS)>5?`Arvio ${arvioS>tod.vaikutus_s?"yliarvioi":"aliarvioi"} vaikutusta ${nf(Math.abs(arvioS-tod.vaikutus_s)/Math.abs(arvioS)*100)} %.`:""} Tätä vertailua käytetään arvioiden kalibrointiin.</p>`:""}
     <h3>Miten luvut on laskettu</h3>
-    <p class="note">Lisäaika per ohitus: työmaan pysäkkivälien ajoaika verrattuna ${tod?"samaan väliin ilman työtä, samalla vuorokaudenjaksolla":"saman linjan muihin väleihin samaan aikaan (arvio)"}. Ruuhka ja sää kumoutuvat, koska vertailu tehdään samassa 2 tunnin jaksossa. Koko keston luku = lisäaika vuorokaudessa × kesto. Lähteet: HSL:n avoin ajoneuvodata (HFP), Helsingin kaupungin katuluvat. Työmaatutka ${new Date().toLocaleDateString("fi-FI")}.</p>`;
+    <p class="note">Lisäaika per ohitus: työmaan pysäkkivälien ajoaika verrattuna ${tod?"samaan väliin ilman työtä, samalla vuorokaudenjaksolla":"saman linjan muihin väleihin samaan aikaan (arvio)"}. Ruuhka ja sää kumoutuvat, koska vertailu tehdään samassa 2 tunnin jaksossa. Koko keston luku = lisäaika vuorokaudessa × kesto. Lähteet: HSL:n avoin ajoneuvodata (HFP), Helsingin kaupungin katuluvat. Tietutka ${new Date().toLocaleDateString("fi-FI")}.</p>`;
 }
 /* Sekunnit ihmisen kielelle: 67 -> "noin minuutin", 227 -> "lähes 4 minuuttia" */
 function minuutteina(sec){
@@ -2664,7 +2672,7 @@ async function renderDetail(){
   box.querySelectorAll("[data-draft]").forEach(b=>b.onclick=()=>draft(b.dataset.draft, l.lupa_id));
   wireInfo(box);
   const sh = document.getElementById("shareBtn");
-  if(sh) sh.onclick = ()=>{ const u = location.origin+location.pathname+"#/?l="+encodeURIComponent(l.lupa_id); (navigator.share ? navigator.share({title:"Työmaatutka: "+title(l), url:u}).catch(()=>{}) : navigator.clipboard?.writeText(u)); sh.textContent = navigator.share ? "Jaa" : "Kopioitu"; };
+  if(sh) sh.onclick = ()=>{ const u = location.origin+location.pathname+"#/?l="+encodeURIComponent(l.lupa_id); (navigator.share ? navigator.share({title:"Tietutka: "+title(l), url:u}).catch(()=>{}) : navigator.clipboard?.writeText(u)); sh.textContent = navigator.share ? "Jaa" : "Kopioitu"; };
   if(document.getElementById("nousBox")) taytaNousijat(l);
   if(LIIK_TESTI && document.getElementById("liikBox")) taytaLiikenne(l);
   const r = document.getElementById("load");
@@ -4194,9 +4202,9 @@ setInterval(()=>{ if(!document.hidden) load(); }, 120000);
 <div class="tt-modal" id="ttModal" hidden role="dialog" aria-modal="true" aria-labelledby="ttmH">
   <div class="tt-card">
     <button class="tt-x" id="ttmX" aria-label="Sulje">×</button>
-    <div class="tt-brand"><span class="tt-logo"></span>Työmaatutka</div>
+    <div class="tt-brand"><svg class="tlogo" role="img" aria-label="Tietutka" style="height:30px;width:auto" xmlns="http://www.w3.org/2000/svg" viewBox="-33 -926 3923 1000"><path transform="translate(0 0) scale(1 -1)" d="M261 0Q213 0 184.5 28.5Q156 57 156 106V399H27V494H156V653H271V494H413V399H271V125Q271 95 299 95H398V0Z" fill="#1F5FBF"></path><path transform="translate(445 0) scale(1 -1)" d="M73 0V494H188V0Z" fill="#1F5FBF"></path><path transform="translate(694 0) scale(1 -1)" d="M299 -14Q225 -14 168.5 17.5Q112 49 80.5 106.5Q49 164 49 241V253Q49 331 80.0 388.0Q111 445 167.0 476.5Q223 508 296 508Q368 508 422.0 476.5Q476 445 506.0 388.0Q536 331 536 255V214H165Q167 156 206.0 121.0Q245 86 302 86Q358 86 385.0 110.5Q412 135 426 166L521 117Q507 90 480.5 59.5Q454 29 410.0 7.5Q366 -14 299 -14ZM166 301H419Q415 350 381.5 379.0Q348 408 295 408Q240 408 207.0 379.0Q174 350 166 301Z" fill="#1F5FBF"></path><path transform="translate(1246 0) scale(1 -1)" d="M261 0Q213 0 184.5 28.5Q156 57 156 106V399H27V494H156V653H271V494H413V399H271V125Q271 95 299 95H398V0Z" fill="#0F1B2D"></path><path transform="translate(1691 0) scale(1 -1)" d="M262 -8Q205 -8 161.0 17.5Q117 43 93.0 89.5Q69 136 69 198V494H183V207Q183 147 212.5 118.0Q242 89 296 89Q357 89 392.5 129.0Q428 169 428 244V494H542V0H430V69H413Q400 42 365.5 17.0Q331 -8 262 -8Z" fill="#0F1B2D"></path><path transform="translate(2294 0) scale(1 -1)" d="M261 0Q213 0 184.5 28.5Q156 57 156 106V399H27V494H156V653H271V494H413V399H271V125Q271 95 299 95H398V0Z" fill="#0F1B2D"></path><path transform="translate(2739 0) scale(1 -1)" d="M73 0V700H188V307H205L383 494H534L295 255L542 0H393L205 201H188V0Z" fill="#0F1B2D"></path><path transform="translate(3275 0) scale(1 -1)" d="M226 -14Q174 -14 132.0 4.5Q90 23 65.5 58.0Q41 93 41 144Q41 194 65.5 228.0Q90 262 133.0 279.5Q176 297 231 297H374V327Q374 366 350.0 390.5Q326 415 275 415Q225 415 199.5 391.5Q174 368 166 331L60 366Q72 405 98.5 437.0Q125 469 169.0 488.5Q213 508 277 508Q374 508 429.5 459.5Q485 411 485 319V125Q485 95 513 95H555V0H474Q438 0 415.0 18.0Q392 36 392 67V69H375Q369 55 354.0 35.0Q339 15 308.5 0.5Q278 -14 226 -14ZM245 80Q302 80 338.0 112.5Q374 145 374 200V210H238Q201 210 178.0 194.0Q155 178 155 147Q155 117 179.0 98.5Q203 80 245 80Z" fill="#0F1B2D"></path><circle cx="575.5" cy="-650" r="72" fill="#F5A524"></circle><circle cx="575.5" cy="-650" r="134" fill="none" stroke="#F5A524" stroke-width="26" opacity="0.6"></circle><circle cx="575.5" cy="-650" r="196" fill="none" stroke="#F5A524" stroke-width="26" opacity="0.28"></circle></svg></div>
     <h2 id="ttmH">Mitä katutyöt maksavat joukkoliikenteelle?</h2>
-    <p class="tt-lead">Työmaatutka mittaa avoimesta datasta joka päivä, paljonko Helsingin katutyöt hidastavat busseja ja ratikoita. Se kertoo myös, mitä asialle kannattaisi tehdä.</p>
+    <p class="tt-lead">Tietutka mittaa avoimesta datasta joka päivä, paljonko Helsingin katutyöt hidastavat busseja ja ratikoita. Se kertoo myös, mitä asialle kannattaisi tehdä.</p>
     <div class="tt-3">
       <div><b>Mittaa</b>Jokaisen työmaan lisäaika linjoittain, tunteina ja euroina.</div>
       <div><b>Ennakoi</b>Alkavien töiden vaikutus ja kasautumat samoille linjoille.</div>
@@ -4206,14 +4214,14 @@ setInterval(()=>{ if(!document.hidden) load(); }, 120000);
     <ul class="tt-voit">
       <li><b>Klikkaa työmaata</b> kartalla tai listassa: näet mitatun vaikutuksen.</li>
       <li><b>Hae linjaa</b> yläpalkista, esim. 55: näet sen kaikki työmaat reitillä.</li>
-      <li><b>Pilotti ja menetelmä</b> kertoo, miten tätä kokeiltaisiin HSL:ssä ja miten tekoälyä valvotaan.</li>
+      <li><b>Pilotti ja menetelmä</b> kertoo, miten tätä kokeillaan käytännössä ja miten tekoälyä valvotaan.</li>
     </ul>
     <div class="tt-foot">
       <button class="tt-go" id="ttmGo">Avaa tilannekuva →</button>
-      <span class="note">Konsepti, ei HSL:n eikä kaupungin virallinen palvelu. Avoin data, ei henkilötietoja. Tekijä Pontus Kettunen.</span>
+      <span class="note">Itsenäinen palvelu, ei HSL:n eikä kaupungin. Avoin data, ei henkilötietoja. Tekijä Pontus Kettunen.</span>
     </div>
   </div>
 </div>
-<button class="tt-help" id="ttHelp" hidden title="Mikä Työmaatutka on?">?</button>
+<button class="tt-help" id="ttHelp" hidden title="Mikä Tietutka on?">?</button>
 </body>
 </html>
