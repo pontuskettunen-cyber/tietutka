@@ -701,6 +701,56 @@ html.hsl .subnav a.on{color:#1F5FBF;border-bottom-color:#1F5FBF}
 .entila{font-weight:700;font-size:13px;white-space:nowrap}.entila.red,.entila.zero{color:#B42318}.entila.amb{color:#9A6200}.entila.ok{color:#0F7A64}.entila.na{color:var(--m)}
 .enkaksi{display:grid;grid-template-columns:1.5fr 1fr;gap:24px}
 @media(max-width:900px){.enajo,.enkaksi{grid-template-columns:1fr}.enkp{grid-template-columns:1fr 1fr}}
+
+/* ===== Karttatyöpöytä (Ennakkoarvio) ===== */
+html.tp-on body{overflow:hidden}
+html.tp-on footer{display:none}
+html.tp-on #v-ennakko.on{position:fixed;left:0;right:0;top:var(--toph,76px);bottom:0;z-index:20;display:block}
+#v-ennakko #mapE{position:absolute;inset:0;height:auto;border-radius:0;z-index:0}
+.tp-rail{position:absolute;left:12px;top:16px;width:66px;background:var(--p);border-radius:10px;box-shadow:0 4px 18px rgba(15,27,45,.16);padding:4px 0;z-index:1000;display:flex;flex-direction:column}
+.tp-ic{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;background:none;border:0;color:var(--i2);font:600 10.5px/1.2 "Inter",sans-serif!important;cursor:pointer}
+.tp-ic+.tp-ic{border-top:1px solid var(--l2)}
+.tp-ic:hover{color:var(--i)}
+.tp-ic.on{color:#1F5FBF;box-shadow:inset 3px 0 0 #1F5FBF}
+.tp-ic.tp-pal0{color:var(--m);margin-top:6px;border-top:1px solid var(--l)!important}
+.tp-pal{position:absolute;z-index:900;background:rgba(255,255,255,.98);border-radius:10px;box-shadow:0 8px 28px rgba(15,27,45,.22);display:flex;flex-direction:column;max-height:calc(100% - 32px);overflow:hidden}
+.tp-pal[hidden]{display:none}
+.tp-pal.raahaa{box-shadow:0 14px 40px rgba(15,27,45,.32);opacity:.96;user-select:none}
+.tp-ph{display:flex;align-items:center;gap:8px;padding:7px 8px 7px 12px;border-bottom:1px solid var(--l);background:#F7F9FB;cursor:move;touch-action:none;flex:none}
+.tp-ph b{font-size:13.5px;flex:none}
+.tp-sub{flex:1;min-width:0;font-size:11.5px;color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right}
+.tp-ph b+.tp-min{margin-left:auto}
+.tp-grip{color:#9AA6B8;font-size:12px}
+.tp-min,.tp-x{background:none;border:0;color:var(--m);font-size:17px;line-height:1;width:24px;height:24px;border-radius:5px;cursor:pointer;padding:0}
+.tp-min:hover,.tp-x:hover{background:var(--l2);color:var(--i)}
+.tp-pb{padding:10px 14px 12px;overflow-y:auto;overscroll-behavior:contain}
+.tp-pal.min .tp-pb{display:none}
+.tp-intro{font-size:13px;line-height:1.45;color:var(--i2);margin-bottom:10px}
+.tp-sel{width:100%;font:inherit;font-size:13.5px;padding:7px 9px;border:1px solid var(--l)!important;border-radius:6px!important;background:var(--p);color:var(--i)}
+.tp-row{margin-bottom:6px}.tp-lnk{display:flex;gap:16px}
+#v-ennakko #enOhje{font-size:12px;line-height:1.4;padding:0;border:0}
+#v-ennakko .enopt{grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--l);border-radius:7px;overflow:hidden;margin-bottom:10px}
+#v-ennakko .enopt label{border:0;border-radius:0;padding:6px 4px;justify-content:center;display:flex;gap:5px;font-size:12.5px}
+#v-ennakko .enopt label+label{border-left:1px solid var(--l)}
+#v-ennakko .enopt label:has(input:checked){background:#0F1B2D;color:#fff}
+#v-ennakko .enopt input{display:none}
+#v-ennakko .enrow{margin-bottom:0}
+#v-ennakko .enkp b{font-size:20px}
+.tp-pal[data-pal="ajo"] .enajo{grid-template-columns:220px 1fr;gap:16px}
+.tp-pal[data-pal="ajo"] .hat td,.tp-pal[data-pal="ajo"] .hat th{font-size:12.5px;padding:6px}
+.tp-pal[data-pal="lin"] .enlin td,.tp-pal[data-pal="lin"] .enlin th{font-size:12.5px;padding:6px}
+.tp-muut{display:block}
+#v-ennakko .leaflet-bottom.leaflet-left{left:88px}
+@media(max-width:900px){
+  html.tp-on body{overflow:auto}
+  html.tp-on #v-ennakko.on{position:static;display:block}
+  #v-ennakko #mapE{position:relative;height:55vh}
+  .tp-rail{position:sticky;top:var(--toph,60px);left:auto;width:auto;flex-direction:row;overflow-x:auto;border-radius:0;margin:0 -14px}
+  .tp-ic{flex:1;min-width:64px}.tp-ic+.tp-ic{border-top:0;border-left:1px solid var(--l2)}
+  .tp-pal{position:static!important;width:auto!important;max-height:none;margin:10px 0;box-shadow:0 1px 4px rgba(15,27,45,.12)}
+  .tp-ph{cursor:default}.tp-grip{display:none}
+  .tp-pal[data-pal="ajo"] .enajo{grid-template-columns:1fr}
+}
 /* Urakoitsijan haitta-arvio */
 .halom{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:2px 0 6px}
 .halom label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--m)}
@@ -1485,30 +1535,25 @@ html.hsl .navn.lC{background:#0F1B2D}
 
 <!-- ================= ENNAKKOARVIO ================= -->
 <section class="view" id="v-ennakko">
-  <div class="brief"><div class="k">Ennakkoarvio<span class="forpro">Urakoitsijoille ja suunnittelijoille</span></div><p><b>Arvioi työn liikennehaitta ennen kaivuilmoitusta.</b> Piirrä työalue kartalle tai valitse alkava lupa. Tietutka laskee, mihin bussi- ja raitiolinjoihin työ osuu, paljonko lisäaikaa se tuo, mikä ajoitus on edullisin ja mitä vaihtoehdot maksavat. Tulos tallentuu yhden sivun haitta-arvioksi, jonka voi liittää kaivuilmoitukseen.<span id="ttEsittely"></span></p></div>
-  <div class="split fit">
-    <div class="panel mapp">
-      <div class="ph"><h2>Työalue</h2>
-        <select id="enLupa" class="search" style="max-width:340px"><option value="">Valitse alkava lupa…</option></select>
-        <div class="seg"><button id="enUndo" type="button">Kumoa piste</button><button id="enClear" type="button">Tyhjennä</button></div>
+  <div class="map" id="mapE"></div>
+  <div class="tp-rail" role="toolbar" aria-label="Työkalut"><button type="button" class="tp-ic" data-tp="tyo" title="Työalue"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 16l6-12 6 12"/></svg><span>Työalue</span></button><button type="button" class="tp-ic" data-tp="arvio" title="Arvio"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 12h18"/></svg><span>Arvio</span></button><button type="button" class="tp-ic" data-tp="ajo" title="Ajoitus"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5l3 3M12 21a9 9 0 110-18 9 9 0 010 18"/></svg><span>Ajoitus</span></button><button type="button" class="tp-ic" data-tp="lin" title="Linjat"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><span>Linjat</span></button><button type="button" class="tp-ic" data-tp="muut" title="Muut työt"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Muut työt</span></button><button type="button" class="tp-ic" data-tp="pdf" title="PDF"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l5 5v13H6zM14 3v6h6"/></svg><span>PDF</span></button><button type="button" class="tp-ic" data-tp="vert" title="Vertailu"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4v16M16 4v16M4 8h8M12 16h8"/></svg><span>Vertailu</span></button><button type="button" class="tp-ic tp-pal0" data-tp="palauta" title="Palauta palettien oletuspaikat"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8M3 3v5h5"/></svg><span>Palauta</span></button></div>
+  <div class="tp-pal" data-pal="tyo" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Työalue</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb">
+      <div class="tp-intro"><b>Arvioi työn liikennehaitta ennen kaivuilmoitusta.</b> Valitse alkava lupa tai piirrä työalue kartalle.<span id="ttEsittely"></span></div>
+      <div class="tp-row"><select id="enLupa" class="tp-sel"><option value="">Valitse alkava lupa…</option></select></div>
+      <div class="tp-row tp-lnk"><button id="enUndo" type="button" class="lnk">Kumoa piste</button><button id="enClear" type="button" class="lnk">Tyhjennä</button></div>
+      <div class="note" id="enOhje"></div>
+      <div class="sec" style="margin:10px 0 6px">Työn haitta liikenteelle</div>
+      <div class="enopt" id="enHaitta">
+        <label title="kaistat auki · tyypillinen mitattu työ"><input type="radio" name="haitta" value="pieni"> <b>Pieni</b></label>
+        <label title="kaista kapenee · haitallisin neljännes"><input type="radio" name="haitta" value="kohtalainen" checked> <b>Kohtalainen</b></label>
+        <label title="kaistoja suljetaan · haitallisin kymmenesosa"><input type="radio" name="haitta" value="suuri"> <b>Suuri</b></label>
       </div>
-      <div class="note" id="enOhje" style="padding:5px 16px 6px;border-bottom:1px solid var(--l);font-size:12.5px;line-height:1.4"></div>
-      <div class="map" id="mapE"></div>
-    </div>
-    <div class="panel" id="enPanel">
-      <div class="det">
-        <div class="sec" style="margin-top:0">Työn haitta liikenteelle</div>
-        <div class="enopt" id="enHaitta">
-          <label><input type="radio" name="haitta" value="pieni"> <b>Pieni</b><span>kaistat auki · tyypillinen mitattu työ</span></label>
-          <label><input type="radio" name="haitta" value="kohtalainen" checked> <b>Kohtalainen</b><span>kaista kapenee · haitallisin neljännes</span></label>
-          <label><input type="radio" name="haitta" value="suuri"> <b>Suuri</b><span>kaistoja suljetaan · haitallisin kymmenesosa</span></label>
-        </div>
-        <div class="enrow"><label>Alkaa<input type="date" id="enA"></label><label>Päättyy<input type="date" id="enP"></label></div>
-        <div id="enOut"><div class="empty">Piirrä työalue tai valitse lupa, niin arvio lasketaan.</div></div>
-      </div>
-    </div>
-  </div>
-  <div id="enDet"></div>
+      <div class="enrow"><label>Alkaa<input type="date" id="enA"></label><label>Päättyy<input type="date" id="enP"></label></div></div></div>
+  <div class="tp-pal" data-pal="arvio" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Arvio</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enOut"><div class="empty">Valitse lupa tai piirrä työalue, niin arvio lasketaan.</div></div></div></div>
+  <div class="tp-pal" data-pal="ajo" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Ajoitus ja kustannus</b><span class="tp-sub" id="enAjoSub"></span><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enAjo"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
+  <div class="tp-pal" data-pal="lin" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Linjat</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enLin"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
+  <div class="tp-pal" data-pal="muut" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Muut työt ja menetelmä</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enMuut"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
+  <div class="tp-pal" data-pal="vert" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Vaihtoehtojen vertailu</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enVert"><div class="note">Tallenna vaihtoehto Arvio-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div></div></div></div>
 </section>
 
 <!-- ================= JÄLKIRAPORTTI ================= -->
@@ -2179,6 +2224,7 @@ function haittaMalli(){
 function initEnnakko(l){
   if(!M.en){
     M.en = mkMap("mapE"); M.en.setView([60.172,24.94],14);
+    if(M.en.zoomControl) M.en.zoomControl.setPosition("bottomright");
     const leg = L.control({position:"bottomleft"});
     leg.onAdd = ()=>{ const d = L.DomUtil.create("div","enleg"); d.innerHTML = `<div><i class="w"></i>Työalue</div><div><i class="b"></i>Linjojen pysäkkivälit, joihin työ osuu</div>`; return d; };
     leg.addTo(M.en);
@@ -2202,6 +2248,7 @@ function initEnnakko(l){
   sel.value = cur;
   if(l && S.byId[l] && EN.lupa !== l) valitseLupaEn(l);
   enOhje();
+  tpInit(); tpPiirra();
   setTimeout(()=>M.en.invalidateSize(), 60);
 }
 function valitseLupaEn(id){
@@ -2284,7 +2331,7 @@ function enOhje(){
 function laskeEn(){
   clearTimeout(EN.timer);
   const out = document.getElementById("enOut");
-  if(!EN.pts.length){ EN.res = null; if(EN.segL) EN.segL.clearLayers(); const dt = document.getElementById("enDet"); if(dt) dt.innerHTML = ""; out.innerHTML = `<div class="empty">Piirrä työalue tai valitse lupa, niin arvio lasketaan.</div>`; return; }
+  if(!EN.pts.length){ EN.res = null; if(EN.segL) EN.segL.clearLayers(); tpTyhjenna(); out.innerHTML = `<div class="empty">Piirrä työalue tai valitse lupa, niin arvio lasketaan.</div>`; return; }
   out.innerHTML = `<div class="empty">Lasketaan…</div>`;
   EN.timer = setTimeout(async ()=>{
     const pts = EN.rings ? EN.pts : tiheyta(EN.pts), id = (EN.req = (EN.req||0) + 1);
@@ -2350,7 +2397,7 @@ function naytaEn(){
   const out = document.getElementById("enOut"); if(!EN.res) return;
   if(!EN.segL) EN.segL = L.layerGroup().addTo(M.en); EN.segL.clearLayers();
   const rows = EN.res.filter(r=>{ const n = ln(r.route); return /^\d{1,3}[A-Z]?$/.test(n) && !/N$/.test(n); });
-  if(!rows.length){ document.getElementById("enDet").innerHTML = ""; out.innerHTML = `<div class="tiivis">Työalueen kohdalla (alle 40 m) ei kulje bussi- tai ratikkareittejä. Työ ei vaikuta joukkoliikenteeseen suoraan.</div>`; return; }
+  if(!rows.length){ tpTyhjenna(); out.innerHTML = `<div class="tiivis">Työalueen kohdalla (alle 40 m) ei kulje bussi- tai ratikkareittejä. Työ ei vaikuta joukkoliikenteeseen suoraan.</div>`; return; }
   // välit kartalle
   const seen = new Set(); rows.forEach(g=>{ const k = g.from_stop+"|"+g.to_stop; if(seen.has(k)) return; seen.add(k);
     const pts = Array.isArray(g.viiva)&&g.viiva.length>1 ? g.viiva : [[g.from_lat,g.from_lon],[g.to_lat,g.to_lon]];
@@ -2401,12 +2448,12 @@ function naytaEn(){
   const ratikkaYli = KR ? [...new Set(KR.yli.map(r=>r.n))] : [];
   const ratikkaAmb = KR ? [...new Set(KR.ratikat.filter(r=>r.tila==="amb").map(r=>r.n))] : [];
   const recs = [];
-  recs.push(EN.kust ? `<div class="rec" id="enRecAjo"><i></i><span>${haSuositus(EN.kust)} <a href="#enDAjo" data-hyppy>Vaihtoehdot ↓</a></span></div>`
+  recs.push(EN.kust ? `<div class="rec" id="enRecAjo"><i></i><span>${haSuositus(EN.kust)} <a href="#enDAjo" data-hyppy>Vaihtoehdot →</a></span></div>`
     : `<div class="rec"><i></i><span>Valitse alkamis- ja päättymispäivä, niin ajoitusvaihtoehdot ja kustannukset lasketaan.</span></div>`);
-  if(KR && ratikkaYli.length) recs.push(`<div class="rec red"><i></i><span><b>Viivevara ylittyy ${ratikkaYli.length===1?"linjalla":"linjoilla"} ${esc(ratikkaYli.join(", "))}.</b> Huonoimmissa vuoroissa myöhästyminen siirtyy seuraavaan lähtöön. <a href="#enDLin" data-hyppy>Linjat ↓</a></span></div>`);
-  else if(KR && ratikkaAmb.length) recs.push(`<div class="rec"><i></i><span><b>Yli puolet viivevarasta käytössä</b> ${ratikkaAmb.length===1?"linjalla":"linjoilla"} ${esc(ratikkaAmb.join(", "))}. <a href="#enDLin" data-hyppy>Linjat ↓</a></span></div>`);
-  else if(KR && KR.ratikat.length) recs.push(`<div class="rec ok"><i></i><span>Ratikoiden viivevara riittää. <a href="#enDLin" data-hyppy>Linjat ↓</a></span></div>`);
-  recs.push(kas.length ? `<div class="rec"><i></i><span><b>${kas.length} ${kas.length===1?"päällekkäinen työ":"päällekkäistä työtä"}</b> samoilla linjoilla alle 1,5 km päässä (${esc(kas.slice(0,2).map(o=>shortStreet(o.x)).join(", "))}${kas.length>2?"…":""}). <a href="#enDMuut" data-hyppy>Muut työt ↓</a></span></div>`
+  if(KR && ratikkaYli.length) recs.push(`<div class="rec red"><i></i><span><b>Viivevara ylittyy ${ratikkaYli.length===1?"linjalla":"linjoilla"} ${esc(ratikkaYli.join(", "))}.</b> Huonoimmissa vuoroissa myöhästyminen siirtyy seuraavaan lähtöön. <a href="#enDLin" data-hyppy>Linjat →</a></span></div>`);
+  else if(KR && ratikkaAmb.length) recs.push(`<div class="rec"><i></i><span><b>Yli puolet viivevarasta käytössä</b> ${ratikkaAmb.length===1?"linjalla":"linjoilla"} ${esc(ratikkaAmb.join(", "))}. <a href="#enDLin" data-hyppy>Linjat →</a></span></div>`);
+  else if(KR && KR.ratikat.length) recs.push(`<div class="rec ok"><i></i><span>Ratikoiden viivevara riittää. <a href="#enDLin" data-hyppy>Linjat →</a></span></div>`);
+  recs.push(kas.length ? `<div class="rec"><i></i><span><b>${kas.length} ${kas.length===1?"päällekkäinen työ":"päällekkäistä työtä"}</b> samoilla linjoilla alle 1,5 km päässä (${esc(kas.slice(0,2).map(o=>shortStreet(o.x)).join(", "))}${kas.length>2?"…":""}). <a href="#enDMuut" data-hyppy>Muut työt →</a></span></div>`
     : `<div class="rec ok"><i></i><span>Ei päällekkäisiä töitä samoilla linjoilla lähellä.</span></div>`);
   out.innerHTML = `
     <p class="tiivis" style="margin-top:0">Työ osuu <b>${nf(linjaNimet.length)} ${linjaNimet.length===1?"linjaan":"linjaan"}</b> (${esc(nimiL.join(", "))}${linjaNimet.length>6?"…":""}), noin <b>${nf(tot)} ohitusta arkipäivänä</b>. Lisäaikaa tulee noin <b>${nf(H(tot,s),1)} h vuorokaudessa</b>, kun kaista on suljettu koko vuorokauden.</p>
@@ -2417,20 +2464,17 @@ function naytaEn(){
     <div class="altbar"><button type="button" class="btn" id="haAvaa" ${EN.kust?"":"disabled"}>Avaa haitta-arvio (PDF)</button><button type="button" class="share" id="enSave" ${EN.alt.length>=3?"disabled":""}>+ Tallenna vaihtoehdoksi ${String.fromCharCode(65+EN.alt.length)}</button></div>
     ${puuttuu.length?`<div class="note" style="margin-top:6px">Liikennemääriä ei ole vielä mitattu kaikille vuorokaudenajoille (puuttuu: ${puuttuu.map(j=>({aamu:"aamu 6–10",paiva:"päivä 10–14",ilta:"ilta 14–18",muu:"ilta–yö 18–6"})[j]).join(", ")}), joten luvut ovat toistaiseksi liian pieniä.</div>`:""}`;
   // Yksityiskohdat koko leveydellä kartan alla
-  const det = document.getElementById("enDet");
+  const det = document.getElementById("v-ennakko");
   const linRivit = L2.map(e=>{ const r = KR && KR.rivit.find(x=>x.n===e.n && x.d===e.d); return {e, r}; })
     .sort((x,y)=>{ const w = r => !r ? 3 : (r.tila==="red"||r.tila==="zero") ? 0 : r.tila==="amb" ? 1 : 2; return w(x.r)-w(y.r) || y.e.vrk-x.e.vrk; });
   const tilaHTML = r => !r ? "" : r.tila==="bus" ? '<span class="note" title="Bussien viivevaraa ei ole vielä tarkistettu autokierroista.">ei arvioida</span>'
     : `<span class="entila ${r.tila}">${({red:"ylittyy",zero:"ei varaa",amb:"seuraa",ok:"mahtuu",na:"ei tiedossa"})[r.tila]}${r.pros!=null&&r.tila!=="zero"&&(r.tila!=="ok"||r.pros>=10)?" "+nf(Math.round(r.pros))+" %":""}</span>`;
   const NAYTA = 4;
-  det.innerHTML = `<div class="enjump"><a href="#enDAjo" data-hyppy>Ajoitus ja kustannus</a><a href="#enDLin" data-hyppy>Linjat</a><a href="#enDMuut" data-hyppy>Muut työt</a><a href="#enDMiten" data-hyppy>Miten arvio lasketaan</a></div>
-    ${vertailuHTML()}
-    <h2 class="enh" id="enDAjo">Ajoitus ja kustannus</h2>
-    ${kesto ? `<div class="enajo"><div>${haLomake(haAsetukset())}</div><div><div id="haTaul">${haTaulukko(EN.kust, true)}</div>
+  document.getElementById("enVert").innerHTML = vertailuHTML() || '<div class="note">Tallenna vaihtoehto Arvio-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div>';
+  document.getElementById("enAjo").innerHTML = `    ${kesto ? `<div class="enajo"><div>${haLomake(haAsetukset())}</div><div><div id="haTaul">${haTaulukko(EN.kust, true)}</div>
       <div class="note" style="margin-top:6px">Vaihtoehtoja verrataan kokonaishaitan mukaan: sama työtuntimäärä (${nf(9*kesto)} h), joten lyhyemmät päivät pidentävät työtä. Päivätyön kesto on valittu ajanjakso; jos työ ei täytä koko lupa-aikaa, muuta päivämäärät. Kaista oletetaan auki työajan ulkopuolella, ellei toisin valita. Ilta–yöjakson liikenne on tasattu klo 18–06, joten yötyön haitta on todellisuudessa tätä pienempi. Alle 15 %:n ero on arvion epävarmuuden sisällä.</div></div></div>`
-      : `<div class="note">Valitse alkamis- ja päättymispäivä, niin vaihtoehdot ja kustannukset lasketaan.</div>`}
-    <h2 class="enh" id="enDLin">Linjat</h2>
-    ${KR ? `<p class="tiivis" style="margin-top:0">${KR.yhteenveto}</p>` : `<div class="note">Ladataan aikataulun viivevaroja…</div>`}
+      : `<div class="note">Valitse alkamis- ja päättymispäivä, niin vaihtoehdot ja kustannukset lasketaan.</div>`}`;
+  document.getElementById("enLin").innerHTML = `    ${KR ? `<p class="tiivis" style="margin-top:0">${KR.yhteenveto}</p>` : `<div class="note">Ladataan aikataulun viivevaroja…</div>`}
     <div class="enscroll"><table class="t enlin"><thead><tr><th>Linja</th><th class="r">Ohituksia / arkip.</th><th class="r">Lisäaika / vrk</th><th class="r">Nyt muista töistä</th><th class="r">+ tämä työ</th><th class="r">Viivevara</th><th>Tila</th><th>Muut työt linjalla</th></tr></thead><tbody>
     ${linRivit.map(({e,r},k)=>{ const lt = linjanTyot(e.n);
       return `<tr class="${k>=NAYTA?"enpiilo":""}"><td style="white-space:nowrap"><span class="lbadge ${e.tram?"tram":""}">${esc(e.n)}</span> <span class="note">suunta ${e.d}</span></td>
@@ -2440,18 +2484,19 @@ function naytaEn(){
         <td>${lt.n ? `${nf(lt.n)} ${lt.n===1?"työ":"työtä"} · ${lt.top.slice(0,1).map(x=>`<a href="#/?l=${encodeURIComponent(x.l.lupa_id)}">${esc(shortStreet(x.l))}</a>${x.vehH>=0.05?` +${nf(x.vehH,1)} h`:""}`).join("")} <button type="button" class="lnk" data-en-linja="${esc(e.n)}">linja kartalla →</button>` : '<span class="note">ei muita töitä</span>'}</td></tr>`; }).join("")}
     </tbody></table></div>
     ${linRivit.length>NAYTA?`<button type="button" class="lnk" id="enLinKaikki">Näytä kaikki ${nf(linRivit.length)} linjasuuntaa</button>`:""}
-    <div class="note" style="margin-top:6px">Nyt muista töistä = linjan huonoimman 10 %:n vuorojen mitattu lisäaika reitin muista töistä (min:s per vuoro). Viivevara = aikataulun max_delay, päiväajan vuorojen mediaani: kuinka paljon vuoro voi myöhästyä ilman, että saman vaunun seuraava lähtö myöhästyy. Busseilla aikataulun arvoa ei ole vielä tarkistettu autokierroista, joten ylittymistä ei arvioida.</div>
-    <div class="enkaksi"><div><h2 class="enh" id="enDMuut">Muut työt samoilla linjoilla</h2>
+    <div class="note" style="margin-top:6px">Nyt muista töistä = linjan huonoimman 10 %:n vuorojen mitattu lisäaika reitin muista töistä (min:s per vuoro). Viivevara = aikataulun max_delay, päiväajan vuorojen mediaani: kuinka paljon vuoro voi myöhästyä ilman, että saman vaunun seuraava lähtö myöhästyy. Busseilla aikataulun arvoa ei ole vielä tarkistettu autokierroista, joten ylittymistä ei arvioida.</div>`;
+  document.getElementById("enMuut").innerHTML = `    <div class="tp-muut"><div><div class="sec" style="margin-top:0">Muut työt samoilla linjoilla</div>
       ${kas.length?`<ul class="kas">${kas.map(o=>`<li><a href="#/?l=${encodeURIComponent(o.x.lupa_id)}">${esc(shortStreet(o.x))}</a> · ${nf(o.d)} m · ${o.yht.length===1?"linja":"linjat"} ${esc(o.yht.slice(0,5).join(", "))}${o.x.alkaa?` · ${fsY(o.x.alkaa)}${o.x.paattyy&&fsY(o.x.paattyy)!==fsY(o.x.alkaa)?"–"+fsY(o.x.paattyy):""}`:""}</li>`).join("")}</ul>`:'<div class="note">Ei päällekkäisiä töitä samoilla linjoilla alle 1,5 km päässä.</div>'}</div>
-      <div><h2 class="enh" id="enDMiten">Miten arvio lasketaan</h2><div class="note" style="font-size:13.5px">Ohitukset ovat työalueen pysäkkiväleiltä mitattuja bussien ja ratikoiden määriä arkipäivinä${S.tila?.keruu_alkoi?" (keruu alkoi "+esc(fmtDate(S.tila.keruu_alkoi))+")":""}. Lisäaika per ohitus on ${esc(kesk)}. Arvio tarkentuu, kun todennettuja lukuja kertyy.</div></div></div>`;
-  const hyppy = root => root.querySelectorAll("[data-hyppy]").forEach(a=>a.onclick = ev=>{ ev.preventDefault(); const t = document.getElementById(a.getAttribute("href").slice(1)); if(t) window.scrollTo({top: t.getBoundingClientRect().top + scrollY - (document.querySelector(".top")?.offsetHeight||70) - 50, behavior:"smooth"}); });
-  hyppy(out); hyppy(det);
+      <div><div class="sec">Miten arvio lasketaan</div><div class="note" style="font-size:13.5px">Ohitukset ovat työalueen pysäkkiväleiltä mitattuja bussien ja ratikoiden määriä arkipäivinä${S.tila?.keruu_alkoi?" (keruu alkoi "+esc(fmtDate(S.tila.keruu_alkoi))+")":""}. Lisäaika per ohitus on ${esc(kesk)}. Arvio tarkentuu, kun todennettuja lukuja kertyy.</div></div></div>`;
+  tpAjoSub();
+  const hyppy = root => root.querySelectorAll("[data-hyppy]").forEach(a=>a.onclick = ev=>{ ev.preventDefault(); tpAvaa(({enDAjo:"ajo", enDLin:"lin", enDMuut:"muut"})[a.getAttribute("href").slice(1)]); });
+  hyppy(out);
   const lk = document.getElementById("enLinKaikki"); if(lk) lk.onclick = ()=>{ det.querySelectorAll(".enpiilo").forEach(t=>t.classList.remove("enpiilo")); lk.remove(); };
   const hb = document.getElementById("haAvaa"); if(hb) hb.onclick = haAvaa;
   det.querySelectorAll("[data-ha]").forEach(i=>i.oninput = i.onchange = ()=>{ const as = haAsetukset();
     as[i.dataset.ha] = i.type==="checkbox" ? i.checked : Math.max(0, +i.value||0); haTallenna(as);
     EN.kust = haLaske(...EN.kustArgs, as); document.getElementById("haTaul").innerHTML = haTaulukko(EN.kust, true);
-    const ra = document.getElementById("enRecAjo"); if(ra){ ra.querySelector("span").innerHTML = haSuositus(EN.kust) + ' <a href="#enDAjo" data-hyppy>Vaihtoehdot ↓</a>'; hyppy(ra); } });
+    tpAjoSub(); const ra = document.getElementById("enRecAjo"); if(ra){ ra.querySelector("span").innerHTML = haSuositus(EN.kust) + ' <a href="#enDAjo" data-hyppy>Vaihtoehdot →</a>'; hyppy(ra); } });
   det.querySelectorAll("[data-en-linja]").forEach(b=>b.onclick=()=>avaaLinja(b.dataset.enLinja));
   document.getElementById("enSave").onclick = ()=>{ if(EN.alt.length>=3) return;
     EN.alt.push({nimi:String.fromCharCode(65+EN.alt.length), pts:EN.pts.map(p=>p.slice()), rings:kopioRenkaat(EN.rings), muok:EN.muok, lupa:EN.lupa, calc:JSON.parse(JSON.stringify(EN.calc))});
@@ -2614,6 +2659,65 @@ async function haAvaa(){
   document.getElementById("haClose").onclick = ()=>{ document.documentElement.classList.remove("ha-auki"); ovl.innerHTML = ""; };
   document.getElementById("haPrint").onclick = ()=>window.print();
   document.getElementById("haEsit").onclick = ()=>esittely(lukittu ? id : null);
+}
+/* ===== Karttatyöpöytä (Ennakkoarvio): koko näytön kartta, työkalurivi ja siirrettävät paletit ===== */
+const TP_OLETUS = {
+  tyo:  {auki:true,  l:88,  t:16, w:330},
+  arvio:{auki:true,  r:16,  t:16, w:410},
+  ajo:  {auki:false, l:88,  b:16, w:780},
+  lin:  {auki:false, r:16,  b:16, w:640},
+  muut: {auki:false, r:440, t:16, w:420},
+  vert: {auki:false, l:430, t:16, w:520},
+};
+let TP = null, TPZ = 10;
+const tpMobiili = () => matchMedia("(max-width: 900px)").matches;
+function tpLue(){ let o = {}; try{ o = JSON.parse(localStorage.getItem("tt_tp")||"{}"); }catch(e){} const r = {}; Object.keys(TP_OLETUS).forEach(k=>r[k] = {...TP_OLETUS[k], ...(o[k]||{})}); return r; }
+function tpTallenna(){ try{ localStorage.setItem("tt_tp", JSON.stringify(TP)); }catch(e){} }
+function tpPaikka(el, st){
+  const pw = el.parentElement.clientWidth; el.style.width = (pw > 400 ? Math.min(st.w, pw - 104) : st.w) + "px";
+  ["left","right","top","bottom"].forEach(x=>el.style[x] = "");
+  if(st.x != null){ el.style.left = st.x + "px"; el.style.top = st.y + "px"; }
+  else { if(st.l != null) el.style.left = st.l + "px"; if(st.r != null) el.style.right = st.r + "px"; if(st.t != null) el.style.top = st.t + "px"; if(st.b != null) el.style.bottom = st.b + "px"; }
+}
+function tpPiirra(){
+  const sec = document.getElementById("v-ennakko"); if(!sec || !TP) return;
+  sec.querySelectorAll(".tp-pal").forEach(el=>{ const k = el.dataset.pal, st = TP[k];
+    el.hidden = !st.auki; el.classList.toggle("min", !!st.min); if(!tpMobiili()) tpPaikka(el, st); });
+  sec.querySelectorAll(".tp-ic").forEach(b=>{ const st = TP[b.dataset.tp]; b.classList.toggle("on", !!(st && st.auki)); b.setAttribute("aria-pressed", st && st.auki ? "true" : "false"); });
+}
+function tpEteen(el){ el.style.zIndex = ++TPZ; }
+function tpAvaa(k){ if(!TP || !TP[k]) return; TP[k].auki = true; TP[k].min = false; tpTallenna(); tpPiirra();
+  const el = document.querySelector(`#v-ennakko .tp-pal[data-pal="${k}"]`); if(el){ tpEteen(el); if(tpMobiili()) el.scrollIntoView({behavior:"smooth", block:"start"}); } }
+function tpTyhjenna(){ ["enAjo","enLin","enMuut"].forEach(id=>{ const e = document.getElementById(id); if(e) e.innerHTML = '<div class="note">Arvio lasketaan, kun työalue on valittu.</div>'; });
+  const v = document.getElementById("enVert"); if(v && !EN.alt.length) v.innerHTML = '<div class="note">Tallenna vaihtoehto Arvio-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div>';
+  const s = document.getElementById("enAjoSub"); if(s) s.textContent = ""; }
+function tpAjoSub(){ const s = document.getElementById("enAjoSub"); if(!s) return; const a = haAsetukset();
+  s.textContent = `${nf(a.hlo)} hlö · ${nf(a.eur)} €/h · ilta ${nf(a.ilta)} % · yö ${nf(a.yo)} % · maksu ${nf(a.maksu)} €/vrk`; }
+function tpInit(){
+  const sec = document.getElementById("v-ennakko"); if(!sec || sec.dataset.tp) return; sec.dataset.tp = "1";
+  TP = tpLue();
+  sec.querySelectorAll(".tp-ic").forEach(b=>b.onclick = ()=>{ const k = b.dataset.tp;
+    if(k==="pdf"){ if(EN.kust) haAvaa(); else tpAvaa("tyo"); return; }
+    if(k==="palauta"){ TP = JSON.parse(JSON.stringify(TP_OLETUS)); tpTallenna(); tpPiirra(); return; }
+    TP[k].auki = !TP[k].auki; if(TP[k].auki) TP[k].min = false; tpTallenna(); tpPiirra();
+    if(TP[k].auki) tpEteen(sec.querySelector(`.tp-pal[data-pal="${k}"]`)); });
+  sec.querySelectorAll(".tp-pal").forEach(el=>{ const k = el.dataset.pal, ph = el.querySelector(".tp-ph");
+    el.addEventListener("pointerdown", ()=>tpEteen(el), true);
+    el.querySelector(".tp-x").onclick = ()=>{ TP[k].auki = false; tpTallenna(); tpPiirra(); };
+    el.querySelector(".tp-min").onclick = ()=>{ TP[k].min = !TP[k].min; tpTallenna(); tpPiirra(); };
+    ph.addEventListener("dblclick", e=>{ if(e.target.closest("button")) return; TP[k].min = !TP[k].min; tpTallenna(); tpPiirra(); });
+    ph.addEventListener("pointerdown", e=>{
+      if(tpMobiili() || e.button !== 0 || e.target.closest("button")) return;
+      e.preventDefault(); const r = el.getBoundingClientRect(), pr = sec.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+      el.classList.add("raahaa"); ph.setPointerCapture(e.pointerId);
+      const liiku = ev=>{ const x = Math.max(0, Math.min(ev.clientX - pr.left - dx, pr.width - 80)), y = Math.max(0, Math.min(ev.clientY - pr.top - dy, pr.height - 40));
+        TP[k].x = Math.round(x); TP[k].y = Math.round(y); el.style.right = el.style.bottom = ""; el.style.left = x + "px"; el.style.top = y + "px"; };
+      const irti = ()=>{ el.classList.remove("raahaa"); ph.removeEventListener("pointermove", liiku); ph.removeEventListener("pointerup", irti); ph.removeEventListener("pointercancel", irti); tpTallenna(); };
+      ph.addEventListener("pointermove", liiku); ph.addEventListener("pointerup", irti); ph.addEventListener("pointercancel", irti);
+    });
+  });
+  addEventListener("resize", ()=>{ if(document.documentElement.classList.contains("tp-on")) tpPiirra(); });
+  tpPiirra(); tpAjoSub();
 }
 function drawAlt(){
   if(EN.altL) EN.altL.remove(); EN.altL = L.layerGroup().addTo(M.en);
@@ -4375,6 +4479,8 @@ function route(nav){
   if(path==="uusi"){ history.replaceState(null,"","#/"); }   // vanha vertailulinkki
   const v = ["tyot","menetelma","linjat","raportti","ennakko","hsl","kehitys","halytykset"].includes(path) ? path : "home";
   document.documentElement.classList.toggle("uusi", !!S.uusi && v==="home");
+  document.documentElement.classList.toggle("tp-on", v==="ennakko");
+  { const tp = document.querySelector(".top"); if(tp) document.documentElement.style.setProperty("--toph", tp.offsetHeight + "px"); }
   document.querySelectorAll("#v-home .subnav a").forEach(a=>a.classList.toggle("on", a.getAttribute("href")==="#/"));
   document.querySelectorAll(".view").forEach(x=>x.classList.toggle("on", x.id==="v-"+v));
   const va = (window.NAV_ALIAS||{})[v] || v;
