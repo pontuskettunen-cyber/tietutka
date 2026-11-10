@@ -2410,7 +2410,7 @@ function esittely(arvioId){
     <label>Nimi<input name="nimi" required maxlength="120" autocomplete="name"></label>
     <label>Yritys<input name="yritys" maxlength="160" autocomplete="organization"></label>
     <label>Sähköposti tai puhelin<input name="yhteys" required maxlength="160" autocomplete="email"></label>
-    <label>Viesti <span class="note">(vapaaehtoinen)</span><textarea name="viesti" rows="3" maxlength="2000" placeholder="Esim. millaisia töitä teette ja missä"></textarea></label>
+    <label><span>Viesti <span class="note" style="font-weight:400">(vapaaehtoinen)</span></span><textarea name="viesti" rows="3" maxlength="2000" placeholder="Esim. millaisia töitä teette ja missä"></textarea></label>
     ${arvioId?`<div class="note">Liitetään arvioon ${esc(arvioId)}</div>`:""}
     <div class="es-row"><button class="btn" type="submit">Lähetä</button><button class="btn ghost" type="button" id="esX">Peruuta</button><span class="note" id="esTila"></span></div></form>`;
   d.classList.add("on");
@@ -2518,7 +2518,8 @@ async function haAvaa(){
   const p = K.paras, pohja = K.pohja;
   const paras = p===pohja ? "Suunniteltu päivätyö on jo pienimmän haitan vaihtoehto näillä oletuksilla."
     : `<b>${esc(p.t)}</b> pienentää kokonaishaittaa ${nf(Math.round((1-p.yht/Math.max(1e-9,pohja.yht))*100))} %${p.pv!==pohja.pv?` ja ${p.pv<pohja.pv?"lyhentää työtä":"pidentää työtä"} ${nf(Math.abs(pohja.pv-p.pv))} päivällä`:""}. ${p.ero < -0.5 ? `Se myös säästää noin ${haEur(-p.ero)}, koska alueenkäyttömaksu pienenee enemmän kuin lisät kasvavat.` : p.ero <= 0.5 ? "Kustannus pysyy ennallaan." : `Lisäkustannus on noin ${haEur(p.ero)}.`}`;
-  const lead = `Työ osuu <b>${bus.length} ${bus.length===1?"bussilinjaan":"bussilinjaan"}${tram.length?` ja ${tram.length} raitiolinjaan`:""}</b>. Päivätyönä se tuo joukkoliikenteelle noin <b>${nf(pohja.vrk,1)} tuntia lisäaikaa arkipäivässä</b>. ${paras}`;
+  const osat = [bus.length?`${bus.length} bussilinjaan`:"", tram.length?`${tram.length} raitiolinjaan`:""].filter(Boolean).join(" ja ");
+  const lead = `Työ osuu <b>${osat}</b>. Päivätyönä se tuo joukkoliikenteelle noin <b>${nf(pohja.vrk,1)} tuntia lisäaikaa arkipäivässä</b>. ${paras}`;
   const ovl = document.getElementById("haOvl") || document.body.appendChild(Object.assign(document.createElement("div"),{id:"haOvl"}));
   ovl.innerHTML = `<div class="ha-bar"><button class="btn" id="haPrint">Tulosta / tallenna PDF</button><button class="btn ghost" id="haClose">Sulje</button><button class="btn ghost" id="haEsit">Pyydä esittely</button><span class="note">Tallenna PDF:nä ja liitä kaivuilmoitukseen tai haittojenhallintasuunnitelmaan.</span></div>
   <div class="ha-page"><div class="ha-b1"></div><div class="ha-b2"></div>

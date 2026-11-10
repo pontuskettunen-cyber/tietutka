@@ -72,7 +72,7 @@ revoke all on tietutka_yhteydenotot from anon, authenticated;
 
 create or replace function tietutka_pyyda_esittely(p_nimi text, p_yritys text, p_yhteys text, p_viesti text, p_arvio_id text default null)
 returns json language plpgsql security definer set search_path = public as $$
-declare v_kanava text := (select v from vahti_ilmoitus_asetus where k = 'ntfy_kanava');
+declare v_kanava text := (select topic from vahti_kanava where id = 1);
 begin
   if coalesce(trim(p_nimi), '') = '' or coalesce(trim(p_yhteys), '') = '' then raise exception 'nimi ja yhteystieto tarvitaan'; end if;
   if length(p_nimi) > 120 or length(coalesce(p_yritys, '')) > 160 or length(p_yhteys) > 160 or length(coalesce(p_viesti, '')) > 2000 then raise exception 'liian pitkä'; end if;
