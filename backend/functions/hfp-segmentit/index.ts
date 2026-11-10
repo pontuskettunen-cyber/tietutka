@@ -36,19 +36,10 @@ async function run() {
   const prev: any[] = [];
   const tuore = Date.now() - 5 * 60_000;
   const raja = new Date(Date.now() - 4 * 3600_000).toISOString();
-  for (let from = 0; from < 20000; from += 1000) {
-    const { data } = await db.from("hfp_tila").select("*").gt("t", raja).order("veh").range(from, from + 999);
-    prev.push(...(data ?? []));
-    if (!data || data.length < 1000) break;
-  }
-  for (const r of prev) st.set(r.veh, { t: +new Date(r.t), stop: r.stop, dl: r.dl, trip: r.trip,
-    arr_stop: r.arr_stop, arr_t: r.arr_t ? +new Date(r.arr_t) : null, arr_dl: r.arr_dl, seen: false,
-    vanha: +new Date(r.t) < tuore && !(r.arr_t && +new Date(r.arr_t) >= tuore),
-    k_alku: r.k_alku ? +new Date(r.k_alku) : null, k_trip: r.k_trip ?? null, k_dl: r.k_dl ?? null });
   // keruun kattavuus 4 h ajalta: jakso on luotettava vain, jos ajojen välissä ei ole yli 5 min aukkoa
   const ajot: number[] = [];
   {
-    const { data } = await db.from("tallennin_loki").select("alkoi").eq("funktio", "hfp-segmentit").gt("alkoi", raja).order("alkoi").limit(500);
+    const { data } = await db.from("tallennin_loki").select("alkoi").eq("funktio", "hfp-segmentit").gt("rivit", 0).gt("alkoi", raja).order("alkoi").limit(500);
     (data ?? []).forEach((r: any) => ajot.push(+new Date(r.alkoi)));
     ajot.push(Date.now() + LISTEN_MS);
   }
@@ -57,6 +48,15 @@ async function run() {
     for (const x of ajot) { if (x < a) continue; if (x - ed > 300_000) return false; ed = x; if (x >= b) return true; }
     return false;
   };
+  for (let from = 0; from < 20000; from += 1000) {
+    const { data } = await db.from("hfp_tila").select("*").gt("t", raja).order("veh").range(from, from + 999);
+    prev.push(...(data ?? []));
+    if (!data || data.length < 1000) break;
+  }
+  for (const r of prev) st.set(r.veh, { t: +new Date(r.t), stop: r.stop, dl: r.dl, trip: r.trip,
+    arr_stop: r.arr_stop, arr_t: r.arr_t ? +new Date(r.arr_t) : null, arr_dl: r.arr_dl, seen: false,
+    vanha: +new Date(r.t) < tuore && !(r.arr_t && +new Date(r.arr_t) >= tuore && katettu(+new Date(r.t), +new Date(r.arr_t))),
+    k_alku: r.k_alku ? +new Date(r.k_alku) : null, k_trip: r.k_trip ?? null, k_dl: r.k_dl ?? null });
   const seisonnat: any[] = [];
   const seisoi = (r: any) => { if (r.kesto_s > 0) seisonnat.push(r); };
   // 2) seurattavat parit
@@ -100,7 +100,7 @@ async function run() {
       const trip = `${p.route}|${p.dir}|${p.oday}|${p.start}`;
       const s = st.get(key);
       // myöhässä perille tullut vanha viesti ei saa palauttaa tilaa taaksepäin (syntyisi vääriä pysäkkivälejä)
-      if (s && s.trip === trip && (t < s.t || (s.arr_t != null && t < s.arr_t))) return;
+      if (s && t < Math.max(s.t, s.arr_t ?? 0)) return;
       if (ev === "ARS") {
         if (s && s.trip === trip) { s.arr_stop = stop; s.arr_t = t; s.arr_dl = dl; s.seen = true; }  // valolaskurit säilyvät välin loppuun
         else {
@@ -134,7 +134,7 @@ async function run() {
               dl_alku: s.arr_dl, dl_loppu: dl, vuoro: trip, vuoro_ed: null });
           // pitkä katko pysäkkien välillä
           const viim = Math.max(s.t, s.arr_t ?? 0);
-          if (s.stop !== stop && t - viim > 1_200_000 && t - viim <= 4 * 3600_000 && katettu(viim, t))
+          if (s.stop !== stop && s.arr_stop !== stop && t - viim > 1_200_000 && t - viim <= 4 * 3600_000 && katettu(viim, t))
             seisoi({ veh: key, tyyppi: "valilla", route: String(p.route), dir: Number(p.dir), mode: mode0, stop: s.arr_stop ?? s.stop, stop2: stop,
               alku: new Date(viim).toISOString(), loppu: new Date(t).toISOString(), kesto_s: Math.round((t - viim) / 1000),
               dl_alku: s.arr_dl ?? s.dl, dl_loppu: dl, vuoro: trip, vuoro_ed: null });
