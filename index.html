@@ -706,7 +706,8 @@ html.ha-auki #haOvl{display:block;position:fixed;inset:0;z-index:6000;background
 .ha-k{font-weight:600;font-size:7.5pt;letter-spacing:.07em;text-transform:uppercase;color:#43506A;margin:14px 0 6px}
 .ha-page table{width:100%;border-collapse:collapse;font-size:9pt}
 .ha-page th{text-align:left;font-weight:600;font-size:7.5pt;letter-spacing:.04em;text-transform:uppercase;color:#43506A;padding:5px 6px;border-bottom:1.5px solid #0F1B2D;background:none}
-.ha-page td{padding:6px;border-bottom:1px solid #D6DCE5;vertical-align:top}
+.ha-page td{padding:6px;border-bottom:1px solid #D6DCE5;vertical-align:top}.ha-page td.r,.ha-page th.r{white-space:nowrap}
+.ha-bar .btn:not(.ghost){background:#1F5FBF}
 .ha-page tr.best td{background:#FFF6E5}.ha-page tr.best td:first-child{box-shadow:inset 3px 0 0 #F5A524}
 .ha-page .vchip{display:inline;background:none!important;color:#9A6200!important;font-size:7.5pt;font-weight:600;text-transform:uppercase;padding:0;margin-left:4px}
 .ha-note{font-size:8pt;color:#43506A;line-height:1.4;margin-top:5px}
@@ -2372,7 +2373,7 @@ function naytaEn(){
     ${puuttuu.length?`<div class="note" style="margin-top:4px">Liikennemääriä ei ole vielä mitattu kaikille vuorokaudenajoille (puuttuu: ${puuttuu.map(j=>({aamu:"aamu 6–10",paiva:"päivä 10–14",ilta:"ilta 14–18",muu:"ilta–yö 18–6"})[j]).join(", ")}). Keruu alkoi 2.11., joten luvut täydentyvät vuorokauden kuluessa, ja vuorokausiluvut ovat siihen asti liian pieniä.</div>`:""}
     <div class="note" style="margin-top:4px">Oletus: kun työtä ei tehdä, kaistat ovat auki eikä haittaa synny.</div>
     <div class="sec">Ajoitus ja kustannus</div>
-    ${kesto ? haLomake(haAsetukset()) + `<div id="haTaul">${haTaulukko(EN.kust)}</div><div class="note" style="margin-top:4px">Sama työtuntimäärä kaikissa vaihtoehdoissa. Kesto lyhenee, kun päivässä on enemmän työtunteja. Ilta-yöjakson liikenne on tasattu klo 18–06, joten yötyön haitta on todellisuudessa tätä pienempi. Lisäprosentit ja maksu ovat oletuksia: tarkista ne työehtosopimuksesta ja kaivupäätöksen maksuarviosta.</div>` : `<div class="note">Valitse alkamis- ja päättymispäivä, niin vaihtoehdot ja kustannukset lasketaan.</div>`}
+    ${kesto ? haLomake(haAsetukset()) + `<div id="haTaul">${haTaulukko(EN.kust)}</div><div class="note" style="margin-top:4px">Päivätyön kesto on valittu ajanjakso. Jos työ ei kestä koko lupa-aikaa, muuta päivämäärät. Sama työtuntimäärä kaikissa vaihtoehdoissa. Kesto lyhenee, kun päivässä on enemmän työtunteja. Ilta-yöjakson liikenne on tasattu klo 18–06, joten yötyön haitta on todellisuudessa tätä pienempi. Lisäprosentit ja maksu ovat oletuksia: tarkista ne työehtosopimuksesta ja kaivupäätöksen maksuarviosta.</div>` : `<div class="note">Valitse alkamis- ja päättymispäivä, niin vaihtoehdot ja kustannukset lasketaan.</div>`}
     ${kas.length?`<div class="sec">Muut työt samoilla linjoilla</div><ul class="kas">${kas.map(o=>`<li><a href="#/?l=${encodeURIComponent(o.x.lupa_id)}">${esc(shortStreet(o.x))}</a> ${nf(o.d/1000,1)} km päässä, ${o.yht.length===1?"linja":"linjat"} ${esc(o.yht.slice(0,5).join(", "))}${o.x.alkaa?` · ${fsY(o.x.alkaa)}${o.x.paattyy&&fsY(o.x.paattyy)!==fsY(o.x.alkaa)?"–"+fsY(o.x.paattyy):""}`:""}</li>`).join("")}</ul>`:""}
     ${kasautumaHTML(L2, s, a, p)}
     <div class="sec">Linjat</div>
@@ -2488,7 +2489,7 @@ function haAvaa(){
       </div></div>
     <div class="ha-k">Ajoitusvaihtoehdot ja kustannus</div>
     ${haTaulukko(K, true)}
-    <div class="ha-note">Oletukset (urakoitsija voi muuttaa): ${nf(as.hlo)} työntekijää · ${nf(as.eur)} €/h · iltalisä ${nf(as.ilta)} % · yölisä ${nf(as.yo)} % · ${as.maksu?`alueenkäyttömaksu ${nf(as.maksu)} €/vrk`:"alueenkäyttömaksua ei laskettu"} · ${as.auki?"kaista auki työajan ulkopuolella":"kaista suljettu koko ajan"}. Sama työtuntimäärä kaikissa vaihtoehdoissa (${nf(9*pohja.pv)} h). Yötyöstä tehdään meluilmoitus.</div>
+    <div class="ha-note">Oletukset (urakoitsija voi muuttaa): ${nf(as.hlo)} työntekijää · ${nf(as.eur)} €/h · iltalisä ${nf(as.ilta)} % · yölisä ${nf(as.yo)} % · ${as.maksu?`alueenkäyttömaksu ${nf(as.maksu)} €/vrk`:"alueenkäyttömaksua ei laskettu"} · ${as.auki?"kaista auki työajan ulkopuolella":"kaista suljettu koko ajan"}. Sama työtuntimäärä kaikissa vaihtoehdoissa (${nf(9*pohja.pv)} h, päivätyön kesto = valitut päivät; jos työ ei täytä koko lupa-aikaa, muuta päivämäärät). Yötyöstä tehdään meluilmoitus.</div>
     <div class="ha-two"><div><div class="ha-k">Muut työt samoilla linjoilla</div>${calc.kasautumat.length?`<ul>${calc.kasautumat.map(k=>`<li><b>${esc(k.osoite)}</b> · ${nf(k.etaisyys_m)} m · linjat ${esc(k.yhteiset_linjat.join(", "))}${k.alkaa?` · ${esc(k.alkaa)}–${esc(k.paattyy||"")}`:""}</li>`).join("")}</ul>`:'<div class="ha-note">Ei päällekkäisiä töitä samoilla linjoilla alle 1,5 km päässä.</div>'}</div>
       <div><div class="ha-k">Mitä arvio kattaa</div><ul><li>Bussien ja raitiovaunujen lisäaika, mitattu HSL:n avoimesta ajoneuvodatasta</li><li>Ei kata henkilöautoliikennettä, kävelyä eikä pyöräilyä</li><li>Täydentää Haitatonin haittaindeksiä: luokan sijaan tunnit ja ajoitus</li></ul></div></div>
     <div class="ha-foot"><span><b>${id}</b> · ${nyt.toLocaleDateString("fi-FI")}</span><span>Tietutka · tietutka.fi · Itsenäinen palvelu, ei HSL:n eikä kaupungin. Data: HSL, Helsingin kaupunki (CC BY 4.0).</span></div>
