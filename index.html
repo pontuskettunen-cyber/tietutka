@@ -838,6 +838,12 @@ html:root #v-home .tp-pal .card.sel{background:#FFF6E5!important;box-shadow:inse
 .top .saa-top .saa-pop{color:var(--i);top:calc(100% + 10px)}
 html.hsl .top .omalinja{margin-left:10px!important}
 @media(max-width:1250px){.top .saa-top .saa-pill-l{display:none}}
+
+/* Ei pillereitä paleteissa */
+.tp-ph .seg{border-radius:6px!important;padding:2px!important;border:1px solid var(--l)!important;background:var(--p)!important}
+.tp-ph .seg button{border-radius:4px!important}
+.tp-pal #detail button,.tp-pal #detail .chip,.tp-pal #detail .vchip,.tp-pal #detail .share,.tp-pal .share,.tp-pal .st,.tp-pal .lv,.tp-pal .bb{border-radius:5px!important}
+.tp-pal #detail .lbadge{border-radius:4px!important}
 /* Urakoitsijan haitta-arvio */
 .halom{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:2px 0 6px}
 .halom label{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--m)}
@@ -1332,7 +1338,7 @@ html.hsl .navn.lC{background:#0F1B2D}
   window.NAV_ALIAS = { tyot: "home", menetelma: "hsl", raportti: "home", kehitys: "hsl" };
   const nav = document.querySelector(".top nav");
   nav.querySelectorAll('a[data-r="tyot"], a[data-r="menetelma"], .navk, .navsep').forEach(x=>x.style.display="none");
-  const ph = nav.querySelector('a[data-r="hsl"]'); ph.textContent = "Pilotti ja menetelmä";
+  const ph = nav.querySelector('a[data-r="hsl"]'); ph.textContent = "Tietoa"; ph.title = "Pilotti, menetelmä ja lähteet";
   const sub = (pairs, cur) => { const d = document.createElement("div"); d.className = "subnav"; d.innerHTML = pairs.map(([href,t,k])=>`<a href="${href}" class="${k===cur?"on":""}">${t}</a>`).join(""); return d; };
   const A = [["#/","Yleiskuva","home"],["#/tyot","Kaikki työmaat","tyot"]], B = [["#/hsl","Pilotti","hsl"],["#/kehitys","Tekoäly tuotannossa","kehitys"],["#/menetelma","Menetelmä ja lähteet","menetelma"]];
   h.prepend(sub(A,"home"));
