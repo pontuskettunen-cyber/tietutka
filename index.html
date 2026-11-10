@@ -3510,7 +3510,8 @@ function liveSet(on){
         try{
           const p = JSON.parse(msg.toString()).VP; if(!p || p.lat==null) return;
           const parts = topic.split("/"), id = p.oper+"/"+p.veh;
-          LV.veh.set(id, {id, lat:p.lat, lon:p.long, line:(p.desi||ln(parts[9])), dl:p.dl, spd:p.spd, mode:parts[6], head:decodeURIComponent(parts[11]||""), t:Date.now()});
+          const ed = LV.veh.get(id), nyt = Date.now();
+          LV.veh.set(id, {id, lat:p.lat, lon:p.long, line:(p.desi||ln(parts[9])), dl:p.dl, spd:p.spd, mode:parts[6], head:decodeURIComponent(parts[11]||""), t:nyt, seis: (p.spd||0) < 0.5 ? (ed && ed.seis || nyt) : null});
         }catch(e){}
       });
     } else syncSubs();
@@ -3525,8 +3526,19 @@ function liveSet(on){
   try{ localStorage.setItem("tt_live2", on ? "1" : "0"); }catch(e){}
 }
 const markers = new Map();
+/* Auton tila. HFP:n dl on poikkeama auki olevan lähdön aikataulusta. Jos auto seisoo varikolla, päätepysäkillä tai rikki
+   ja lähtö on jäänyt auki, dl kasvaa satoihin minuutteihin. Se ei ole myöhästymistä, joten sitä ei näytetä eikä lasketa. */
+function vTila(v){
+  const dl = v && v.dl, seisoo = v && v.seis ? (Date.now() - v.seis) / 1000 : 0;
+  if(dl == null) return {k:"?", txt:"aikataulu ei tiedossa", cls:""};
+  if(dl < -2700 || (dl < -900 && seisoo >= 120)) return {k:"seis", txt:"seisoo, ei ajossa", cls:"seis", pitka:`seisoo, lähtö jäänyt auki (${nf(-dl/60)} min), ei lasketa myöhästymäksi`};
+  if(dl < -30) return {k:"myoh", txt:`+${nf(-dl/60,1)} min`, cls: dl < -180 ? "slow" : "", pitka:`+${nf(-dl/60,1)} min myöhässä`};
+  if(dl > 30) return {k:"etu", txt:"etuajassa", cls:"fast", pitka:"etuajassa"};
+  return {k:"ok", txt:"ajallaan", cls:"ok", pitka:"ajallaan"};
+}
 function vehLabel(v, site, pinned){
-  const late = v.dl < -30 ? `<span class="${v.dl<-180?"slow":""}">+${nf(-v.dl/60,1)} min</span>` : v.dl > 30 ? `<span class="fast">etuajassa</span>` : `<span class="ok">ajallaan</span>`;
+  const vt = vTila(v);
+  const late = vt.k==="seis" ? `<span style="color:#6B737B">${vt.pitka}</span>` : `<span class="${vt.cls}">${vt.txt}</span>`;
   if(!pinned) return `${v.mode==="tram"?"Ratikka":"Bussi"} <b>${esc(v.line)}</b>${v.head?" → "+esc(v.head):""}<br>${late} · ${nf((v.spd||0)*3.6)} km/h${site?`<br><span style="color:#A16207">Työmaalla nyt: ${esc(title(site))}</span>`:""}<br><span style="color:#6B737B">Napauta seurataksesi</span>`;
   return `<b>${esc(v.line)}</b> ${late} · ${nf((v.spd||0)*3.6)} km/h${site?`<br><span style="color:#C2410C">⚠ ${esc(title(site))}</span>`:""}`;
 }
@@ -3548,11 +3560,12 @@ function drawLive(){
   for(const [id,v] of LV.veh){
     if(now - v.t > (LV.pinned.has(id)?180000:60000)){ LV.veh.delete(id); const m = markers.get(id); if(m){ LV.layer.removeLayer(m); markers.delete(id); } continue; }
     n++;
-    const site = nearSite(v.lat, v.lon); if(site) atSite++;
-    if(selShape && inShape(selShape, v.lat, v.lon)) here.push(v);
+    const seis = vTila(v).k === "seis";
+    const site = nearSite(v.lat, v.lon); if(site && !seis) atSite++;
+    if(selShape && !seis && inShape(selShape, v.lat, v.lon)) here.push(v);
     let m = markers.get(id);
     const pinned = LV.pinned.has(id);
-    const style = {radius: pinned ? 8 : v.mode==="tram"?5:4, color: site?"#EAB308":pinned?"#14181D":"#fff", weight: site?3:pinned?2.5:1, fillColor: v.mode==="tram"?"#00985F":"#1D6FB8", fillOpacity:.9};
+    const style = {radius: pinned ? 8 : v.mode==="tram"?5:4, color: site?"#EAB308":pinned?"#14181D":"#fff", weight: site?3:pinned?2.5:1, fillColor: seis ? "#9AA3AD" : v.mode==="tram"?"#00985F":"#1D6FB8", fillOpacity: seis ? .55 : .9};
     if(!m){ m = L.circleMarker([v.lat,v.lon], {...style, bubblingMouseEvents:false}).addTo(LV.layer); markers.set(id, m); m.on("click", ()=>togglePin(id)); }
     else { m.setLatLng([v.lat,v.lon]); m.setStyle(style); }
     const html = vehLabel(v, site, pinned);
@@ -3567,7 +3580,7 @@ function drawLive(){
   const lc = document.getElementById("liveCount"); if(lc) lc.textContent = n ? `· ${nf(n)}, joista ${nf(atSite)} työmaalla` : "· yhdistetään…";
   const np = document.getElementById("nowPass");
   if(np) np.innerHTML = `<div class="sec">Ohittaa juuri nyt <span class="note" style="text-transform:none;letter-spacing:0;font-weight:400">livenä</span></div>` + (here.length
-    ? here.sort((a,b)=>a.dl-b.dl).slice(0,6).map(v=>`<div class="veh" style="padding:7px 0"><span class="badge ${v.mode==="tram"?"tram":""}">${esc(v.line)}</span><div class="note">${v.head?"→ "+esc(v.head)+" · ":""}${nf((v.spd||0)*3.6)} km/h</div><div class="r mono ${v.dl<-120?"slow":""}">${v.dl<-30?"+"+nf(-v.dl/60,1)+" min":"ajallaan"}</div></div>`).join("")
+    ? here.sort((a,b)=>a.dl-b.dl).slice(0,6).map(v=>`<div class="veh" style="padding:7px 0"><span class="badge ${v.mode==="tram"?"tram":""}">${esc(v.line)}</span><div class="note">${v.head?"→ "+esc(v.head)+" · ":""}${nf((v.spd||0)*3.6)} km/h</div><div class="r mono ${vTila(v).cls}">${vTila(v).txt}</div></div>`).join("")
     : `<div class="note">Ei ohittajia juuri nyt.</div>`);
 }
 
@@ -4147,7 +4160,8 @@ function lLiveStart(e){
   LL.client.on("message", (topic, msg)=>{ try{
     const p = JSON.parse(msg.toString()).VP; if(!p || p.lat==null) return;
     const parts = topic.split("/"), id = p.oper+"/"+p.veh;
-    LL.veh.set(id, {id, lat:p.lat, lon:p.long, dir:String(p.dir||parts[10]), dl:p.dl, spd:p.spd, head:decodeURIComponent(parts[11]||""), t:Date.now()});
+    const ed = LL.veh.get(id), nyt = Date.now();
+    LL.veh.set(id, {id, lat:p.lat, lon:p.long, dir:String(p.dir||parts[10]), dl:p.dl, spd:p.spd, head:decodeURIComponent(parts[11]||""), t:nyt, seis: (p.spd||0) < 0.5 ? (ed && ed.seis || nyt) : null});
   }catch(err){} });
   LL.timer = setInterval(lLiveDraw, 1000);
 }
@@ -4163,13 +4177,13 @@ function lLiveDraw(){
   for(const [id,v] of LL.veh){
     if(now - v.t > 60000){ LL.veh.delete(id); const m = LL.mk.get(id); if(m){ LL.layer.removeLayer(m); LL.mk.delete(id); } continue; }
     n++;
-    const site = nearSite(v.lat, v.lon), oma = v.dir===S.lDir;
-    const st = {radius: oma?7:5, color: site?"#EAB308":"#fff", weight: site?3.5:1.5, fillColor: LL.name && TRAM.has(LL.name) ? "#00985F" : "#1D6FB8", fillOpacity: oma?.95:.45};
+    const site = nearSite(v.lat, v.lon), oma = v.dir===S.lDir, vt = vTila(v);
+    const st = {radius: oma?7:5, color: site?"#EAB308":"#fff", weight: site?3.5:1.5, fillColor: vt.k==="seis" ? "#9AA3AD" : LL.name && TRAM.has(LL.name) ? "#00985F" : "#1D6FB8", fillOpacity: vt.k==="seis" ? .5 : oma?.95:.45};
     let m = LL.mk.get(id);
     if(!m){ m = L.circleMarker([v.lat,v.lon],{...st, bubblingMouseEvents:false}).addTo(LL.layer); LL.mk.set(id, m);
       m.on("click", ()=>{ const s2 = nearSite(v.lat, v.lon); if(s2) lValitse(lineIndex().find(x=>x.name===S.lSel), s2.lupa_id, false); m._pin = !m._pin; m.unbindTooltip(); m._tt = null; }); }
     else { m.setLatLng([v.lat,v.lon]); m.setStyle(st); }
-    const late = v.dl < -30 ? `+${nf(-v.dl/60,1)} min myöhässä` : v.dl > 30 ? "etuajassa" : "ajallaan";
+    const late = vt.pitka || vt.txt;
     const html = `<b>${esc(LL.name)}</b>${v.head?" → "+esc(v.head):""}<br>${late} · ${nf((v.spd||0)*3.6)} km/h${site?`<br><span style="color:#A16207">Työmaalla nyt: ${esc(title(site))}</span>`:""}`;
     if(m._tt !== !!m._pin){ m.unbindTooltip(); m.bindTooltip(html, m._pin ? {permanent:true, direction:"top", offset:[0,-8], className:"pinned"} : {direction:"top", offset:[0,-6]}); m._tt = !!m._pin; if(m._pin) m.openTooltip(); }
     else m.setTooltipContent(html);
@@ -4349,8 +4363,8 @@ function hLinjaPalkki(){
 /* Seurattu auto linjarivissä: myöhästyminen ja reitin pahimmat hidastajat (mahdollinen syy) */
 function hAutoRivi(ws){
   const a = S.hAuto; if(!a) return "";
-  const v = LV.veh.get(a.id) || a, dl = v.dl ?? a.dl;
-  const tila = dl < -30 ? `<b class="${dl<-180?"slow":""}">+${nf(-dl/60,1)} min myöhässä</b>` : dl > 30 ? "etuajassa" : "ajallaan";
+  const v = LV.veh.get(a.id) || a, vt = vTila({dl: v.dl ?? a.dl, seis: v.seis}), dl = vt.k === "myoh" ? (v.dl ?? a.dl) : 0;
+  const tila = vt.k === "myoh" ? `<b class="${vt.cls}">${vt.pitka}</b>` : vt.k === "seis" ? `<span class="note">${vt.pitka}</span>` : vt.txt;
   const syy = ws.slice(0,3).map(x=>`${esc(shortStreet(x.l))} ${sgn(x.s)}`).join(", ");
   return `<div class="hlauto">Seurattu auto${v.head?` → ${esc(v.head)}`:""}: ${tila}.${dl < -30 && syy ? ` Reitin suurimmat hidastajat nyt: ${syy}.` : dl < -30 ? " Reitillä ei ole mitattuja hidastavia työmaita: myöhästyminen johtuu todennäköisesti muusta (ruuhka, häiriö)." : ""}</div>`;
 }
