@@ -1642,7 +1642,7 @@ html.hsl .navn.lC{background:#0F1B2D}
       </div>
       <div class="note tp-haittase" id="enHaittaSe"></div>
       <div class="enrow"><label>Alkaa<input type="date" id="enA"></label><label>Päättyy<input type="date" id="enP"></label></div></div></div>
-  <div class="tp-pal" data-pal="arvio" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Arvio</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enOut"><div class="empty">Valitse lupa tai piirrä työalue, niin arvio lasketaan.</div></div></div></div>
+  <div class="tp-pal" data-pal="arvio" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Tulos</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enOut"><div class="empty">Valitse lupa tai piirrä työalue, niin arvio lasketaan.</div></div></div></div>
   <div class="tp-pal" data-pal="ajo" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Ajoitus ja kustannus</b><span class="tp-sub" id="enAjoSub"></span><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enAjo"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
   <div class="tp-pal" data-pal="lin" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Linjat</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enLin"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
   <div class="tp-pal" data-pal="muut" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Muut työt ja menetelmä</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enMuut"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
@@ -2863,6 +2863,10 @@ function tpPaletti(k, otsikko, sisalto, extra){
   el.innerHTML = `<div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>${otsikko}</b>${extra||""}<button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"></div>`;
   const pb = el.querySelector(".tp-pb"); sisalto.filter(Boolean).forEach(n=>pb.appendChild(n)); return el;
 }
+// Sää yläpalkissa kaikissa näkymissä: piirretään, kun säädata on ladattu (yritetään muutaman kerran)
+function tpSaa(n){ const sb = document.getElementById("saaBox"); if(!sb || sb.innerHTML.trim()) return;
+  if(S.saa && S.saa.length && typeof renderBrief==="function"){ try{ renderBrief(); }catch(e){} }
+  if(!sb.innerHTML.trim() && n < 8) setTimeout(()=>tpSaa(n+1), 2500); }
 function tpRakennaHome(){
   const h = document.getElementById("v-home"); if(!h || h.dataset.tpRak) return; h.dataset.tpRak = "1";
   const kartta = document.getElementById("map"), q = s => h.querySelector(s);
@@ -4679,7 +4683,7 @@ function route(nav){
     if(l==="vahti") setTimeout(()=>{ const h = document.getElementById("vahtiOtsikko"); if(h) window.scrollTo(0, Math.max(0, h.getBoundingClientRect().top + scrollY - 80)); }, 400); }
   if(S.karttaNakyma && (v==="home" || v==="ennakko")){ const kv = S.karttaNakyma, m = v==="home" ? M.home : M.en; if(m){ S.karttaNakyma = null; setTimeout(()=>{ m.invalidateSize(); m.setView(kv.c, kv.z); }, 80); } }
   if(v==="home"){ tpPiirraWs("home"); setTimeout(()=>M.home && M.home.invalidateSize(), 60); }
-  { tpRakennaHome(); const sb = document.getElementById("saaBox"); if(sb && !sb.innerHTML.trim() && typeof renderBrief==="function"){ try{ renderBrief(); }catch(e){} } }
+  tpRakennaHome(); tpSaa(0);
   if(toiseltaSivulta){ const d = document.getElementById("detail"); window.scrollTo(0, 0); if(d) setTimeout(()=>window.scrollTo(0, Math.max(0, d.getBoundingClientRect().top + scrollY - 90)), 350); }
   else if(nav==="hash") window.scrollTo(0,0);
 }
