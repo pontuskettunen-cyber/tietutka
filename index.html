@@ -2423,7 +2423,7 @@ function naytaEn(){
   const tilaHTML = r => !r ? "" : r.tila==="bus" ? '<span class="note" title="Bussien viivevaraa ei ole vielä tarkistettu autokierroista.">ei arvioida</span>'
     : `<span class="entila ${r.tila}">${({red:"ylittyy",zero:"ei varaa",amb:"seuraa",ok:"mahtuu",na:"ei tiedossa"})[r.tila]}${r.pros!=null&&r.tila!=="zero"&&(r.tila!=="ok"||r.pros>=10)?" "+nf(Math.round(r.pros))+" %":""}</span>`;
   const NAYTA = 4;
-  det.innerHTML = `<nav class="enjump"><a href="#enDAjo" data-hyppy>Ajoitus ja kustannus</a><a href="#enDLin" data-hyppy>Linjat</a><a href="#enDMuut" data-hyppy>Muut työt</a><a href="#enDMiten" data-hyppy>Miten arvio lasketaan</a></nav>
+  det.innerHTML = `<div class="enjump"><a href="#enDAjo" data-hyppy>Ajoitus ja kustannus</a><a href="#enDLin" data-hyppy>Linjat</a><a href="#enDMuut" data-hyppy>Muut työt</a><a href="#enDMiten" data-hyppy>Miten arvio lasketaan</a></div>
     ${vertailuHTML()}
     <h2 class="enh" id="enDAjo">Ajoitus ja kustannus</h2>
     ${kesto ? `<div class="enajo"><div>${haLomake(haAsetukset())}</div><div><div id="haTaul">${haTaulukko(EN.kust, true)}</div>
