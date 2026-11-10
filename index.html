@@ -686,8 +686,8 @@ html.hsl .subnav a.on{color:#1F5FBF;border-bottom-color:#1F5FBF}
 .hat td,.hat th{font-size:13px}.hat td.r,.hat th.r{white-space:nowrap}
 #haOvl{display:none}
 html.ha-auki{overflow:hidden}
-html.ha-auki #haOvl{display:block;position:fixed;inset:0;z-index:6000;background:rgba(15,27,45,.55);overflow:auto;padding:16px 0 40px}
-.ha-bar{position:sticky;top:0;z-index:2;display:flex;gap:10px;align-items:center;max-width:210mm;margin:0 auto 12px;padding:10px 0}
+html.ha-auki #haOvl{display:block;position:fixed;inset:0;z-index:6000;background:rgba(15,27,45,.92);overflow:auto;padding:16px 0 40px}
+.ha-bar{position:sticky;top:0;z-index:2;display:flex;gap:10px;align-items:center;max-width:210mm;margin:0 auto 12px;padding:10px 0;background:#0F1B2D}
 .ha-bar .note{color:#E8EEF6}
 .ha-page{width:210mm;min-height:297mm;margin:0 auto;background:#fff;color:#0F1B2D;padding:14mm 15mm 12mm;position:relative;font:10pt/1.45 "Inter",system-ui,sans-serif;font-variant-numeric:tabular-nums}
 .ha-page *{font-family:"Inter",system-ui,sans-serif!important}
@@ -2455,6 +2455,7 @@ function haKaavio(){
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%"><rect width="${W}" height="${H}" fill="#F1F4F8"/>
     ${viivat.map((v,i)=>`<path d="${d(v)}" fill="none" stroke="${ratikka[i]?"#0F7A64":"#7FB0FF"}" stroke-width="3" ${ratikka[i]?'stroke-dasharray="7 4"':""} stroke-linecap="round"/>`).join("")}
     ${EN.rings ? `<path d="${EN.rings.map(r=>d(r)+"Z").join("")}" fill="#C2410C" fill-opacity=".35" stroke="#C2410C" stroke-width="2"/>` : `<path d="${d(EN.pts)}" fill="none" stroke="#C2410C" stroke-width="10" stroke-linecap="round" opacity=".85"/>`}
+    ${(()=>{ const [cx,cy] = P([c.lat,c.lng]); return `<circle cx="${cx}" cy="${cy}" r="13" fill="none" stroke="#F5A524" stroke-width="2" opacity=".55"/><circle cx="${cx}" cy="${cy}" r="7" fill="#F5A524" stroke="#fff" stroke-width="1.5"/>`; })()}
     <g font-family="Inter,sans-serif" font-size="8" fill="#0F1B2D"><rect x="8" y="${H-34}" width="150" height="28" fill="#fff" opacity=".92"/><path d="M14 ${H-25}h14" stroke="#C2410C" stroke-width="5"/><text x="34" y="${H-22}">Työalue</text><path d="M14 ${H-13}h14" stroke="#7FB0FF" stroke-width="3"/><text x="34" y="${H-10}">Bussi</text><path d="M70 ${H-13}h14" stroke="#0F7A64" stroke-width="3" stroke-dasharray="5 3"/><text x="90" y="${H-10}">Raitiotie</text></g></svg>`;
 }
 function haTunniste(calc){
