@@ -1646,7 +1646,7 @@ html.hsl .navn.lC{background:#0F1B2D}
   <div class="tp-pal" data-pal="ajo" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Ajoitus ja kustannus</b><span class="tp-sub" id="enAjoSub"></span><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enAjo"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
   <div class="tp-pal" data-pal="lin" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Linjat</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enLin"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
   <div class="tp-pal" data-pal="muut" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Muut työt ja menetelmä</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enMuut"><div class="note">Arvio lasketaan, kun työalue on valittu.</div></div></div></div>
-  <div class="tp-pal" data-pal="vert" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Vaihtoehtojen vertailu</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enVert"><div class="note">Tallenna vaihtoehto Arvio-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div></div></div></div>
+  <div class="tp-pal" data-pal="vert" hidden><div class="tp-ph"><span class="tp-grip" aria-hidden="true">⠿</span><b>Vaihtoehtojen vertailu</b><button type="button" class="tp-min" title="Pienennä" aria-label="Pienennä">–</button><button type="button" class="tp-x" title="Sulje" aria-label="Sulje">×</button></div><div class="tp-pb"><div id="enVert"><div class="note">Tallenna vaihtoehto Tulos-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div></div></div></div>
 </section>
 
 <!-- ================= JÄLKIRAPORTTI ================= -->
@@ -2524,30 +2524,40 @@ function naytaEn(){
   const puuttuu = ["aamu","paiva","ilta","muu"].filter(j=>!EN.have.has(j));
   const paras = sk.slice(1).filter(x=>x.ok).sort((a,b)=>a.h-b.h)[0], koko = sk[0];
   const a = document.getElementById("enA").value, p = document.getElementById("enP").value;
-  const kesto = a && p ? Math.max(1, Math.round((new Date(p)-new Date(a))/DAY)+1) : null;
+  const pvVirhe = a && p && new Date(p) < new Date(a);
+  const kesto = a && p && !pvVirhe ? Math.round((new Date(p)-new Date(a))/DAY)+1 : null;
   // kasautumat: sama linja, päällekkäinen aika, alle 1,5 km
   const c0 = L.latLngBounds(EN.pts).getCenter(), nimet = new Set(L2.map(e=>e.n));
   const kas = S.luvat.filter(x=>x.lupa_id!==EN.lupa && onRoute(x) && x.geom && phase(x).k!=="paattynyt" && x.ai_vaikutus!=="ei" && x.ai_vaikutus!=="pieni").map(x=>{ const c = centroid(x.geom); const d = c ? c0.distanceTo(c) : 1e9; const yht = lines(x.linjat).filter(n=>nimet.has(n));
       const ov = a && p ? (!x.paattyy || +new Date(x.paattyy) >= +new Date(a)) && (!x.alkaa || +new Date(x.alkaa) <= +new Date(p)+DAY) : true; return {x, d, yht, ov}; })
-    .filter(o=>o.d < 1500 && o.d > 30 && o.yht.length && o.ov).sort((a,b)=>a.d-b.d).slice(0,4);
+    .filter(o=>o.d < 1500 && o.yht.length && o.ov).sort((a,b)=>a.d-b.d).slice(0,4);
   const kesk = m ? `otettu ${nf(m.n)} käynnissä olevan työn mitatuista luvuista. Valinta "${({p50:"pieni",p75:"kohtalainen",p90:"suuri"})[kv]}" vastaa ${({p50:"tyypillistä työtä",p75:"töiden haitallisinta neljännestä",p90:"töiden haitallisinta kymmenesosaa"})[kv]} (${sgn(s)}). Tyypillinen työ lisää ${sgn(lo)}, haitallisin kymmenesosa ${sgn(hi)}. Nyt ${nf(Math.round((m.osuus20||0)*100))} % mitatuista töistä lisää yli 20 s per ohitus` : `oletusarvo, koska mitattuja töitä on vielä alle 20`;
-  EN.calc = {haitta, s:Math.round(s), lo:Math.round(lo), hi:Math.round(hi), perusta:kesk, alkaa:a, paattyy:p, kesto,
-    linjat:L2.slice(0,12).map(e=>({linja:e.n, suunta:+e.d, ratikka:e.tram, ohitukset_arkipaiva:Math.round(e.vrk), aamuruuhka:Math.round(e.j.aamu||0), iltaruuhka:Math.round(e.j.ilta||0)})),
-    ohitukset_arkipaiva:Math.round(tot), lisaaika_h_vrk:+H(tot,s).toFixed(1), ajoitus:sk.filter(x=>x.ok).map(x=>({vaihtoehto:x.t, lisaaika_h_vrk:+x.h.toFixed(1)})),
-    paras: paras && koko.ok ? {vaihtoehto:paras.t, saasto_pros:koko.h?Math.round((1-paras.h/koko.h)*100):0} : null, puuttuvat_jaksot: puuttuu,
-    kasautumat:kas.map(o=>({osoite:shortStreet(o.x), lupa_id:o.x.lupa_id, etaisyys_m:Math.round(o.d), yhteiset_linjat:o.yht.slice(0,6), alkaa:o.x.alkaa?fmtDate(o.x.alkaa):null, paattyy:o.x.paattyy?fmtDate(o.x.paattyy):null})),
-    osoite: EN.lupa ? title(S.byId[EN.lupa]) + (EN.muok ? " (muokattu alue)" : "") : null};
-  const nimiL = L2.slice(0,6).map(e=>`${e.n}`).filter((v,i,a)=>a.indexOf(v)===i);
-  const ohitJ = {aamu:ohit("aamu"), paiva:ohit("paiva"), ilta:ohit("ilta"), muu:ohit("muu")};
-  EN.kust = kesto ? haLaske(ohitJ, s, kesto, haAsetukset()) : null;
+  // Yksi pääperuste kaikkialla (Tulos, Ajoitus, PDF, Vertailu, lukitus): päivätyö klo 7–16 urakoitsijan oletuksilla
+  const ohitJ = {aamu:ohit("aamu"), paiva:ohit("paiva"), ilta:ohit("ilta"), muu:ohit("muu")}, asE = haAsetukset();
+  EN.kust = kesto ? haLaske(ohitJ, s, kesto, asE) : null;
+  if(EN.kust) EN.kust.puuttuu = puuttuu;
   EN.kustArgs = [ohitJ, s, kesto];
-  kasautumaHTML(L2, s, a, p);   // laskee EN.kasR (tai käynnistää aikataulujen latauksen)
-  const KR = EN.kasR, mm = KR ? KR.mm : (x=>x);
+  const pvH = x => haLaske(ohitJ, x, 1, asE).pohja.vrk, pvS = pvH(s);
   const linjaNimet = [...new Set(L2.map(e=>e.n))];
+  EN.calc = {haitta, s:Math.round(s), lo:Math.round(lo), hi:Math.round(hi), perusta:kesk, mitattu_malli: !!m, alkaa:a, paattyy:p, kesto,
+    linjanimet: linjaNimet, bussilinjat: linjaNimet.filter(n=>!TRAM.has(n)), raitiolinjat: linjaNimet.filter(n=>TRAM.has(n)),
+    lisaaika_h_vrk: +pvS.toFixed(2), lisaaika_h_vrk_koko_vrk: +H(tot,s).toFixed(1), koko_kesto_h: EN.kust ? +EN.kust.pohja.yht.toFixed(1) : null,
+    linjat:L2.slice(0,12).map(e=>({linja:e.n, suunta:+e.d, ratikka:e.tram, ohitukset_arkipaiva:Math.round(e.vrk), aamuruuhka:Math.round(e.j.aamu||0), iltaruuhka:Math.round(e.j.ilta||0)})),
+    ohitukset_arkipaiva:Math.round(tot),
+    ajoitus: EN.kust ? EN.kust.rivit.map(r=>({vaihtoehto:r.t, paivat:r.pv, lisaaika_h_vrk:+r.vrk.toFixed(2), haitta_yhteensa_h:+r.yht.toFixed(1), lisakulu_eur:Math.round(r.ero)})) : null,
+    paras: EN.kust && !puuttuu.length ? {vaihtoehto:EN.kust.paras.t, edullisin:EN.kust.edull?EN.kust.edull.t:null, pienin_haitta:EN.kust.pienin?EN.kust.pienin.t:null} : null, puuttuvat_jaksot: puuttuu,
+    kasautumat:kas.map(o=>({osoite:shortStreet(o.x), lupa_id:o.x.lupa_id, etaisyys_m:Math.round(o.d), yhteiset_linjat:o.yht.slice(0,6), alkaa:o.x.alkaa?fsY(o.x.alkaa):null, paattyy:o.x.paattyy?fsY(o.x.paattyy):null})),
+    lupa_id: EN.lupa || null,
+    osoite: EN.lupa ? title(S.byId[EN.lupa]) + (EN.muok ? " (muokattu alue)" : "") : (EN.nimi || null)};
+  const nimiL = L2.slice(0,6).map(e=>`${e.n}`).filter((v,i,a)=>a.indexOf(v)===i);
+  EN.kasR = null; kasautumaHTML(L2, s, a, p);   // laskee EN.kasR (tai käynnistää aikataulujen latauksen)
+  const KR = EN.kasR, mm = KR ? KR.mm : (x=>x);
+  if(KR) EN.calc.viivevara_ylittyy = [...new Set(KR.yli.map(r=>r.n))];
   const ratikkaYli = KR ? [...new Set(KR.yli.map(r=>r.n))] : [];
   const ratikkaAmb = KR ? [...new Set(KR.ratikat.filter(r=>r.tila==="amb").map(r=>r.n))] : [];
   const recs = [];
   recs.push(EN.kust ? `<div class="rec" id="enRecAjo"><i></i><span>${haSuositus(EN.kust)} <a href="#enDAjo" data-hyppy>Vaihtoehdot →</a></span></div>`
+    : pvVirhe ? `<div class="rec red"><i></i><span><b>Päättymispäivä on ennen alkamispäivää.</b> Korjaa päivämäärät Työalue-paletissa.</span></div>`
     : `<div class="rec"><i></i><span>Valitse alkamis- ja päättymispäivä, niin ajoitusvaihtoehdot ja kustannukset lasketaan.</span></div>`);
   if(KR && ratikkaYli.length) recs.push(`<div class="rec red"><i></i><span><b>Viivevara ylittyy ${ratikkaYli.length===1?"linjalla":"linjoilla"} ${esc(ratikkaYli.join(", "))}.</b> Huonoimmissa vuoroissa myöhästyminen siirtyy seuraavaan lähtöön. <a href="#enDLin" data-hyppy>Linjat →</a></span></div>`);
   else if(KR && ratikkaAmb.length) recs.push(`<div class="rec"><i></i><span><b>Yli puolet viivevarasta käytössä</b> ${ratikkaAmb.length===1?"linjalla":"linjoilla"} ${esc(ratikkaAmb.join(", "))}. <a href="#enDLin" data-hyppy>Linjat →</a></span></div>`);
@@ -2555,9 +2565,9 @@ function naytaEn(){
   recs.push(kas.length ? `<div class="rec"><i></i><span><b>${kas.length} ${kas.length===1?"päällekkäinen työ":"päällekkäistä työtä"}</b> samoilla linjoilla alle 1,5 km päässä (${esc(kas.slice(0,2).map(o=>shortStreet(o.x)).join(", "))}${kas.length>2?"…":""}). <a href="#enDMuut" data-hyppy>Muut työt →</a></span></div>`
     : `<div class="rec ok"><i></i><span>Ei päällekkäisiä töitä samoilla linjoilla lähellä.</span></div>`);
   out.innerHTML = `
-    <p class="tiivis" style="margin-top:0">Työ osuu <b>${nf(linjaNimet.length)} ${linjaNimet.length===1?"linjaan":"linjaan"}</b> (${esc(nimiL.join(", "))}${linjaNimet.length>6?"…":""}), noin <b>${nf(tot)} ohitusta arkipäivänä</b>. Lisäaikaa tulee noin <b>${nf(H(tot,s),1)} h vuorokaudessa</b>, kun kaista on suljettu koko vuorokauden.</p>
-    <div class="enkp"><div><b>${nf(H(tot,s),1)} h</b><small>lisäaikaa / arkipäivä (vaihteluväli ${nf(H(tot,lo),1)}–${nf(H(tot,hi),1)} h)</small></div>
-      <div><b>${EN.kust ? nf(EN.kust.pohja.yht,0)+" h" : "–"}</b><small>koko työn ajalta päivätyönä${kesto?` (${kesto} pv)`:""}</small></div>
+    <p class="tiivis" style="margin-top:0">Työ osuu <b>${nf(linjaNimet.length)} ${linjaNimet.length===1?"linjaan":"linjaan"}</b> (${esc(nimiL.join(", "))}${linjaNimet.length>6?"…":""}), noin <b>${nf(tot)} ohitusta arkipäivänä</b>. Päivätyönä (klo 7–16${asE.auki?", kaista auki muulloin":""}) lisäaikaa tulee noin <b>${nf(pvS,1)} h arkipäivässä</b>. Jos kaista on suljettu koko vuorokauden, noin ${nf(H(tot,s),1)} h.</p>
+    <div class="enkp"><div><b id="enKpPv">${nf(pvS,1)} h</b><small>lisäaikaa / arkipäivä päivätyönä (vaihteluväli ${nf(pvH(lo),1)}–${nf(pvH(hi),1)} h)</small></div>
+      <div><b id="enKpYht">${EN.kust ? nf(EN.kust.pohja.yht, EN.kust.pohja.yht<10?1:0)+" h" : "–"}</b><small>koko työn ajalta päivätyönä${kesto?` (${kesto} pv)`:""}</small></div>
       <div><b>${sgn(s)}</b><small>per ohitus (${esc(haitta)} haitta)</small></div></div>
     ${recs.join("")}
     <div class="altbar"><button type="button" class="btn" id="haAvaa" ${EN.kust?"":"disabled"}>Avaa haitta-arvio (PDF)</button><button type="button" class="share" id="enSave" ${EN.alt.length>=3?"disabled":""}>+ Tallenna vaihtoehdoksi ${String.fromCharCode(65+EN.alt.length)}</button></div>
@@ -2569,7 +2579,7 @@ function naytaEn(){
   const tilaHTML = r => !r ? "" : r.tila==="bus" ? '<span class="note" title="Bussien viivevaraa ei ole vielä tarkistettu autokierroista.">ei arvioida</span>'
     : `<span class="entila ${r.tila}">${({red:"ylittyy",zero:"ei varaa",amb:"seuraa",ok:"mahtuu",na:"ei tiedossa"})[r.tila]}${r.pros!=null&&r.tila!=="zero"&&(r.tila!=="ok"||r.pros>=10)?" "+nf(Math.round(r.pros))+" %":""}</span>`;
   const NAYTA = 4;
-  document.getElementById("enVert").innerHTML = vertailuHTML() || '<div class="note">Tallenna vaihtoehto Arvio-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div>';
+  document.getElementById("enVert").innerHTML = vertailuHTML() || '<div class="note">Tallenna vaihtoehto Tulos-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div>';
   document.getElementById("enAjo").innerHTML = `    ${kesto ? `<details class="tp-olet" id="enOlet"><summary>Muuta kustannusoletuksia</summary>${haLomake(haAsetukset())}</details><div id="haTaul">${haTaulukko(EN.kust)}</div>
       <details class="tp-lisa"><summary>Miten vaihtoehdot lasketaan</summary><div class="note">Vaihtoehtoja verrataan kokonaishaitan mukaan: sama työtuntimäärä (${nf(9*kesto)} h), joten lyhyemmät päivät pidentävät työtä. Päivätyön kesto on valittu ajanjakso; jos työ ei täytä koko lupa-aikaa, muuta päivämäärät. Kaista oletetaan auki työajan ulkopuolella, ellei toisin valita. Ilta–yöjakson liikenne on tasattu klo 18–06, joten yötyön haitta on todellisuudessa tätä pienempi. Alle 15 %:n ero on arvion epävarmuuden sisällä.</div></details>`
       : `<div class="note">Valitse alkamis- ja päättymispäivä, niin vaihtoehdot ja kustannukset lasketaan.</div>`}`;
@@ -2595,13 +2605,16 @@ function naytaEn(){
   det.querySelectorAll("[data-ha]").forEach(i=>i.oninput = i.onchange = ()=>{ const as = haAsetukset();
     as[i.dataset.ha] = i.type==="checkbox" ? i.checked : Math.max(0, +i.value||0); haTallenna(as);
     EN.kust = haLaske(...EN.kustArgs, as); document.getElementById("haTaul").innerHTML = haTaulukko(EN.kust, true);
-    tpAjoSub(); const ra = document.getElementById("enRecAjo"); if(ra){ ra.querySelector("span").innerHTML = haSuositus(EN.kust) + ' <a href="#enDAjo" data-hyppy>Vaihtoehdot →</a>'; hyppy(ra); } });
+    naytaEn(); });
   det.querySelectorAll("[data-en-linja]").forEach(b=>b.onclick=()=>avaaLinja(b.dataset.enLinja));
   document.getElementById("enSave").onclick = ()=>{ if(EN.alt.length>=3) return;
     EN.alt.push({nimi:String.fromCharCode(65+EN.alt.length), pts:EN.pts.map(p=>p.slice()), rings:kopioRenkaat(EN.rings), muok:EN.muok, lupa:EN.lupa, calc:JSON.parse(JSON.stringify(EN.calc))});
-    drawAlt(); naytaEn(); };
+    drawAlt(); naytaEn(); if(typeof hToast==="function") hToast(`Tallennettu vaihtoehdoksi ${EN.alt[EN.alt.length-1].nimi}. Vertaa Vertailu-paletissa.`); if(EN.alt.length>=2) tpAvaa("vert"); };
   det.querySelectorAll("[data-altdel]").forEach(b=>b.onclick=()=>{ EN.alt.splice(+b.dataset.altdel,1); EN.alt.forEach((a,i)=>a.nimi=String.fromCharCode(65+i)); drawAlt(); naytaEn(); });
-  det.querySelectorAll("[data-altload]").forEach(b=>b.onclick=()=>{ const a = EN.alt[+b.dataset.altload]; enTalleta(); EN.pts = a.pts.map(p=>p.slice()); EN.rings = kopioRenkaat(a.rings); EN.muok = a.muok; EN.lupa = a.lupa; document.getElementById("enLupa").value = a.lupa||""; drawEn(); laskeEn(); });
+  det.querySelectorAll("[data-altload]").forEach(b=>b.onclick=()=>{ const a = EN.alt[+b.dataset.altload]; enTalleta(); EN.pts = a.pts.map(p=>p.slice()); EN.rings = kopioRenkaat(a.rings); EN.muok = a.muok; EN.lupa = a.lupa; document.getElementById("enLupa").value = a.lupa||"";
+    if(a.calc){ if(a.calc.alkaa) document.getElementById("enA").value = a.calc.alkaa; if(a.calc.paattyy) document.getElementById("enP").value = a.calc.paattyy;
+      const hr = document.querySelector(`#enHaitta input[value="${a.calc.haitta}"]`); if(hr){ hr.checked = true; if(typeof enHaittaSe==="function") enHaittaSe(); } }
+    drawEn(); laskeEn(); });
 }
 /* Esittelypyyntö: tallentuu tietokantaan ja ilmoitus menee ylläpitäjän puhelimeen. Sähköpostiosoitetta ei julkaista. */
 function esittely(arvioId){
@@ -2804,7 +2817,7 @@ function tpAvaaWs(ws, k){ if(!TPS[ws] || !TPS[ws].pal[k]) return; const T = TPS[
 // Ennakkoarvion vanhat nimet
 const tpAvaa = k => tpAvaaWs("ennakko", k), tpPiirra = () => tpPiirraWs("ennakko");
 function tpTyhjenna(){ ["enAjo","enLin","enMuut"].forEach(id=>{ const e = document.getElementById(id); if(e) e.innerHTML = '<div class="note">Arvio lasketaan, kun työalue on valittu.</div>'; });
-  const v = document.getElementById("enVert"); if(v && !EN.alt.length) v.innerHTML = '<div class="note">Tallenna vaihtoehto Arvio-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div>';
+  const v = document.getElementById("enVert"); if(v && !EN.alt.length) v.innerHTML = '<div class="note">Tallenna vaihtoehto Tulos-paletista, niin voit verrata eri sijainteja, vaiheistuksia tai ajankohtia.</div>';
   const s = document.getElementById("enAjoSub"); if(s) s.textContent = ""; }
 function tpAjoSub(){ const s = document.getElementById("enAjoSub"); if(!s) return; const a = haAsetukset();
   s.title = "Muuta kustannusoletuksia"; s.onclick = ()=>{ const d = document.getElementById("enOlet"); if(d) d.open = !d.open; };
@@ -2913,7 +2926,7 @@ function vertailuHTML(){
   if(!EN.alt.length) return "";
   const nyk = EN.calc ? {nimi:"Nykyinen", calc:EN.calc, cur:true} : null;
   const rivit = [...EN.alt, ...(nyk && !EN.alt.some(a=>JSON.stringify(a.calc)===JSON.stringify(EN.calc)) ? [nyk] : [])];
-  const h = a => a.calc.lisaaika_h_vrk, kesto = a => a.calc.kesto ? a.calc.lisaaika_h_vrk*a.calc.kesto : null;
+  const h = a => a.calc.lisaaika_h_vrk, kesto = a => a.calc.koko_kesto_h != null ? a.calc.koko_kesto_h : a.calc.kesto ? a.calc.lisaaika_h_vrk*a.calc.kesto : null;
   const ks = rivit.map(kesto).filter(x=>x!=null).sort((x,y)=>x-y), min = ks[0];
   const selva = ks.length > 1 && ks[1] > 0 && (ks[1]-ks[0])/ks[1] >= 0.15;   // alle 15 % ero on arvion epävarmuuden sisällä
   return `<div class="vert"><div class="sec" style="margin-top:0">Vaihtoehtojen vertailu</div>
@@ -2927,7 +2940,7 @@ function vertailuHTML(){
 async function lausuntoEn(){
   const o = document.getElementById("enAiOut"); o.innerHTML = `<div class="answer note">Kirjoitetaan…</div>`;
   try{
-    const r = await fn({tila:"lausunto", laskelma: EN.alt.length ? {...EN.calc, vaihtoehdot: EN.alt.map(a=>({vaihtoehto:a.nimi, osoite:a.calc.osoite, alkaa:a.calc.alkaa, paattyy:a.calc.paattyy, haitta:a.calc.haitta, linjoja:new Set(a.calc.linjat.map(x=>x.linja)).size, ohitukset_arkipaiva:a.calc.ohitukset_arkipaiva, lisaaika_h_vrk:a.calc.lisaaika_h_vrk, koko_kestolta_h:a.calc.kesto?Math.round(a.calc.lisaaika_h_vrk*a.calc.kesto):null, kasautumia:a.calc.kasautumat.length}))} : EN.calc});
+    const r = await fn({tila:"lausunto", laskelma: EN.alt.length ? {...EN.calc, vaihtoehdot: EN.alt.map(a=>({vaihtoehto:a.nimi, osoite:a.calc.osoite, alkaa:a.calc.alkaa, paattyy:a.calc.paattyy, haitta:a.calc.haitta, linjoja:new Set(a.calc.linjat.map(x=>x.linja)).size, ohitukset_arkipaiva:a.calc.ohitukset_arkipaiva, lisaaika_h_vrk:a.calc.lisaaika_h_vrk, koko_kestolta_h:a.calc.koko_kesto_h != null ? Math.round(a.calc.koko_kesto_h) : null, kasautumia:a.calc.kasautumat.length}))} : EN.calc});
     if(r.lausunto) o.innerHTML = `<div class="ltxt"><div class="ai-badge"><i></i>HSL:N LAUSUNTOLUONNOS KAUPUNGILLE</div><div class="lbody">${linkLupa(r.lausunto)}</div><button class="share" data-c="lausunto">Kopioi</button></div>
       <div class="ltxt"><div class="ai-badge"><i></i>MATKUSTAJATIEDOTE</div><div class="lbody">${linkLupa(r.tiedote||"")}</div><button class="share" data-c="tiedote">Kopioi</button></div>
       <div class="note">Luonnos ihmisen tarkistettavaksi. Agentti käyttää vain yllä laskettuja lukuja.</div>`;
