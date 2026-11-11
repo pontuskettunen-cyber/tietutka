@@ -2882,14 +2882,14 @@ async function haAvaa2(calc, K){
 }
 /* ===== Karttatyöpöytä: koko näytön kartta, työkalurivi ja siirrettävät paletit (Tilannekuva ja Ennakkoarvio) ===== */
 const TP_WS = {
-  ennakko: {sec:"v-ennakko", avain:"tt_tp", def:{
+  ennakko: {sec:"v-ennakko", avain:"tt_tp", paa:"tyo", def:{
     tyo:  {auki:true,  l:88,  t:16, w:330},
     arvio:{auki:true,  r:16,  t:16, w:410},
     ajo:  {auki:false, l:88,  b:16, w:700},
     lin:  {auki:false, r:16,  b:16, w:600},
     muut: {auki:false, r:440, t:16, w:420},
     vert: {auki:false, l:430, t:16, w:520}}},
-  linjat: {sec:"v-linjat", avain:"tt_tp_linja", def:{
+  linjat: {sec:"v-linjat", avain:"tt_tp_linja", paa:"kulku", def:{
     kulku:  {auki:true,  l:88, t:16, w:460},
     tyot:   {auki:true,  r:16, t:16, w:540},
     tyomaa: {auki:false, r:16, b:16, w:460},
@@ -2931,7 +2931,8 @@ function tpPiirraWs(ws){
 function tpEteen(el){ if(!el) return; if(TPZ >= 990){ TPZ = 900; document.querySelectorAll(".tp-pal").forEach(p=>p.style.zIndex = ""); } el.style.zIndex = ++TPZ; }
 function tpAukaise(ws, k){ const T = TPS[ws]; T.pal[k].auki = true; T.pal[k].min = false;
   T.jarj = T.jarj.filter(x=>x!==k && T.pal[x].auki); T.jarj.push(k);
-  while(T.jarj.filter(x=>!T.pal[x].min).length > tpMax()){ const vanhin = T.jarj.find(x=>x!==k && !T.pal[x].min); if(!vanhin) break; T.pal[vanhin].min = true; } }
+  while(T.jarj.filter(x=>!T.pal[x].min).length > tpMax()){ const paa = TP_WS[ws].paa;   // näkymän pääpaletti (esim. Linja, Työalue) pysyy auki, muista vanhin pienennetään
+    const vanhin = T.jarj.find(x=>x!==k && x!==paa && !T.pal[x].min) || T.jarj.find(x=>x!==k && !T.pal[x].min); if(!vanhin) break; T.pal[vanhin].min = true; } }
 function tpAvaaWs(ws, k){ if(!TPS[ws] || !TPS[ws].pal[k]) return; const T = TPS[ws];
   if(!(T.pal[k].auki && !T.pal[k].min)) tpAukaise(ws, k); tpTallenna(ws); tpPiirraWs(ws);
   const el = document.querySelector(`#${TP_WS[ws].sec} > .tp-pal[data-pal="${k}"]`); tpEteen(el); if(el && tpMobiili()) el.scrollIntoView({behavior:"smooth", block:"start"}); }
@@ -4023,7 +4024,7 @@ function lNauha(e){
   el.innerHTML = `<div class="k" style="align-items:center"><span title="Työmaat ajojärjestyksessä, pallon koko = lisäaika">Reittinauha</span>${dsel}</div><div class="lnauha"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Työmaat reitin järjestyksessä">
     <line x1="6" x2="${W-6}" y1="30" y2="30" stroke="#C9CDC4" stroke-width="4" stroke-linecap="round"/>
     ${pts.map((p,i)=>`<g data-site="${esc(p.id)}"><title>${esc(p.name)} · ${sgn(p.s)}</title><circle cx="${p.x}" cy="30" r="${Math.max(5, Math.min(13, 5 + Math.abs(p.s)/10))}" fill="${p.s>10?"#B42318":p.s<-10?"#1D4ED8":"#8A9198"}" stroke="${S.lSite===p.id?"#14181D":"#fff"}" stroke-width="${S.lSite===p.id?3:2}"/>
-      <text x="${p.x}" y="${i%2?62:10}" text-anchor="middle" font-size="10" fill="#3A4148">${esc(p.name.length>14?p.name.slice(0,13)+"…":p.name)}</text></g>`).join("")}
+      <text x="${p.x}" y="${i%2?62:10}" text-anchor="${n>1&&i===0?"start":n>1&&i===n-1?"end":"middle"}" font-size="10" fill="#3A4148">${esc(p.name.length>14?p.name.slice(0,13)+"…":p.name)}</text></g>`).join("")}
   </svg></div>`;
   el.querySelectorAll("[data-site]").forEach(g=>g.onclick=()=>lValitse(e, g.dataset.site, true));
   wire();
