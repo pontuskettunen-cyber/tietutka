@@ -1312,13 +1312,13 @@ html.hsl .top .hbell b{border-color:#0F1B2D}
 #v-linjat .tp-pal .lc-tg{flex:1 0 100%;margin:8px 0 0;padding:0}
 #v-linjat .tp-pal .ltabs{padding:0}
 #v-linjat .tp-pal #sugPanel{margin:0}
-#v-linjat .leaflet-top.leaflet-left,#v-linjat .leaflet-bottom.leaflet-left{left:88px}
-#v-linjat .leaflet-top.leaflet-left{top:auto;bottom:16px}
-#v-linjat .leaflet-top.leaflet-right{top:auto;bottom:16px;right:auto;left:140px}
+#v-linjat .leaflet-bottom.leaflet-left{left:88px}
+#v-linjat .leaflet-top.leaflet-left{top:auto;bottom:64px;left:auto;right:6px}
+#v-linjat .leaflet-top.leaflet-right{top:auto;bottom:18px;right:6px}
 #v-linjat .lpick{z-index:995}
-@media(min-width:901px){html.tp-on #v-linjat.on{height:auto;min-height:0;display:block}}
+@media(min-width:901px){html.tp-on #v-linjat.on{height:auto;min-height:0;display:block;position:fixed}}
 @media(max-width:900px){html.tp-on #v-linjat.on{height:auto;min-height:0}}
-@media(max-width:900px){#v-linjat .leaflet-top.leaflet-left,#v-linjat .leaflet-bottom.leaflet-left{left:10px}#v-linjat .leaflet-top.leaflet-right{left:60px}#v-linjat .lpick{position:fixed;left:8px!important;right:8px;top:calc(var(--toph,100px) + 8px)!important;width:auto}}
+@media(max-width:900px){#v-linjat .leaflet-bottom.leaflet-left{left:0}#v-linjat .lpick{position:fixed;left:8px!important;right:8px;top:calc(var(--toph,100px) + 8px)!important;width:auto}}
 /* Ei pillereitä: napit ja sirut suorakaiteita pienellä pyöristyksellä (käyttäjän linjaus) */
 html.hsl .live,html.hsl .btn,html.hsl .seg,html.hsl .share,html.hsl .ai-more,html.hsl .info.txt,html.hsl .top .omarow,html.hsl .saa-pill,html.hsl .tt-go,html.hsl .hr-act button,html.hsl .hlpalkki .hl-avaa,html.hsl .hlpalkki .hl-koko,html.hsl .sugarv button,html.hsl .ask-ex button,html.hsl .livebtn,html.hsl .h-toast,html.hsl .pchip,html.hsl .pclear{border-radius:6px}
 html.hsl .seg button,html.hsl .top .omarow input,html.hsl .st,html.hsl .olo-c,html.hsl .ts-malli,html.hsl .lv,html.hsl .bb,html.hsl .tk-syy,html.hsl .vahti-nimi,html.hsl .h-chip,html.hsl .lsiru,html.hsl .alue-n,html.hsl .kas-chip,html.hsl .answer a.lref,html.hsl .vchip{border-radius:4px}
@@ -3053,7 +3053,7 @@ function tpRakennaLinja(){
   sec.appendChild(tpPaletti("agentti", "Aikatauluagentti", [g("sugPanel")]));
   sec.insertBefore(kartta, sec.firstChild); kartta.classList.add("tp-map");
   if(lmain) lmain.remove();
-  tpInitWs("linjat", [["kulku","Linja: tunnusluvut ja reittinauha"],["tyot","Työmaat ja ajat: linjan työmaat, kellonajat, ajantasaus"],["tyomaa","Työmaa: valitun työmaan tiedot"],["agentti","Aikatauluagentti: ehdotukset aikatauluun"]], [["live","Live: linjan autot kartalla"]]);
+  tpInitWs("linjat", [["kulku","Linja: tunnusluvut ja reittinauha"],["tyot","Työmaat ja ajat: linjan työmaat, kellonajat, ajantasaus"],["tyomaa","Työmaa: valitun työmaan tiedot"],["agentti","Agentti: aikatauluagentin ehdotukset"]], [["live","Live: linjan autot kartalla"]]);
 }
 function drawAlt(){
   if(EN.altL) EN.altL.remove(); EN.altL = L.layerGroup().addTo(M.en);
