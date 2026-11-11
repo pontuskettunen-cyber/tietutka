@@ -212,3 +212,7 @@ json.dump({"paivitetty": datetime.datetime.now(datetime.timezone.utc).strftime("
 print("puskuri esim.", {k: out[k].get("puskuri") for k in ("1007|1", "1007|2", "1001|1", "1055|1", "1500|1") if k in out})
 print(f"linjasuuntia {len(out)}, ajantasauspysäkkejä {len(pys)}, suunnat {collections.Counter(k.split('|')[1] for k in out)}")
 print(json.dumps({k: out[k] for k in list(out)[:1]}, ensure_ascii=False)[:1500])
+
+# linjojen nimet hakua varten (data/linjanimet.json)
+import subprocess
+subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "linjanimet.py")], check=False)
