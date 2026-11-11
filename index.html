@@ -1323,7 +1323,8 @@ html.hsl .top .hbell b{border-color:#0F1B2D}
 
 /* Yhteinen haku */
 html.hsl .top #omaForm{position:relative}
-html.hsl .top .omarow input{width:230px}
+html.hsl .top .omarow input{width:190px}
+@media(max-width:1560px){html.hsl .top .omarow input{width:160px}}
 .haku-dd{position:absolute;right:0;top:calc(100% + 6px);width:min(420px,92vw);max-height:min(70vh,560px);overflow:auto;background:#fff;color:var(--k);border:1px solid var(--l);border-radius:8px;box-shadow:0 12px 32px rgba(15,27,45,.22);z-index:1300;padding:4px 0}
 .haku-dd[hidden]{display:none}
 .haku-dd .hk-r{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5C6B78;padding:8px 12px 4px}
@@ -4430,7 +4431,7 @@ function hakuPiirra(){
   const otsikko = t => t!==ryhma ? (ryhma = t, `<div class="hk-r">${{linja:"Linjat", tyo:"Työmaat", os:"Osoitteet"}[t]}</div>`) : "";
   dd.innerHTML = kaikki.map(x=>{ const j = i++, on = j===HAKU.i ? " on" : "";
     if(x.t==="linja") return otsikko("linja") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="lbadge ${TRAM.has(x.n)?"tram":""}">${esc(x.n)}</span><span class="hk-t"><b>${esc(x.nimi || (TRAM.has(x.n)?"Raitiovaunu":"Bussi"))}</b><small>${x.e && x.e.sites ? `${nf(x.e.sites)} ${x.e.sites===1?"työmaa-alue":"työmaa-aluetta"} reitillä` : "ei katutöitä reitillä"}</small></span></button>`;
-    if(x.t==="tyo"){ const ph = phase(x.l); return otsikko("tyo") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="hk-ik">⌖</span><span class="hk-t"><b>${esc(title(x.l))}</b><small>${esc(ph.txt||"")}${x.l.kaupunginosa?" · "+esc(x.l.kaupunginosa):""} · ${esc(x.l.lupa_id)}</small></span></button>`; }
+    if(x.t==="tyo"){ const ph = phase(x.l); return otsikko("tyo") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="hk-ik">⌖</span><span class="hk-t"><b>${esc(title(x.l))}</b><small>${esc(ph.txt||"")}${x.l.kaupunginosa?" · "+esc(String(x.l.kaupunginosa).replace(/^\d+\s+/,"").toLowerCase().replace(/(^|[\s-])\S/g,c=>c.toUpperCase())):""} · ${esc(x.l.lupa_id)}</small></span></button>`; }
     return otsikko("os") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="hk-ik">⌂</span><span class="hk-t"><b>${esc(x.o.nimi)}</b><small>katuosoite, näytä kartalla</small></span></button>`;
   }).join("") + (HAKU.haetaan ? `<div class="hk-r hk-hae">Haetaan osoitteita…</div>` : "");
   dd.hidden = false; q.setAttribute("aria-expanded","true");
