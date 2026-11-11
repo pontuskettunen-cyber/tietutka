@@ -1261,7 +1261,7 @@ html.hsl .navn.lC{background:#0F1B2D}
 /* ===== Katselmus 11.11.2026: puhelin ja tabletti, kosketus, saavutettavuus ===== */
 @media(max-width:900px){
   html.tp-on .view.tp-ws.on{position:static;inset:auto;z-index:auto;display:flex;flex-direction:column}
-  html.tp-on #v-ennakko.on,html.tp-on #v-home.on{display:flex;flex-direction:column}
+  html.tp-on #v-ennakko.on,html.tp-on #v-home.on,html.tp-on #v-linjat.on{display:flex;flex-direction:column}
   #v-ennakko #mapE,.tp-ws > .tp-map{position:relative!important;inset:auto!important;height:52vh!important;min-height:300px;order:-2;z-index:0}
   .tp-ws > .tp-rail{order:-1;z-index:900}
   .tp-pal{height:auto!important;resize:none;scroll-margin-top:calc(var(--toph,76px) + 64px)}
@@ -1302,6 +1302,23 @@ html.tp-on #liveBtn.leaflet-control{display:none}
 .tt-go:focus-visible{outline:3px solid #0F1B2D}
 .tt-go:hover{background:#184C99}
 html.hsl .top .hbell b{border-color:#0F1B2D}
+
+/* Linja karttatyöpöytänä */
+#v-linjat .tp-pal .lcard{border:0;box-shadow:none;padding:0;margin:0 0 10px;background:none;border-radius:0}
+#v-linjat .tp-pal .lcock{flex-wrap:wrap;border:0;margin:0 0 10px;overflow:visible;background:none}
+#v-linjat .tp-pal .lc-sel{flex:1 0 100%;border-right:0;border-bottom:1px solid var(--l);padding:0 0 8px}
+#v-linjat .tp-pal .lc-k{flex:1 1 30%;padding:8px 8px 8px 0;border-right:0;border-bottom:1px solid var(--l)}
+#v-linjat .tp-pal .lc-k span{white-space:normal}
+#v-linjat .tp-pal .lc-tg{flex:1 0 100%;margin:8px 0 0;padding:0}
+#v-linjat .tp-pal .ltabs{padding:0}
+#v-linjat .tp-pal #sugPanel{margin:0}
+#v-linjat .leaflet-top.leaflet-left,#v-linjat .leaflet-bottom.leaflet-left{left:88px}
+#v-linjat .leaflet-top.leaflet-left{top:auto;bottom:16px}
+#v-linjat .leaflet-top.leaflet-right{top:auto;bottom:16px;right:auto;left:140px}
+#v-linjat .lpick{z-index:995}
+@media(min-width:901px){html.tp-on #v-linjat.on{height:auto;min-height:0;display:block}}
+@media(max-width:900px){html.tp-on #v-linjat.on{height:auto;min-height:0}}
+@media(max-width:900px){#v-linjat .leaflet-top.leaflet-left,#v-linjat .leaflet-bottom.leaflet-left{left:10px}#v-linjat .leaflet-top.leaflet-right{left:60px}#v-linjat .lpick{position:fixed;left:8px!important;right:8px;top:calc(var(--toph,100px) + 8px)!important;width:auto}}
 /* Ei pillereitä: napit ja sirut suorakaiteita pienellä pyöristyksellä (käyttäjän linjaus) */
 html.hsl .live,html.hsl .btn,html.hsl .seg,html.hsl .share,html.hsl .ai-more,html.hsl .info.txt,html.hsl .top .omarow,html.hsl .saa-pill,html.hsl .tt-go,html.hsl .hr-act button,html.hsl .hlpalkki .hl-avaa,html.hsl .hlpalkki .hl-koko,html.hsl .sugarv button,html.hsl .ask-ex button,html.hsl .livebtn,html.hsl .h-toast,html.hsl .pchip,html.hsl .pclear{border-radius:6px}
 html.hsl .seg button,html.hsl .top .omarow input,html.hsl .st,html.hsl .olo-c,html.hsl .ts-malli,html.hsl .lv,html.hsl .bb,html.hsl .tk-syy,html.hsl .vahti-nimi,html.hsl .h-chip,html.hsl .lsiru,html.hsl .alue-n,html.hsl .kas-chip,html.hsl .answer a.lref,html.hsl .vchip{border-radius:4px}
@@ -2872,6 +2889,11 @@ const TP_WS = {
     lin:  {auki:false, r:16,  b:16, w:600},
     muut: {auki:false, r:440, t:16, w:420},
     vert: {auki:false, l:430, t:16, w:520}}},
+  linjat: {sec:"v-linjat", avain:"tt_tp_linja", def:{
+    kulku:  {auki:true,  l:88, t:16, w:460},
+    tyot:   {auki:true,  r:16, t:16, w:540},
+    tyomaa: {auki:false, r:16, b:16, w:460},
+    agentti:{auki:false, l:88, b:16, w:520}}},
   home: {sec:"v-home", avain:"tt_tp_home", def:{
     tilanne:{auki:true,  l:88, t:16, w:430},
     tyomaa: {auki:true,  r:16, t:16, w:450},
@@ -2926,7 +2948,8 @@ const TP_IKONI = {tilanne:'M3 12l9-8 9 8M5 10v10h14V10', linja:'M3 12h4l3-8 4 16
   tyo:'M4 20h16M6 16l6-12 6 12', ajo:'M12 7v5l3 3M12 21a9 9 0 110-18 9 9 0 010 18', lin:'M3 12h4l3-8 4 16 3-8h4', muut:'M4 6h16M4 12h16M4 18h10',
   pdf:'M6 3h9l5 5v13H6zM14 3v6h6', vert:'M8 4v16M16 4v16M4 8h8M12 16h8', tyomaa:'M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11zM12 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5',
   tanaan:'M8 3v4M16 3v4M4 9h16M5 5h14v16H5z', ai:'M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z', live:'M5 12a7 7 0 0114 0M8.5 12a3.5 3.5 0 017 0M12 12v.01', palauta:'M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8M3 3v5h5'};
-const TP_PAL_IKONI = {tilanne:'M4 6h16M4 12h16M4 18h10', arvio:'M4 20h16M4 4v16M8 16l4-6 4 3 4-7'};
+const TP_PAL_IKONI = {tilanne:'M4 6h16M4 12h16M4 18h10', arvio:'M4 20h16M4 4v16M8 16l4-6 4 3 4-7',
+  kulku:'M3 12h4l3-8 4 16 3-8h4', tyot:'M4 5h16v14H4zM4 10h16M10 10v9', agentti:'M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z'};
 const tpIk = (k, t, attrs, cls) => `<button type="button" class="tp-ic ${cls||""}" ${attrs} title="${t}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${(attrs.includes('data-tp=') && TP_PAL_IKONI[k]) || TP_IKONI[k]}"/></svg><span>${t.split(":")[0]}</span></button>`;
 function tpRail(ws, paletit, kerrokset){
   const nak = [["tilanne","Tilanne: mitä kaupungissa tapahtuu nyt","#/","home"],["linja","Linja: miten linja kulkee ja mikä sitä hidastaa","#/linjat","linjat"],["arvio","Arvio: mitä suunniteltu työ aiheuttaa","#/ennakko","ennakko"]];
@@ -2935,7 +2958,7 @@ function tpRail(ws, paletit, kerrokset){
     ${kerrokset.length?`<div class="tp-grp">Kerros</div>${kerrokset.map(([k,t])=>tpIk(k,t,`data-ker="${k}"`,"ker")).join("")}`:""}
     <div class="tp-grp tp-sep"></div>${tpIk("palauta","Palauta: palettien oletuspaikat",'data-tp="palauta"',"tp-pal0")}</div>`;
 }
-function tpKarttaNyt(){ const m = S.nakyma==="ennakko" ? M.en : S.nakyma==="home" ? M.home : null; return m ? {c:m.getCenter(), z:m.getZoom()} : null; }
+function tpKarttaNyt(){ const m = S.nakyma==="ennakko" ? M.en : S.nakyma==="home" ? M.home : S.nakyma==="linjat" ? M.linja : null; return m ? {c:m.getCenter(), z:m.getZoom()} : null; }
 function tpInitWs(ws, paletit, kerrokset){
   const sec = document.getElementById(TP_WS[ws].sec); if(!sec || sec.dataset.tp) return; sec.dataset.tp = "1";
   sec.classList.add("tp-ws"); TPS[ws] = tpLue(ws);
@@ -2974,6 +2997,9 @@ function tpInitWs(ws, paletit, kerrokset){
   tpPiirraWs(ws);
 }
 function tpKerros(k, b){
+  if(k==="live" && S.nakyma==="linjat"){   // Linja-näkymässä live näyttää valitun linjan autot
+    if(LL.on) lLiveStop(); else { const e = lineIndex().find(x=>x.name===S.lSel); if(e) lLiveStart(e); }
+    S.lLivePois = !LL.on; b.classList.toggle("on", !!LL.on); return; }
   if(k==="live" && typeof liveSet==="function"){ liveSet(!LV.on); b.classList.toggle("on", !!LV.on); }
 }
 const EN_HAITTA_SE = {pieni:"<b>Pieni:</b> kaistat pysyvät auki, työ on reunalla tai jalkakäytävällä. Vastaa tyypillistä mitattua työtä.",
@@ -3016,6 +3042,18 @@ function tpRakennaHome(){
   tpInitWs("home", [["tilanne","Tilanne nyt"],["tyomaa","Työmaa: valitun työmaan tiedot"],["tanaan","Tänään huomioitavaa"],["ai","Tekoäly: katsaus ja kysy"]], [["live","Live: bussit ja ratikat livenä"]]);
   // Työmaan valinta avaa Työmaa-paletin
   if(typeof select === "function" && !select._tp){ const alk = select; select = function(){ const r = alk.apply(this, arguments); tpAvaaWs("home","tyomaa"); return r; }; select._tp = true; }
+}
+/* Linja karttatyöpöydäksi: sama malli kuin Tilannekuvassa, olemassa olevat osat siirretään paletteihin */
+function tpRakennaLinja(){
+  const sec = document.getElementById("v-linjat"); if(!sec || sec.dataset.tpRak) return; sec.dataset.tpRak = "1";
+  const g = id => document.getElementById(id), kartta = g("lMap"), lmain = sec.querySelector(".lmain");
+  sec.appendChild(tpPaletti("kulku", "Linja", [g("lCock"), g("lNauha")]));
+  sec.appendChild(tpPaletti("tyot", "Työmaat ja ajat", [g("lTabs")]));
+  sec.appendChild(tpPaletti("tyomaa", "Työmaa", [g("lSite")]));
+  sec.appendChild(tpPaletti("agentti", "Aikatauluagentti", [g("sugPanel")]));
+  sec.insertBefore(kartta, sec.firstChild); kartta.classList.add("tp-map");
+  if(lmain) lmain.remove();
+  tpInitWs("linjat", [["kulku","Linja: tunnusluvut ja reittinauha"],["tyot","Työmaat ja ajat: linjan työmaat, kellonajat, ajantasaus"],["tyomaa","Työmaa: valitun työmaan tiedot"],["agentti","Aikatauluagentti: ehdotukset aikatauluun"]], [["live","Live: linjan autot kartalla"]]);
 }
 function drawAlt(){
   if(EN.altL) EN.altL.remove(); EN.altL = L.layerGroup().addTo(M.en);
@@ -3905,7 +3943,10 @@ function renderLinjat(){
   if(!S.lSel || !all.some(e=>e.name===S.lSel)){ if(list[0]) S.lSel = list[0].name; }
   renderLinjaDet(all.find(e=>e.name===S.lSel));
 }
-function lPick(on){ const pk = document.getElementById("lPick"); pk.hidden = !on; if(on){ const c = document.getElementById("lCock"); pk.style.top = (c.offsetTop + c.offsetHeight + 6)+"px"; pk.style.left = c.offsetLeft+"px"; setTimeout(()=>document.getElementById("lQ").focus(), 30); } }
+function lPick(on){ const pk = document.getElementById("lPick"); pk.hidden = !on; if(on){ const c = document.getElementById("lCock"), pal = c.closest(".tp-pal");
+    if(pal && !tpMobiili()){ const vasen = pal.offsetLeft + pal.offsetWidth + 10, mahtuu = vasen + 420 < pal.parentElement.clientWidth;
+      pk.style.left = (mahtuu ? vasen : pal.offsetLeft) + "px"; pk.style.top = (mahtuu ? pal.offsetTop : pal.offsetTop + Math.min(pal.offsetHeight, 220)) + "px"; }
+    else { pk.style.top = (c.offsetTop + c.offsetHeight + 6)+"px"; pk.style.left = c.offsetLeft+"px"; } setTimeout(()=>document.getElementById("lQ").focus(), 30); } }
 document.getElementById("lPickX").onclick = ()=>lPick(false);
 addEventListener("keydown", e=>{ if(e.key==="Escape" && !document.getElementById("lPick").hidden) lPick(false); });
 addEventListener("mousedown", e=>{ const pk = document.getElementById("lPick"); if(!pk.hidden && !pk.contains(e.target) && !e.target.closest("#lDD")) lPick(false); });
@@ -3968,7 +4009,7 @@ function renderLinjaDet(e){
   wireInfo(cock);
   lNauha(e); lSiteCard(e); lTabs(e);
   linjaKartta(e);
-  lLiveStart(e);
+  if(!S.lLivePois) lLiveStart(e);
   if(!S.at) loadAT().then(x=>{ if(x && S.lSel===e.name && document.getElementById("v-linjat").classList.contains("on")) renderLinjaDet(e); });
 }
 function lNauha(e){
@@ -4018,6 +4059,7 @@ function lValitse(e, id, fly){
 }
 function lSiteCard(e){
   const el = document.getElementById("lSite"), id = S.lSite, l = id && S.byId[id];
+  if(id && id !== S._lSiteAuki && TPS.linjat) tpAvaaWs("linjat", "tyomaa"); S._lSiteAuki = id;
   el.classList.toggle("on", !!l);
   const V = S.lVali && LLay.vali && LLay.vali.get(S.lVali);
   if(!l && V){
@@ -4097,7 +4139,7 @@ function lTabs(e){
     const k = all.find(r=>r.jakso==="kaikki");
     body = all.length ? `<div class="note" style="margin:2px 0 6px">Suunta ${d} · ${nf(k?.vuoroja)} vuoroa${k?.paivia?` · ${k.paivia} pv`:""}. Lisäaika = vuoron kaikkien työmaiden lisäajat yhteensä, sama pysäkkiväli lasketaan vuorolle vain kerran.</div>
       <table class="t"><thead><tr><th>Jakso</th><th class="r">Vuoroja</th><th class="r">Tavallinen</th><th class="r">Huonoin 10 %</th></tr></thead><tbody>
-      ${["aamu","paiva","ilta","muu","kaikki"].map(j=>all.find(r=>r.jakso===j)).filter(Boolean).map(r=>`<tr><td>${r.jakso==="kaikki"?"<b>Koko päivä</b>":JNAME[r.jakso]}</td><td class="r">${nf(r.vuoroja)}</td><td class="r">${r.vuoroja>=5?sgn(r.med):"–"}</td><td class="r ${r.p90>120&&r.vuoroja>=5?"slow":""}">${r.vuoroja>=5?sgn(r.p90):"–"}</td></tr>`).join("")}</tbody></table>`
+      ${["aamu","paiva","ilta","muu","kaikki"].map(j=>all.find(r=>r.jakso===j)).filter(Boolean).map(r=>`<tr><td>${r.jakso==="kaikki"?"<b>Koko päivä</b>":JNAME[r.jakso]}</td><td class="r">${nf(r.vuoroja)}</td><td class="r">${r.vuoroja>=5?sgn(r.med):"–"}</td><td class="r ${r.p90>120&&r.vuoroja>=20?"slow":""}">${r.vuoroja>=5?sgn(r.p90):"–"}</td></tr>`).join("")}</tbody></table>`
       : `<div class="note">Vuorokohtaista mittausta ei vielä ole tässä suunnassa. Arvio työmaiden yhteisvaikutuksesta: ${e.tot[d]!=null?sgn(e.tot[d]):"–"}.</div>`;
   }
   if(S.lTab==="at") body = atTaulu(e, d, (S.ltila[e.name]||[]).find(r=>r.ikkuna===S.ik && r.dir===d && r.jakso==="kaikki")||{}) || `<div class="note">Ajantasaustietoa ei löytynyt tälle linjalle.</div>`;
@@ -4812,8 +4854,9 @@ function route(nav){
   if(path==="uusi"){ history.replaceState(null,"","#/"); }   // vanha vertailulinkki
   const v = ["tyot","menetelma","linjat","raportti","ennakko","hsl","kehitys","halytykset"].includes(path) ? path : "home";
   document.documentElement.classList.toggle("uusi", !!S.uusi && v==="home");
-  document.documentElement.classList.toggle("tp-on", v==="ennakko" || v==="home");
+  document.documentElement.classList.toggle("tp-on", v==="ennakko" || v==="home" || v==="linjat");
   if(v==="home") tpRakennaHome();
+  if(v==="linjat"){ tpRakennaLinja(); tpPiirraWs("linjat"); }
   { const tp = document.querySelector(".top"); if(tp) document.documentElement.style.setProperty("--toph", tp.offsetHeight + "px"); }
   document.querySelectorAll("#v-home .subnav a").forEach(a=>a.classList.toggle("on", a.getAttribute("href")==="#/"));
   document.querySelectorAll(".view").forEach(x=>x.classList.toggle("on", x.id==="v-"+v));
@@ -4841,7 +4884,8 @@ function route(nav){
     else if(LV.on){ buildShapes(); syncSubs(); }
     if((changed || nav==="first") && S.byId[S.sel] && l){ const c = centroid(S.byId[S.sel].geom||{coordinates:[]}); if(c) M.home.setView(c,16); } }
   if(v==="tyot") renderTyot();
-  if(v==="linjat") renderLinjat(); else if(typeof lLiveStop==="function" && LL.on){ lLiveStop(); }
+  if(v==="linjat"){ renderLinjat(); setTimeout(()=>{ if(M.linja) M.linja.invalidateSize(); const b = document.querySelector('#v-linjat .tp-ic[data-ker="live"]'); if(b) b.classList.toggle("on", !!LL.on); }, 60); }
+  else if(typeof lLiveStop==="function" && LL.on){ lLiveStop(); }
   if(v==="raportti") renderRaportti(l);
   if(v==="ennakko") initEnnakko(nav==="refresh" ? null : l);   // päivitys ei saa vaihtaa käyttäjän valitsemaa aluetta
   if(v==="kehitys"){ renderKehitys(); renderVahti();
