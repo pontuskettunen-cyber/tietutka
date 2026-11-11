@@ -1336,6 +1336,7 @@ html.hsl .top .omarow input{width:190px}
 .haku-dd .hk-t{display:flex;flex-direction:column;min-width:0}
 .haku-dd .hk-t b{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .haku-dd .hk-t small{font-size:12px;color:var(--m)}
+.haku-dd .hk-laji{font-style:normal;font-weight:600;color:#1F5FBF;margin-right:6px}.haku-dd .hk-laji.tram{color:#0F7A64}
 .lrow .lnimi{font-size:12px;color:var(--m);margin-bottom:1px}
 @media(max-width:860px){html.hsl .top .omalinja#omaForm{display:block}html.hsl .top .omarow input{width:150px}}
 @media(max-width:640px){html.hsl .top .omalinja#omaForm{order:5;flex:1 0 100%;margin:0 0 8px}html.hsl .top .omarow{width:100%}html.hsl .top .omarow input{flex:1;width:auto}.haku-dd{position:fixed;left:8px;right:8px;top:auto;width:auto}}
@@ -4409,8 +4410,9 @@ fetch("data/linjanimet.json").then(r=>r.ok?r.json():null).then(d=>{ if(d && d.ni
 const HAKU = {i:0, tulos:[], os:[], ajastin:null, pyynto:0};
 function hakuNormi(t){ return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
 function hakuLaske(qRaw){
-  const q = qRaw.trim(), qn = hakuNormi(q), qU = q.toUpperCase(); if(!q) return [];
+  const q = qRaw.trim(), qn = hakuNormi(q), qU = q.toUpperCase();
   const li = S.loaded ? lineIndex() : [], liM = new Map(li.map(e=>[e.name, e]));
+  if(!q) return li.filter(e=>e.sites).sort((a,b)=>b.sites-a.sites || (b.max||0)-(a.max||0)).slice(0, 8).map(e=>({t:"linja", n:e.name, nimi:LINJANIMET[e.name]||"", e, eniten:true}));
   const nimet = Object.keys(LINJANIMET).length ? Object.keys(LINJANIMET) : li.map(e=>e.name);
   const linjat = [...new Set([...nimet, ...li.map(e=>e.name)])]
     .map(n=>({n, nimi:LINJANIMET[n]||"", e:liM.get(n)}))
@@ -4425,15 +4427,16 @@ function hakuLaske(qRaw){
 function hakuPiirra(){
   const dd = document.getElementById("hakuDD"), q = document.getElementById("omaQ"); if(!dd) return;
   const kaikki = [...HAKU.tulos, ...HAKU.os.map(o=>({t:"os", o}))];
-  if(!q.value.trim() || !kaikki.length && !HAKU.haetaan){ dd.hidden = true; q.setAttribute("aria-expanded","false"); return; }
+  if(!kaikki.length && !HAKU.haetaan){ dd.hidden = true; q.setAttribute("aria-expanded","false"); return; }
   HAKU.i = Math.max(0, Math.min(HAKU.i, kaikki.length-1));
   let ryhma = "", i = 0;
-  const otsikko = t => t!==ryhma ? (ryhma = t, `<div class="hk-r">${{linja:"Linjat", tyo:"Työmaat", os:"Osoitteet"}[t]}</div>`) : "";
+  const tyhja = !q.value.trim();
+  const otsikko = t => t!==ryhma ? (ryhma = t, `<div class="hk-r">${tyhja ? "Eniten työmaita reitillä nyt" : {linja:"Linjat", tyo:"Työmaat", os:"Osoitteet"}[t]}</div>`) : "";
   dd.innerHTML = kaikki.map(x=>{ const j = i++, on = j===HAKU.i ? " on" : "";
-    if(x.t==="linja") return otsikko("linja") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="lbadge ${TRAM.has(x.n)?"tram":""}">${esc(x.n)}</span><span class="hk-t"><b>${esc(x.nimi || (TRAM.has(x.n)?"Raitiovaunu":"Bussi"))}</b><small>${x.e && x.e.sites ? `${nf(x.e.sites)} ${x.e.sites===1?"työmaa-alue":"työmaa-aluetta"} reitillä` : "ei katutöitä reitillä"}</small></span></button>`;
+    if(x.t==="linja") return otsikko("linja") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="lbadge ${TRAM.has(x.n)?"tram":""}">${esc(x.n)}</span><span class="hk-t"><b>${esc(x.nimi || (TRAM.has(x.n)?"Raitiovaunu":"Bussi"))}</b><small><i class="hk-laji ${TRAM.has(x.n)?"tram":""}">${TRAM.has(x.n)?"Raitiovaunu":/N$/.test(x.n)?"Yöbussi":"Bussi"}</i>${x.e && x.e.sites ? `${nf(x.e.sites)} ${x.e.sites===1?"työmaa-alue":"työmaa-aluetta"} reitillä` : "ei katutöitä reitillä"}</small></span></button>`;
     if(x.t==="tyo"){ const ph = phase(x.l); return otsikko("tyo") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="hk-ik">⌖</span><span class="hk-t"><b>${esc(title(x.l))}</b><small>${esc(ph.txt||"")}${x.l.kaupunginosa?" · "+esc(String(x.l.kaupunginosa).replace(/^\d+\s+/,"").toLowerCase().replace(/(^|[\s-])\S/g,c=>c.toUpperCase())):""} · ${esc(x.l.lupa_id)}</small></span></button>`; }
     return otsikko("os") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="hk-ik">⌂</span><span class="hk-t"><b>${esc(x.o.nimi)}</b><small>katuosoite, näytä kartalla</small></span></button>`;
-  }).join("") + (HAKU.haetaan ? `<div class="hk-r hk-hae">Haetaan osoitteita…</div>` : "");
+  }).join("") + (HAKU.haetaan ? `<div class="hk-r hk-hae">Haetaan osoitteita…</div>` : "") + (tyhja ? `<div class="hk-r hk-hae">Kirjoita linjan numero, pysäkin nimi, katu tai lupatunnus</div>` : "");
   dd.hidden = false; q.setAttribute("aria-expanded","true");
   dd.querySelectorAll(".hk").forEach(b=>b.onmousedown = ev=>{ ev.preventDefault(); hakuValitse(kaikki[+b.dataset.i]); });
 }
@@ -4474,7 +4477,7 @@ function avaaLinjaHaku(v){
 { const q = document.getElementById("omaQ"), f = document.getElementById("omaForm");
   const dd = document.createElement("div"); dd.id = "hakuDD"; dd.className = "haku-dd"; dd.hidden = true; dd.setAttribute("role","listbox"); f.appendChild(dd);
   q.addEventListener("input", ()=>{ HAKU.i = 0; HAKU.tulos = hakuLaske(q.value); hakuOsoitteet(q.value); hakuPiirra(); });
-  q.addEventListener("focus", ()=>{ if(q.value.trim()){ HAKU.tulos = hakuLaske(q.value); hakuPiirra(); } });
+  q.addEventListener("focus", ()=>{ HAKU.i = 0; HAKU.tulos = hakuLaske(q.value); hakuPiirra(); });
   q.addEventListener("blur", ()=>setTimeout(()=>{ dd.hidden = true; q.setAttribute("aria-expanded","false"); }, 150));
   q.addEventListener("keydown", e=>{ const n = HAKU.tulos.length + HAKU.os.length;
     if(e.key==="ArrowDown"){ e.preventDefault(); HAKU.i = Math.min(n-1, HAKU.i+1); hakuPiirra(); }
