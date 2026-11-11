@@ -1336,6 +1336,9 @@ html.hsl .top .omarow input{width:190px}
 .haku-dd .hk-t{display:flex;flex-direction:column;min-width:0}
 .haku-dd .hk-t b{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .haku-dd .hk-t small{font-size:12px;color:var(--m)}
+.haku-dd .hk-tabs{display:flex;gap:0;border-bottom:1px solid var(--l);padding:0 8px;position:sticky;top:-4px;background:#fff;z-index:1;margin-top:-4px}
+.haku-dd .hk-tabs button{border:0;background:none;font:600 13px/1 inherit;font-family:inherit;color:#5C6B78;padding:12px 10px 10px;border-bottom:2px solid transparent;cursor:pointer}
+.haku-dd .hk-tabs button.on{color:#0F1B2D;border-bottom-color:#1F5FBF}
 .haku-dd .hk-laji{font-style:normal;font-weight:600;color:#1F5FBF;margin-right:6px}.haku-dd .hk-laji.tram{color:#0F7A64}
 .lrow .lnimi{font-size:12px;color:var(--m);margin-bottom:1px}
 @media(max-width:860px){html.hsl .top .omalinja#omaForm{display:block}html.hsl .top .omarow input{width:150px}}
@@ -4407,12 +4410,17 @@ function lLiveDraw(){
 /* ===== Yhteinen haku yläpalkissa: linjat (numero tai päätepysäkki), työmaat (osoite, kaupunginosa, tunnus) ja katuosoitteet ===== */
 let LINJANIMET = {};
 fetch("data/linjanimet.json").then(r=>r.ok?r.json():null).then(d=>{ if(d && d.nimet){ LINJANIMET = d.nimet; if(S.nakyma==="linjat" && S.loaded) renderLinjat(); } }).catch(()=>{});
-const HAKU = {i:0, tulos:[], os:[], ajastin:null, pyynto:0};
+const HAKU = {i:0, tulos:[], os:[], ajastin:null, pyynto:0, valilehti:"linjat"};
 function hakuNormi(t){ return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
 function hakuLaske(qRaw){
   const q = qRaw.trim(), qn = hakuNormi(q), qU = q.toUpperCase();
   const li = S.loaded ? lineIndex() : [], liM = new Map(li.map(e=>[e.name, e]));
-  if(!q) return li.filter(e=>e.sites).sort((a,b)=>b.sites-a.sites || (b.max||0)-(a.max||0)).slice(0, 8).map(e=>({t:"linja", n:e.name, nimi:LINJANIMET[e.name]||"", e, eniten:true}));
+  if(!q){   // tyhjä kenttä: välilehdet Linjat / Työmaat / Alkavat
+    if(HAKU.valilehti==="tyot") return (S.loaded ? ranked() : []).slice(0, 8).map(x=>({t:"tyo", l:x.l, vehH:x.i && x.i.vehH}));
+    if(HAKU.valilehti==="alkavat") return (S.luvat||[]).filter(l=>phase(l).k==="tulossa" && onRoute(l) && +new Date(l.alkaa) < Date.now()+14*DAY)
+      .sort((a,b)=>new Date(a.alkaa)-new Date(b.alkaa) || (b.ohitukset_24h||0)-(a.ohitukset_24h||0)).slice(0, 8).map(l=>({t:"tyo", l}));
+    return li.filter(e=>e.sites).sort((a,b)=>b.sites-a.sites || (b.max||0)-(a.max||0)).slice(0, 8).map(e=>({t:"linja", n:e.name, nimi:LINJANIMET[e.name]||"", e}));
+  }
   const nimet = Object.keys(LINJANIMET).length ? Object.keys(LINJANIMET) : li.map(e=>e.name);
   const linjat = [...new Set([...nimet, ...li.map(e=>e.name)])]
     .map(n=>({n, nimi:LINJANIMET[n]||"", e:liM.get(n)}))
@@ -4427,18 +4435,21 @@ function hakuLaske(qRaw){
 function hakuPiirra(){
   const dd = document.getElementById("hakuDD"), q = document.getElementById("omaQ"); if(!dd) return;
   const kaikki = [...HAKU.tulos, ...HAKU.os.map(o=>({t:"os", o}))];
-  if(!kaikki.length && !HAKU.haetaan){ dd.hidden = true; q.setAttribute("aria-expanded","false"); return; }
+  const tyhja = !q.value.trim();
+  if(!tyhja && !kaikki.length && !HAKU.haetaan){ dd.hidden = true; q.setAttribute("aria-expanded","false"); return; }
   HAKU.i = Math.max(0, Math.min(HAKU.i, kaikki.length-1));
   let ryhma = "", i = 0;
-  const tyhja = !q.value.trim();
-  const otsikko = t => t!==ryhma ? (ryhma = t, `<div class="hk-r">${tyhja ? "Eniten työmaita reitillä nyt" : {linja:"Linjat", tyo:"Työmaat", os:"Osoitteet"}[t]}</div>`) : "";
-  dd.innerHTML = kaikki.map(x=>{ const j = i++, on = j===HAKU.i ? " on" : "";
+  const VL = {linjat:["Linjat","Eniten työmaita reitillä nyt"], tyot:["Työmaat","Eniten lisäaikaa juuri nyt"], alkavat:["Alkavat","Alkavat 14 päivän sisällä joukkoliikenteen reiteillä"]};
+  const otsikko = t => t!==ryhma ? (ryhma = t, tyhja ? `<div class="hk-r">${VL[HAKU.valilehti][1]}</div>` : `<div class="hk-r">${{linja:"Linjat", tyo:"Työmaat", os:"Osoitteet"}[t]}</div>`) : "";
+  const tabit = tyhja ? `<div class="hk-tabs" role="tablist">${Object.entries(VL).map(([k,[t]])=>`<button type="button" role="tab" data-vl="${k}" aria-selected="${HAKU.valilehti===k}" class="${HAKU.valilehti===k?"on":""}">${t}</button>`).join("")}</div>` : "";
+  dd.innerHTML = tabit + (tyhja && !kaikki.length ? `<div class="hk-r hk-hae">Ei näytettävää juuri nyt.</div>` : "") + kaikki.map(x=>{ const j = i++, on = j===HAKU.i ? " on" : "";
     if(x.t==="linja") return otsikko("linja") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="lbadge ${TRAM.has(x.n)?"tram":""}">${esc(x.n)}</span><span class="hk-t"><b>${esc(x.nimi || (TRAM.has(x.n)?"Raitiovaunu":"Bussi"))}</b><small><i class="hk-laji ${TRAM.has(x.n)?"tram":""}">${TRAM.has(x.n)?"Raitiovaunu":/N$/.test(x.n)?"Yöbussi":"Bussi"}</i>${x.e && x.e.sites ? `${nf(x.e.sites)} ${x.e.sites===1?"työmaa-alue":"työmaa-aluetta"} reitillä` : "ei katutöitä reitillä"}</small></span></button>`;
-    if(x.t==="tyo"){ const ph = phase(x.l); return otsikko("tyo") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="hk-ik">⌖</span><span class="hk-t"><b>${esc(title(x.l))}</b><small>${esc(ph.txt||"")}${x.l.kaupunginosa?" · "+esc(String(x.l.kaupunginosa).replace(/^\d+\s+/,"").toLowerCase().replace(/(^|[\s-])\S/g,c=>c.toUpperCase())):""} · ${esc(x.l.lupa_id)}</small></span></button>`; }
+    if(x.t==="tyo"){ const ph = phase(x.l), nl = lines(x.l.linjat).filter(n=>!/N$/.test(n)); return otsikko("tyo") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="hk-ik">⌖</span><span class="hk-t"><b>${esc(title(x.l))}</b><small>${x.vehH>0?`<i class="hk-laji" style="color:#B42318">+${nf(x.vehH,1)} h lisäaikaa / vrk</i>`:""}${esc(ph.txt||"")}${nl.length?" · linjat "+esc(nl.slice(0,5).join(", "))+(nl.length>5?"…":""):""}${x.l.kaupunginosa?" · "+esc(String(x.l.kaupunginosa).replace(/^\d+\s+/,"").toLowerCase().replace(/(^|[\s-])\S/g,c=>c.toUpperCase())):""} · ${esc(x.l.lupa_id)}</small></span></button>`; }
     return otsikko("os") + `<button type="button" class="hk${on}" data-i="${j}" role="option"><span class="hk-ik">⌂</span><span class="hk-t"><b>${esc(x.o.nimi)}</b><small>katuosoite, näytä kartalla</small></span></button>`;
   }).join("") + (HAKU.haetaan ? `<div class="hk-r hk-hae">Haetaan osoitteita…</div>` : "") + (tyhja ? `<div class="hk-r hk-hae">Kirjoita linjan numero, pysäkin nimi, katu tai lupatunnus</div>` : "");
   dd.hidden = false; q.setAttribute("aria-expanded","true");
   dd.querySelectorAll(".hk").forEach(b=>b.onmousedown = ev=>{ ev.preventDefault(); hakuValitse(kaikki[+b.dataset.i]); });
+  dd.querySelectorAll("[data-vl]").forEach(b=>b.onmousedown = ev=>{ ev.preventDefault(); HAKU.valilehti = b.dataset.vl; HAKU.i = 0; HAKU.tulos = hakuLaske(""); hakuPiirra(); });
 }
 function hakuOsoitteet(q){
   clearTimeout(HAKU.ajastin); HAKU.os = []; HAKU.haetaan = false;
@@ -4482,7 +4493,9 @@ function avaaLinjaHaku(v){
   q.addEventListener("keydown", e=>{ const n = HAKU.tulos.length + HAKU.os.length;
     if(e.key==="ArrowDown"){ e.preventDefault(); HAKU.i = Math.min(n-1, HAKU.i+1); hakuPiirra(); }
     else if(e.key==="ArrowUp"){ e.preventDefault(); HAKU.i = Math.max(0, HAKU.i-1); hakuPiirra(); }
-    else if(e.key==="Escape"){ dd.hidden = true; q.setAttribute("aria-expanded","false"); } });
+    else if(e.key==="Escape"){ dd.hidden = true; q.setAttribute("aria-expanded","false"); }
+    else if(!q.value && (e.key==="ArrowRight" || e.key==="ArrowLeft")){ const v = ["linjat","tyot","alkavat"], i = v.indexOf(HAKU.valilehti);
+      HAKU.valilehti = v[(i + (e.key==="ArrowRight"?1:2)) % 3]; HAKU.i = 0; HAKU.tulos = hakuLaske(""); hakuPiirra(); e.preventDefault(); } });
 }
 document.getElementById("omaForm").onsubmit = e => {
   e.preventDefault();
