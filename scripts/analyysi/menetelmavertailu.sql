@@ -1,7 +1,8 @@
 -- Menetelmävertailu (vain luku) seg_paiva-koosteesta.
 -- Uusi = välin päiväkeskiarvojen mediaani työn aikana (7 vrk) − mediaani päivinä, jolloin välillä ei ollut yhtään voimassa olevaa lupaa (±1 vrk).
 with nyk as (
-  select lupa_id, lisa_ajo nyk_s, ohitukset from lupa_mitta where ikkuna = '7d' and jakso = 'kaikki' and ohitukset >= 30),
+  select m.lupa_id, m.lisa_ajo nyk_s, m.ohitukset from lupa_mitta m join v_luvat v using (lupa_id)
+  where m.ikkuna = '7d' and m.jakso = 'kaikki' and m.ohitukset >= 30 and v.alkaa <= now()),
 ls as (select s.lupa_id, s.from_stop, s.to_stop from lupa_segmentit s join nyk using (lupa_id)),
 segs as (select distinct from_stop, to_stop from ls),
 ids as (select distinct s.lupa_id from lupa_segmentit s join segs using (from_stop, to_stop)),
@@ -41,3 +42,4 @@ select coalesce(lv.osoite, nyk.lupa_id) osoite, nyk.ohitukset,
   lv.a alkoi
 from nyk left join lv using (lupa_id) left join u using (lupa_id) left join tot using (lupa_id)
 order by (u.uusi_s is null), nyk.ohitukset desc limit 60;
+-- yhteenveto: select count(*), count(uusi_s) ... (ks. alla)
