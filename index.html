@@ -2047,7 +2047,9 @@ function impact(l){
   const arvio = m && m.n >= MIN_N && m.lisa_ajo != null ? m.lisa_ajo : null;
   if(vk && (vk.tila==="todennettu" || vk.tila==="alustava") && vk.vaikutus_s != null){
     // mitattu: sama väli työn aikana vs. samat päivät ilman yhtään voimassa olevaa työtä
-    return {kind:"v2", tod:true, alust:vk.tila==="alustava", vert:vk.vertailu, s:vk.vaikutus_s, seis:vk.vaikutus_seis, vehH:Math.max(0, vk.ajoneuvotunnit_vrk||0), n:vk.aikana_n, nB:vk.pohja_n, pvB:vk.pohja_pv, pvA:vk.aikana_pv, ala:vk.vali_ala, yla:vk.vali_yla, arvio, prev:null};
+    // negatiivinen luku, jonka vaihteluväli ulottuu nollaan, on mittaustarkkuuden sisällä: näytetään ±0
+    const s0 = vk.vaikutus_s < 0 && (vk.vali_yla == null || vk.vali_yla >= 0) ? 0 : vk.vaikutus_s;
+    return {kind:"v2", tod:true, alust:vk.tila==="alustava", vert:vk.vertailu, s:s0, raw:vk.vaikutus_s, seis:vk.vaikutus_seis, vehH:Math.max(0, vk.ajoneuvotunnit_vrk||0), n:vk.aikana_n, nB:vk.pohja_n, pvB:vk.pohja_pv, pvA:vk.aikana_pv, ala:vk.vali_ala, yla:vk.vali_yla, arvio, prev:null};
   }
   if(m && m.n >= MIN_N && m.lisa_ajo != null){
     // arvio: väli verrattuna linjan muihin osuuksiin. Negatiivinen luku kertoo kadun omasta nopeudesta, ei työstä.
@@ -2424,7 +2426,7 @@ function geomPisteet(g){ const rings = []; const walk = c => { if(typeof c[0][0]
    Tekoälyn haittaluokka ei vielä erottele mitattua vaikutusta, joten arvio asetetaan jakaumaan riskin mukaan:
    pieni = tyypillinen työ (mediaani), kohtalainen = haitallisin neljännes (p75), suuri = haitallisin kymmenesosa (p90). */
 function haittaMalli(){
-  const a = S.luvat.filter(l=>phase(l).k==="kaynnissa" && onRoute(l)).map(l=>impact(l)).filter(im=>im && im.kind==="v2" && im.n >= 20 && (im.tod ? im.s : im.raw) != null).map(im=>im.tod ? im.s : im.raw).sort((x,y)=>x-y);
+  const a = S.luvat.filter(l=>phase(l).k==="kaynnissa" && onRoute(l)).map(l=>impact(l)).filter(im=>im && im.kind==="v2" && im.n >= 20 && (im.raw ?? im.s) != null).map(im=>im.raw ?? im.s).sort((x,y)=>x-y);
   const q = p => a.length ? a[Math.floor((a.length-1)*p)] : null;
   return {n:a.length, p50:q(.5), p75:q(.75), p90:q(.9), osuus20: a.length ? a.filter(x=>x>20).length/a.length : null};
 }
