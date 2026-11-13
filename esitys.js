@@ -96,6 +96,7 @@
       const pb = kohde.closest(".tp-pb");
       if (pb) { const kb = kohde.getBoundingClientRect(), pbb = pb.getBoundingClientRect();
         if (kb.top < pbb.top + 10 || kb.bottom > pbb.bottom - 10) { await vieri(sisaY(pb, kohde, Math.max(20, (pbb.height - kb.height) / 3)), 900, pb); await odota(250); } }
+      else { const kb = kohde.getBoundingClientRect(); if (kb.top < 70 || kb.bottom > innerHeight - 140) { kohde.scrollIntoView({ block: "center", behavior: "smooth" }); await odota(800); } }
       korosta(kohde); } else poistaKorostus();
     const p = kohde instanceof Element ? keski(kohde) : kohde;
     const x0 = kx, y0 = ky, dx = p.x - x0, dy = p.y - y0, d = Math.hypot(dx, dy);
