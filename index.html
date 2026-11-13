@@ -3182,7 +3182,7 @@ function tiivis(l, im, ml){
   if(!onRoute(l)) return `<p class="tiivis">Kohdalla ei kulje bussi- tai ratikkareittejä.</p>`;
   if(ph==="tulossa") return `<p class="tiivis">Työ alkaa <b>${fmtDate(l.alkaa)}</b> ja osuu ${ls.length} linjan reitille (${esc(ls.slice(0,5).join(", "))}${ls.length>5?"…":""}). Vaikutus mitataan heti työn alettua.</p>`;
   if(!im || im.s==null) return `<p class="tiivis">Työ on käynnissä ${ls.length} linjan reitillä. Ohituksia ei vielä tarpeeksi luotettavaan lukuun.</p>`;
-  const top = (ml||[]).filter(r=>r.ohitukset>=MIN_N && r.lisa_ajo>10).sort((a,b)=>b.lisa_ajo-a.lisa_ajo)[0];
+  const top = im.tod ? (ml||[]).filter(r=>r.ohitukset>=MIN_N && r.lisa_ajo>10).sort((a,b)=>b.lisa_ajo-a.lisa_ajo)[0] : null;
   const verbi = im.s > 10 ? `hidastaa: bussi tai ratikka on kohdalla keskimäärin <b>${minuutteina(im.s)}</b> pidempään kuin ${im.tod?"samalla kadulla ilman töitä":"muualla linjalla"}` : `ei hidasta merkittävästi: alle 10 sekuntia ohitusta kohden`;
   const ero = top && im.s > 0 && top.lisa_ajo > im.s*1.6 ? ` Linjoittain ero on suuri: linjalla <a href="#" class="lnk-linja" data-linja="${esc(ln(top.route))}">${esc(ln(top.route))}</a> ${minuutteina(top.lisa_ajo)}.` : top ? ` Eniten hidastuu linja <a href="#" class="lnk-linja" data-linja="${esc(ln(top.route))}">${esc(ln(top.route))}</a> (${minuutteina(top.lisa_ajo)}).` : "";
   const nSlow = (S.segs[l.lupa_id]||[]).filter(g=>(g.n_24h||0)>=MIN_N && g.lisaviive_s>10).length;
@@ -4655,12 +4655,13 @@ const kompakti = () => document.documentElement.classList.contains("kompakti");
 function linjaSirut(l, ml){
   if(!onRoute(l)) return "";
   const idx = new Set(lineIndex().map(e=>e.name));
+  const tod = !!impact(l)?.tod;
   const mitattu = (ml||[]).filter(r=>r.ohitukset>=MIN_N).map(r=>({n:ln(r.route), s:r.lisa_ajo}));
   const per = new Map(); mitattu.forEach(x=>{ if(!per.has(x.n) || x.s > per.get(x.n)) per.set(x.n, x.s); });
   lines(l.linjat).filter(n=>!/N$/.test(n)).forEach(n=>{ if(!per.has(n)) per.set(n, null); });
   const rivit = [...per.entries()].filter(([n])=>idx.has(n)).sort((a,b)=>(b[1]??-1e9)-(a[1]??-1e9)).slice(0,10);
   if(!rivit.length) return "";
-  return `<div class="lsirut"><span class="k">${kompakti() ? "Näytä linja kartalla:" : "Avaa linja:"}</span>${rivit.map(([n,s])=>`<button type="button" class="lsiru ${S.hLinja===n?"on":""}" data-linja="${esc(n)}" title="${kompakti()?"Näytä linjan reitti ja muut työmaat kartalla":"Avaa linja Linjat-näkymässä"}"><span class="lbadge ${TRAM.has(n)?"tram":""}">${esc(n)}</span>${s!=null && Math.abs(s) >= 10 ? `<small class="${s>10?"slow":""}">${sgn(s)}</small>` : ""}</button>`).join("")}</div>`;
+  return `<div class="lsirut"><span class="k">${kompakti() ? "Näytä linja kartalla:" : "Avaa linja:"}</span>${rivit.map(([n,s])=>`<button type="button" class="lsiru ${S.hLinja===n?"on":""}" data-linja="${esc(n)}" title="${kompakti()?"Näytä linjan reitti ja muut työmaat kartalla":"Avaa linja Linjat-näkymässä"}"><span class="lbadge ${TRAM.has(n)?"tram":""}">${esc(n)}</span>${s!=null && s >= 10 ? `<small class="${tod?"slow":"arv"}">${sgn(s)}</small>` : ""}</button>`).join("")}</div>`;
 }
 /* Linjan avaus mistä tahansa: nollaa edellisen linjan valinnat, ettei toisen linjan työmaa jää näkyviin */
 function lAvaa(n){ Object.assign(S, {lSel:n, lSite:null, lVali:null, lReitti:false, lDir:null, lPaluu:null, lQ:""}); const q = document.getElementById("lQ"); if(q) q.value = ""; }
