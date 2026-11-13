@@ -203,93 +203,162 @@
     piilotaTeksti(); poistaKorostus(); $$(".es-kortti, #esKansi").forEach(k => k.remove());
     const q = $("#omaQ"), dd = $("#hakuDD"); if (q) { q.value = ""; q.blur(); } if (dd) dd.hidden = true;
     try { if (pinnattu && LV.pinned.has(pinnattu)) togglePin(pinnattu); } catch (e) {} pinnattu = null;
-    try { if (typeof hLinjaPois === "function") hLinjaPois(true); } catch (e) {}
+    try { if (typeof hLinjaPois === "function") hLinjaPois(true); } catch (e) {} try { M.home && M.home.closePopup(); M.linja && M.linja.closePopup(); } catch (e) {}
   }
+  // karttaklikkaus annetussa pisteessä (canvas-tasot ja kartan pinta)
+  async function klikkaaKarttaa(p, jalkeen = 1600) {
+    await liiku(p); korosta({ left: p.x - 14, top: p.y - 14, right: p.x + 14, bottom: p.y + 14, width: 28, height: 28 }); await odota(350);
+    kursori.classList.add("painuu"); const rr = document.createElement("div"); rr.className = "es-rengas"; rr.style.left = p.x + "px"; rr.style.top = p.y + "px";
+    document.body.appendChild(rr); setTimeout(() => rr.remove(), 800); await odota(120); kursori.classList.remove("painuu");
+    const suoja = $(".es-suoja"); if (suoja) suoja.style.pointerEvents = "none";
+    const t = document.elementFromPoint(p.x, p.y); if (suoja) suoja.style.pointerEvents = "";
+    if (t) ["mousedown", "mouseup", "click"].forEach(tp => t.dispatchEvent(new MouseEvent(tp, { bubbles: true, cancelable: true, clientX: p.x, clientY: p.y, button: 0 })));
+    poistaKorostus(); await odota(jalkeen);
+  }
+  // punainen (hidas) pysäkkiväli kartan canvasilta, mieluiten kartan keskeltä mutta ei aivan keskipisteestä
+  function punainenVali(kartta) {
+    const kont = typeof kartta === "string" ? $(kartta) : kartta; if (!kont) return null;
+    for (const cv of $$("canvas", kont)) { try {
+      const ctx = cv.getContext("2d"), w = cv.width, h = cv.height; if (!w || !h) continue;
+      const d = ctx.getImageData(0, 0, w, h).data, b = cv.getBoundingClientRect(), sx = b.width / w, sy = b.height / h, cx = w / 2, cy = h / 2;
+      const pun = (x, y) => { if (x < 0 || y < 0 || x >= w || y >= h) return false; const i = (y * w + x) * 4; return d[i] > 150 && d[i + 1] < 75 && d[i + 2] < 75 && d[i + 3] > 200; };
+      let best = null, bd = Infinity; const r0 = 30 * (w / b.width);
+      for (let y = 0; y < h; y += 3) for (let x = 0; x < w; x += 3) { if (!pun(x, y)) continue;
+        const dd = (x - cx) ** 2 + (y - cy) ** 2; if (dd < r0 * r0 || dd >= bd) continue;
+        let n = 0; for (let a = -3; a <= 3; a += 3) for (let c = -3; c <= 3; c += 3) n += pun(x + a, y + c); if (n >= 7) { bd = dd; best = { x, y }; } }
+      if (best) { const p = { x: b.left + best.x * sx, y: b.top + best.y * sy }, kb = kont.getBoundingClientRect();
+        if (p.x > kb.left + 40 && p.x < kb.right - 40 && p.y > kb.top + 40 && p.y < kb.bottom - 40) return p; }
+    } catch (e) {} }
+    return null;
+  }
+  // kartan ruudulla näkyvä DOM-merkki (esim. numeroitu työmaa), lähimpänä kartan keskustaa
+  function merkki(kartta, sel) { const kont = $(kartta); if (!kont) return null; const kb = kont.getBoundingClientRect(), cx = (kb.left + kb.right) / 2, cy = (kb.top + kb.bottom) / 2;
+    return $$(sel, kont).filter(el => { const r = el.getBoundingClientRect(); return r.width && r.left > kb.left + 30 && r.right < kb.right - 30 && r.top > kb.top + 30 && r.bottom < kb.bottom - 30 && document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) !== null; })
+      .sort((a, b2) => { const p = keski(a), q = keski(b2); return Math.hypot(p.x - cx, p.y - cy) - Math.hypot(q.x - cx, q.y - cy); })[0] || null; }
+  // työalueen pisteet luvan muodosta: kauimmaiset kärjet, 20 % ja 80 % niiden välistä
+  function pitkaAkseli(geom) { const pts = [];
+    const ker = c => { if (typeof c[0] === "number") pts.push(c); else c.forEach(ker); }; ker(geom.coordinates || []);
+    let a = null, b = null, md = -1; const k = Math.cos(60.2 * Math.PI / 180);
+    for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) { const d = ((pts[i][0] - pts[j][0]) * k) ** 2 + (pts[i][1] - pts[j][1]) ** 2; if (d > md) { md = d; a = pts[i]; b = pts[j]; } }
+    if (!a) return null; const v = t => [a[1] + (b[1] - a[1]) * t, a[0] + (b[0] - a[0]) * t];
+    return [v(.2), v(.8)]; }
+
   const LUVUT = [
     { t: "TILANNE", nimi: "Tilanne nyt", s: 26, f: async () => {
       await naytto("#/");
       const palauta = rail('[data-tp="palauta"]'); if (palauta) palauta.click(); await odota(300);
       if (Y.kansi) Y.kansi = false; else await kortti("sin", `${logo}<h1>Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1><p>Esittely noin kolmessa minuutissa · oikea data tältä päivältä</p>`, 2600);
       const til = ws("tilanne");
-      await kerro("TILANNE", "Tutka on yksi kartta ja sen päällä paletteja. Tilanne nyt kertoo, mikä työ hidastaa eniten ja paljonko lisäaikaa syntyy vuorokaudessa.");
-      const kpi = til && til.querySelector("#kpis [data-bd]"); if (kpi) { await liiku(kpi); await odota(1800); }
-      const r0 = $$(".tp-rail").find(nakyy);
-      if (r0) { await kerro("TILANNE", "Vasemmasta työkalupalkista vaihdetaan näkymää, avataan paletteja ja kytketään karttatasoja."); await liiku(r0); await odota(1600); }
+      await kerro("TILANNE", "Tilanne nyt kertoo, mikä työ hidastaa eniten ja paljonko lisäaikaa syntyy vuorokaudessa.");
+      const kpi = til && til.querySelector("#kpis [data-bd]"); if (kpi) { await liiku(kpi); await odota(1600); }
+      const k2 = $$("#cards .card").filter(nakyy)[1] || $$("#cards .card").find(nakyy);
+      if (k2) { await kerro("TILANNE", "Klikkaa työtä listasta: kartta siirtyy kohteeseen ja tiedot aukeavat oikealle.");
+        await klikkaa(k2, { jalkeen: 2600 }); }
     } },
-    { t: "PALETIT", nimi: "Paletit", s: 22, f: async () => {
+    { t: "PALETIT", nimi: "Paletit", s: 26, f: async () => {
       await naytto("#/");
+      const tn = rail('[data-tp="tanaan"]');
+      try { if (TPS.home && TPS.home.pal.tyomaa && TPS.home.pal.tyomaa.auki) { TPS.home.pal.tyomaa.min = true; tpPiirraWs("home"); await odota(400); } } catch (e) {}
+      if (tn) { await kerro("PALETIT", "Työkalupalkista avataan lisää paletteja, esimerkiksi Tänään huomioitavaa: alkavat työt ja kasautumat.");
+        await klikkaa(tn, { jalkeen: 1800 }); const p = ws("tanaan"); if (p && nakyy(p)) { await liiku(p.querySelector(".tp-pb") || p); await odota(1400); } }
       const til = ws("tilanne"); if (!til || !nakyy(til)) return;
       await kerro("PALETIT", "Paletin voi raahata otsikosta, venyttää kulmasta ja pienentää viivasta. Palauta vie kaiken takaisin.");
       await raahaa(til, 200, 50); await venyta(til, 80, -110);
       const mn = til.querySelector(".tp-min"); if (mn) { await klikkaa(mn, { jalkeen: 900 }); const ph = ws("tilanne") && ws("tilanne").querySelector(".tp-ph"); if (ph) await klikkaa(ph, { jalkeen: 900 }); }
       const pal = rail('[data-tp="palauta"]'); if (pal) await klikkaa(pal, { jalkeen: 1200 });
     } },
-    { t: "LIVE", nimi: "Live", s: 28, f: async () => {
+    { t: "LIVE", nimi: "Live", s: 34, f: async () => {
       await naytto("#/");
       const m = typeof M !== "undefined" && M.home; if (!m || typeof LV === "undefined") return;
       const lv = rail('[data-ker="live"]'); if (lv && !LV.on) lv.click();
       const c = Y.l1 && Y.l1.geom && typeof centroid === "function" ? centroid(Y.l1.geom) : null;
-      if (c) m.flyTo(c, 16, { duration: 2 });
+      if (c) m.flyTo(c, 15.5, { duration: 2.6 });
       await kerro("LIVE", "Live: jokainen bussi (sininen) ja ratikka (vihreä) liikkuu kartalla. Keltainen reunus = auto on työmaalla juuri nyt, harmaa = seisoo.");
       await odotaEl(() => [...LV.veh.values()].some(v => keskelle(m, [v.lat, v.lon])), 6000);
-      await odota(1500);
+      await odota(1200);
       const ehd = [...LV.veh.entries()].filter(([, v]) => keskelle(m, [v.lat, v.lon]) && typeof vTila === "function" && vTila(v).k !== "seis");
       const val = ehd.find(([, v]) => typeof nearSite === "function" && nearSite(v.lat, v.lon)) || ehd[0];
       if (!val) return;
       const [id, v] = val, p = ruutu(m, [v.lat, v.lon]);
-      await kerro("LIVE", "Klikkaa autoa: linja, myöhästyminen ja työmaa, jonka kohdalla se on.");
+      await kerro("LIVE", "Klikkaa autoa: linja, myöhästyminen ja auton koko reitti työmaineen tulevat kartalle.");
       await liiku(p); korosta({ left: p.x - 16, top: p.y - 16, right: p.x + 16, bottom: p.y + 16, width: 32, height: 32 });
       kursori.classList.add("painuu"); const rr = document.createElement("div"); rr.className = "es-rengas"; rr.style.left = p.x + "px"; rr.style.top = p.y + "px";
       document.body.appendChild(rr); setTimeout(() => rr.remove(), 800); await odota(140); kursori.classList.remove("painuu");
-      if (typeof togglePin === "function") { togglePin(id); pinnattu = id; } poistaKorostus(); await odota(3600);
+      if (typeof togglePin === "function") { togglePin(id); pinnattu = id; } poistaKorostus(); await odota(3000);
+      const nro = merkki("#map", ".lnromk");
+      if (nro) { await kerro("LIVE", "Numero on reitin työmaa. Klikkaa sitä: työmaan tiedot aukeavat oikealle.");
+        await klikkaa(nro, { jalkeen: 2600 }); }
       siivoa();
     } },
-    { t: "TYÖMAA", nimi: "Työmaa", s: 22, f: async () => {
+    { t: "TYÖMAA", nimi: "Työmaa", s: 30, f: async () => {
       await naytto("#/");
       const l1 = Y.l1, m = typeof M !== "undefined" && M.home; if (!l1 || typeof select !== "function") return;
       const c = typeof centroid === "function" ? centroid(l1.geom) : null;
-      if (c && m) { m.setView(c, Math.max(m.getZoom(), 14)); await odota(300); const p = ruutu(m, c); await liiku(p); kursori.classList.add("painuu"); await odota(140); kursori.classList.remove("painuu"); }
-      select(l1.lupa_id, false); await odota(1200);
+      if (c && m) { m.flyTo(c, 15, { duration: 1.8 }); await odota(2000);
+        await kerro("TYÖMAA", "Työmaat ovat kartalla alueina. Klikkaa aluetta.");
+        const p = ruutu(m, c); await liiku(p); kursori.classList.add("painuu"); await odota(140); kursori.classList.remove("painuu"); }
+      select(l1.lupa_id, false); await odota(1500);
       const f = await odotaEl(() => $$("#detail .facts > div").find(nakyy), 4000);
       if (f) { const im = typeof impact === "function" ? impact(l1) : null;
-        await kerro("TYÖMAA", "Klikkaa työmaata: lisäaika jokaista ohi ajavaa bussia kohden. " + (im && im.tod ? "Mitattu = sama katu ilman töitä vs. työn aikana." : "Harmaa luku on arvio, joka mitataan työn päätyttyä."));
-        await liiku(f); await odota(1800); }
-      const siru = $$("#detail .lsiru").find(nakyy);
-      if (siru) { await kerro("TYÖMAA", "Linjan numerosta reitti ja sen kaikki työmaat kartalle."); await klikkaa(siru, { jalkeen: 2200 }); siivoa(); }
+        await kerro("TYÖMAA", "Lisäaika jokaista ohi ajavaa bussia kohden. " + (im && im.tod ? "Mitattu = sama katu ilman töitä vs. työn aikana." : "Harmaa luku on arvio, joka mitataan työn päätyttyä."));
+        await liiku(f); await odota(1600); }
+      const pv = punainenVali("#map");
+      if (pv) { await kerro("TYÖMAA", "Punainen viiva on hidas pysäkkiväli. Klikkaa sitä: linjat ja lisäviive juuri sillä välillä.");
+        await klikkaaKarttaa(pv, 3000); try { m.closePopup(); } catch (e) {} }
     } },
-    { t: "LINJA", nimi: "Linja", s: 28, f: async () => {
+    { t: "LINJA", nimi: "Linja", s: 34, f: async () => {
       await naytto("#/");
       const q = $("#omaQ");
       if (q && nakyy(q)) {
         await kerro("LINJA", "Haku löytää linjat, kadut ja luvat.");
         await klikkaa(q, { jalkeen: 300 }); await kirjoita(q, Y.linja); await odota(900);
         const eka = await odotaEl(() => $$("#hakuDD .hk").find(nakyy), 3000);
-        if (eka) await klikkaa(eka, { alas: true, jalkeen: 1800 }); else { q.value = ""; await naytto("#/linjat"); }
+        if (eka) await klikkaa(eka, { alas: true, jalkeen: 2000 }); else { q.value = ""; await naytto("#/linjat"); }
       }
       if (!location.hash.startsWith("#/linjat")) return;
       const k = await odotaEl(() => $$("#lCock .lc-k").find(nakyy), 5000);
-      if (k) { await kerro("LINJA", "Linjan ohjaamo: tavallinen vuoro, huonoimmat vuorot ja mahtuuko lisäaika aikataulun viivevaraan. Oikealla reitin työmaat.");
-        await liiku(k); await odota(1600); }
+      if (k) { await kerro("LINJA", "Linjan ohjaamo: tavallinen vuoro, huonoimmat vuorot ja mahtuuko lisäaika aikataulun viivevaraan.");
+        await liiku(k); await odota(1400); }
+      const nro = merkki("#lMap", ".lnromk");
+      if (nro) { await kerro("LINJA", "Kartalla reitin työmaat numeroituina. Klikkaa numeroa: työmaan vaikutus juuri tällä linjalla.");
+        await klikkaa(nro, { jalkeen: 2400 }); }
+      const pv = punainenVali("#lMap");
+      if (pv) { await kerro("LINJA", "Klikkaa hidasta väliä: lisäaika kellonajoittain ja suunnittain.");
+        await klikkaaKarttaa(pv, 2600); }
       const sug = $$("#lTabs .ltab-h button").find(b => b.dataset.t === "sug" && nakyy(b));
       if (sug) { await kerro("LINJA", "Tekoälyagentti ehdottaa aikataulumuutosta. Ihminen hyväksyy tai hylkää."); await klikkaa(sug, { jalkeen: 2200 }); }
     } },
-    { t: "ENNAKOI", nimi: "Ennakkoarvio", s: 25, f: async () => {
+    { t: "ENNAKOI", nimi: "Ennakkoarvio", s: 32, f: async () => {
       if (!$$(".tp-rail").find(nakyy)) await naytto("#/");
       const arv = rail('[data-nak="#/ennakko"]'); if (!arv) return;
-      await kerro("ENNAKOI", "Ennakkoarvio: valitse alkava lupa tai piirrä työalue, niin tutka arvioi vaikutuksen etukäteen.");
+      await kerro("ENNAKOI", "Ennakkoarvio kertoo etukäteen, mitä suunniteltu työ tekisi joukkoliikenteelle.");
       await klikkaa(arv, { jalkeen: 1500 });
       if (typeof tpAvaaWs === "function") { tpAvaaWs("ennakko", "tyo"); tpAvaaWs("ennakko", "arvio"); }
       const sel = await odotaEl(() => { const x = $("#enLupa"); return x && x.options.length > 1 ? x : null; }, 6000);
-      if (!(sel && nakyy(sel) && typeof valitseLupaEn === "function")) return;
-      await liiku(sel); sel.value = sel.options[1].value; valitseLupaEn(sel.value); await odota(2200);
+      const lupa = sel && S.byId ? S.byId[sel.options[1].value] : null;
+      const akseli = lupa && lupa.geom ? pitkaAkseli(lupa.geom) : null;
+      let piirretty = false;
+      if (akseli && typeof M !== "undefined" && M.en) {
+        const mid = [(akseli[0][0] + akseli[1][0]) / 2, (akseli[0][1] + akseli[1][1]) / 2];
+        M.en.flyTo(mid, 17, { duration: 2 }); await odota(2300);
+        await kerro("ENNAKOI", "Piirrä työalue: klikkaa kartalle kaksi pistettä kadun suuntaisesti.");
+        await klikkaaKarttaa(ruutu(M.en, akseli[0]), 700); await klikkaaKarttaa(ruutu(M.en, akseli[1]), 2200);
+        piirretty = !!(await odotaEl(() => $$("#enOut .rec").find(nakyy), 5000));
+      }
+      if (!piirretty && sel && typeof valitseLupaEn === "function") {
+        await kerro("ENNAKOI", "Tai valitse alkava lupa listasta."); await liiku(sel); sel.value = sel.options[1].value; valitseLupaEn(sel.value); await odota(2200);
+      }
       const rec = await odotaEl(() => $$("#enOut .rec").find(nakyy), 6000);
-      if (rec) { await kerro("ENNAKOI", "Tulos: lisäaika, kärsivät linjat ja ajoitus, joka haittaa joukkoliikennettä vähiten."); await liiku(rec); await odota(2000); }
+      if (rec) { await kerro("ENNAKOI", "Tulos: lisäaika, kärsivät linjat ja ajoitus, joka haittaa joukkoliikennettä vähiten."); await liiku(rec); await odota(1800); }
+      const aj = rail('[data-tp="ajo"]');
+      if (aj && rec) { await kerro("ENNAKOI", "Ajoitus vertaa päivä-, ilta-, yö- ja kaksivuorotyötä."); await klikkaa(aj, { jalkeen: 1600 });
+        const t = $$("#haTaul table").find(nakyy); if (t) { await liiku(t); await odota(1800); } }
     } },
-    { t: "VALVOMO", nimi: "Valvomo", s: 20, f: async () => {
+    { t: "VALVOMO", nimi: "Valvomo", s: 22, f: async () => {
       const vm = tekstinMukaan(".top nav a", /^Valvomo/);
-      if (vm) { piilotaTeksti(); await klikkaa(vm, { jalkeen: 1200 });
-        await kerro("VALVOMO", "Valvomo hälyttää, kun työmaa alkaa hidastaa liikennettä. Tietoa-sivulla menetelmä ja miten tätä kokeiltaisiin HSL:ssä.");
-        const r = $$("#hList .hrow").find(nakyy); if (r) await liiku(r); await odota(1800); }
+      if (vm) { piilotaTeksti(); await klikkaa(vm, { jalkeen: 1400 });
+        await kerro("VALVOMO", "Valvomo hälyttää, kun työmaa alkaa hidastaa liikennettä. Klikkaa hälytystä: syy, luvut ja kuittaus.");
+        const r = $$("#hList .hrow").find(nakyy); if (r) { await klikkaa(r.querySelector(".hr-hd") || r, { jalkeen: 2200 }); const r2 = $$("#hList .hrow.auki").find(nakyy); if (r2) { await liiku(r2); await odota(1600); } } }
       piilotaTeksti(); await odota(200);
       await kortti("val", `${logo}<h1>Mittaa. Ennakoi. Ehdottaa.<br><em>Ihminen päättää.</em></h1><p>Avoin data · ei henkilötietoja · ${NIMI === "Työmaatutka" ? "konsepti, ei HSL:n eikä kaupungin virallinen palvelu" : "itsenäinen palvelu"}</p>`, 3000);
     } },
