@@ -743,6 +743,11 @@ html:root #v-home .tp-pal #kpis.strip,html:root #v-home .tp-pal .strip.s3{grid-t
 .tp-ic+.tp-ic{border-top:1px solid var(--l2)}
 .tp-ic:hover{color:var(--i)}
 .tp-ic.on{color:#1F5FBF;box-shadow:inset 3px 0 0 #1F5FBF}
+.tp-zoom{display:flex;margin:2px 6px 0;border:1px solid var(--l);border-radius:6px;overflow:hidden}
+.tp-zoom button{flex:1;height:30px;border:0;background:none;color:var(--i2);font:500 19px/1 "Inter",sans-serif;cursor:pointer;padding:0}
+.tp-zoom button+button{border-left:1px solid var(--l)}.tp-zoom button:hover{background:#EEF4FC;color:var(--i)}
+@media(min-width:901px){.tp-ws .leaflet-control-zoom{display:none}}
+@media(max-width:900px){.tp-zoom,.tp-zoom+.tp-sep,.tp-rail .tp-grp:has(+.tp-zoom){display:none}}
 .tp-ic.tp-pal0{color:var(--m);margin-top:6px;border-top:1px solid var(--l)!important}
 .tp-pal{position:absolute;z-index:900;background:rgba(255,255,255,.98);border-radius:10px;box-shadow:0 8px 28px rgba(15,27,45,.22);display:flex;flex-direction:column;max-height:calc(100% - 32px);overflow:hidden}
 .tp-pal[hidden]{display:none}
@@ -2997,6 +3002,7 @@ function tpRail(ws, paletit, kerrokset){
   return `<div class="tp-rail" role="toolbar" aria-label="Työkalut"><div class="tp-grp">Näkymä</div>${nak.map(([k,t,h,v])=>tpIk(k,t,`data-nak="${h}"`, (ws==="home"&&v==="home")||(ws===v)?"nak on":"nak")).join("")}
     <div class="tp-grp">Paletit</div>${paletit.map(([k,t])=>tpIk(k,t,`data-tp="${k}"`)).join("")}
     ${kerrokset.length?`<div class="tp-grp">Kerros</div>${kerrokset.map(([k,t])=>tpIk(k,t,`data-ker="${k}"`,"ker")).join("")}`:""}
+    <div class="tp-grp">Kartta</div><div class="tp-zoom"><button type="button" data-zoom="1" title="Lähennä karttaa" aria-label="Lähennä karttaa">+</button><button type="button" data-zoom="-1" title="Loitonna karttaa" aria-label="Loitonna karttaa">−</button></div>
     <div class="tp-grp tp-sep"></div>${tpIk("palauta","Palauta: palettien oletuspaikat",'data-tp="palauta"',"tp-pal0")}</div>`;
 }
 function tpKarttaNyt(){ const m = S.nakyma==="ennakko" ? M.en : S.nakyma==="home" ? M.home : S.nakyma==="linjat" ? M.linja : null; return m ? {c:m.getCenter(), z:m.getZoom()} : null; }
@@ -3009,6 +3015,7 @@ function tpInitWs(ws, paletit, kerrokset){
   sec.insertAdjacentHTML("beforeend", tpRail(ws, paletit, kerrokset));
   sec.querySelectorAll(".tp-rail [data-nak]").forEach(b=>b.onclick = ()=>{ S.karttaNakyma = tpKarttaNyt(); location.hash = b.dataset.nak; });
   sec.querySelectorAll(".tp-rail [data-ker]").forEach(b=>b.onclick = ()=>tpKerros(b.dataset.ker, b));
+  sec.querySelectorAll(".tp-rail [data-zoom]").forEach(b=>b.onclick = ()=>{ const m = ws==="home" ? M.home : ws==="linjat" ? M.linja : M.en; if(m) (+b.dataset.zoom > 0 ? m.zoomIn(1) : m.zoomOut(1)); });
   sec.querySelectorAll(".tp-rail [data-tp]").forEach(b=>b.onclick = ()=>{ const k = b.dataset.tp, T = TPS[ws];
     if(k==="pdf"){ if(EN.kust) haAvaa(); else tpAvaaWs(ws,"tyo"); return; }
     if(k==="palauta"){ TPS[ws] = {pal:JSON.parse(JSON.stringify(TP_WS[ws].def)), jarj:Object.keys(TP_WS[ws].def).filter(x=>TP_WS[ws].def[x].auki)}; tpTallenna(ws); tpPiirraWs(ws); return; }
