@@ -5,8 +5,9 @@
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const TAHTI = 1.15;   // rauhallinen tahti: pitkät tauot pidemmiksi, jotta katsoja ehtii lukea ja katsoa
-  const odota = ms => new Promise(r => setTimeout(r, ms >= 900 ? ms * TAHTI : ms));
+  const TAHTI = 0.9;   // rauhallinen tahti: pitkät tauot pidemmiksi, jotta katsoja ehtii lukea ja katsoa
+  let ohita = false;
+  const odota = ms => ohita ? Promise.resolve() : new Promise(r => setTimeout(r, ms >= 900 ? ms * TAHTI : ms));
   let seis = false;
   const tarkista = () => { if (seis) throw new Error("keskeytetty"); };
   const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -134,13 +135,15 @@
   const tekstinMukaan = (sel, re) => $$(sel).find(e => re.test(e.textContent.trim()) && e.getBoundingClientRect().height > 0);
 
   /* ---------- kuvatekstit ja kortit ---------- */
-  const VAIHEET = ["NÄKYMÄ", "TILANNE NYT", "PALETIT", "LIVE", "TYÖMAA", "TÄNÄÄN", "LINJA", "ENNAKOI", "VALVOMO"];
+  const VAIHEET = ["TILANNE", "PALETIT", "LIVE", "TYÖMAA", "LINJA", "ENNAKOI", "VALVOMO"];
+  let edTag = "";
   async function kerro(tag, t, ylos = false) {
+    if (tag !== edTag) { ohita = false; edTag = tag; }
     if (teksti.classList.contains("on")) { teksti.classList.remove("on"); await odota(450); }
-    const n = VAIHEET.findIndex(v => tag === v || (v === "NÄKYMÄ" && tag === "TYÖKALUT") || (v === "TÄNÄÄN" && tag === "TEKOÄLY") || (v === "LINJA" && /HAKU|AGENTTI|IHMINEN/.test(tag)) || (v === "VALVOMO" && tag === "TIETOA"));
+    const n = VAIHEET.indexOf(tag);
     teksti.innerHTML = `<i>${tag}${n >= 0 ? `<small>${n + 1} / ${VAIHEET.length}</small>` : ""}</i><span>${t}</span>`;
     teksti.classList.add("on"); hamaru.classList.add("on"); sijoitaTeksti();
-    await odota(1100 + t.length * 34);   // lukuaika ennen kuin jotain tapahtuu
+    await odota(700 + t.length * 30);   // lukuaika ennen kuin jotain tapahtuu
   }
   const piilotaTeksti = () => { teksti.classList.remove("on"); hamaru.classList.remove("on"); poistaKorostus(); };
   async function kortti(luokka, html, kesto) {
@@ -166,7 +169,7 @@
     kursori.classList.add("painuu"); el.classList.add("raahaa");
     const x0 = b.left - el.parentElement.getBoundingClientRect().left, y0 = b.top - el.parentElement.getBoundingClientRect().top, kx0 = kx, ky0 = ky;
     el.style.right = el.style.bottom = "";
-    await new Promise(res => { const t0 = performance.now(), kesto = 1700;
+    await new Promise(res => { const t0 = performance.now(), kesto = 1300;
       const askel = t => { const q = Math.min(1, (t - t0) / kesto), e = ease(q);
         el.style.left = (x0 + dx * e) + "px"; el.style.top = (y0 + dy * e) + "px"; aseta(kx0 + dx * e, ky0 + dy * e);
         q < 1 ? requestAnimationFrame(askel) : res(); }; requestAnimationFrame(askel); });
@@ -177,7 +180,7 @@
     const b = el.getBoundingClientRect();
     await liiku({ x: b.right - 8, y: b.bottom - 8 }); await odota(300); kursori.classList.add("painuu");
     const w0 = el.offsetWidth, h0 = el.offsetHeight, kx0 = kx, ky0 = ky;
-    await new Promise(res => { const t0 = performance.now(), kesto = 1600;
+    await new Promise(res => { const t0 = performance.now(), kesto = 1200;
       const askel = t => { const q = Math.min(1, (t - t0) / kesto), e = ease(q);
         el.style.width = (w0 + dw * e) + "px"; el.style.height = (h0 + dh * e) + "px"; aseta(kx0 + dw * e, ky0 + dh * e);
         q < 1 ? requestAnimationFrame(askel) : res(); }; requestAnimationFrame(askel); });
@@ -197,160 +200,103 @@
     tallennaAsettelu();
     await odotaEl(() => typeof S !== "undefined" && S.loaded, 30000);
     if (location.hash !== "#/") { location.hash = "#/"; await odota(900); }
-    const palauta = rail('[data-tp="palauta"]'); if (palauta) palauta.click();   // oletusasettelu
-    await odota(500);
+    const palauta = rail('[data-tp="palauta"]'); if (palauta) palauta.click();
+    await odota(400);
 
-    await kortti("sin", `${logo}<h1>Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1><p>Esittely noin viidessä minuutissa · oikea data tältä päivältä</p>`, 3200);
+    await kortti("sin", `${logo}<h1>Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1><p>Esittely noin kolmessa minuutissa · oikea data tältä päivältä</p>`, 2600);
 
-    // 1. NÄKYMÄ
-    await kerro("NÄKYMÄ", "Tutka on yksi kartta, jonka päällä on siirrettäviä paletteja. Käydään ensin läpi, mistä löytyy mitäkin.");
-    await liiku($(".top nav") || $(".top")); await odota(2200);
-    await kerro("NÄKYMÄ", "Yläpalkissa ovat näkymät: tilannekuva, linjat, ennakkoarvio, valvomo ja tietoa. Hakukenttä löytää linjat, kadut ja luvat.");
-    const q0 = $("#omaQ"); if (q0) { await liiku(q0); await odota(2200); }
-    const r0 = $$(".tp-rail").find(nakyy);
-    if (r0) { await kerro("TYÖKALUT", "Vasemman reunan työkalupalkista vaihdetaan näkymää, avataan paletteja, valitaan karttatasot ja zoomataan.");
-      await liiku(r0); await odota(3200); }
-
-    // 2. TILANNE NYT
+    // 1. TILANNE
     const til = ws("tilanne");
-    if (til) {
-      await kerro("TILANNE NYT", "Tilanne nyt kertoo yhdellä silmäyksellä, mikä työmaa hidastaa eniten ja paljonko lisäaikaa syntyy vuorokaudessa.");
-      const ots = til.querySelector(".tp-pb") && til.querySelector(".tp-pb").firstElementChild; if (ots) { await liiku(ots); await odota(2600); }
-      const kpi = til.querySelector("#kpis [data-bd]");
-      if (kpi) { await liiku(kpi); await odota(2000);
-        const mk = kpi.querySelector(".tmore");
-        if (mk) { await kerro("TILANNE NYT", "Mistä koostuu: lisäaika eriteltynä työmaittain, linjoittain ja työtyypeittäin.");
-          await klikkaa(mk, { jalkeen: 2600 }); const er = $$("#bdTabs").find(nakyy); if (er) { await liiku(er); await odota(2400); }
-          const mk2 = til.querySelector("#kpis [data-bd] .tmore"); if (mk2) await klikkaa(mk2, { jalkeen: 900 }); } }
-      const lista = $$("#cards .card").find(nakyy);
-      if (lista) { await kerro("TILANNE NYT", "Alla lista töistä, jotka vaikuttavat eniten. Punainen luku on lisäaika vuorokaudessa, pienempi luku per ohi ajava bussi.");
-        await liiku(lista); await odota(3000); }
+    await kerro("TILANNE", "Tutka on yksi kartta ja sen päällä paletteja. Tilanne nyt kertoo, mikä työ hidastaa eniten ja paljonko lisäaikaa syntyy vuorokaudessa.");
+    const kpi = til && til.querySelector("#kpis [data-bd]"); if (kpi) { await liiku(kpi); await odota(1800); }
+    const r0 = $$(".tp-rail").find(nakyy);
+    if (r0) { await kerro("TILANNE", "Vasemmasta työkalupalkista vaihdetaan näkymää, avataan paletteja ja kytketään karttatasoja."); await liiku(r0); await odota(1600); }
+
+    // 2. PALETIT
+    if (til && nakyy(til)) {
+      await kerro("PALETIT", "Paletin voi raahata otsikosta, venyttää kulmasta ja pienentää viivasta. Palauta vie kaiken takaisin.");
+      await raahaa(til, 200, 50); await venyta(til, 80, -110);
+      const mn = til.querySelector(".tp-min"); if (mn) { await klikkaa(mn, { jalkeen: 900 }); const ph = ws("tilanne") && ws("tilanne").querySelector(".tp-ph"); if (ph) await klikkaa(ph, { jalkeen: 900 }); }
+      const pal = rail('[data-tp="palauta"]'); if (pal) await klikkaa(pal, { jalkeen: 1200 });
     }
 
-    // 3. PALETIT
-    const pTyo = ws("tyomaa"), pTil = ws("tilanne");
-    if (pTil && nakyy(pTil)) {
-      await kerro("PALETIT", "Paletteja voi siirtää: tartu otsikkoriviin ja raahaa.");
-      await raahaa(pTil, 220, 60); await odota(1200);
-      await kerro("PALETIT", "Kokoa muutetaan oikeasta alakulmasta.");
-      await venyta(pTil, 90, -120); await odota(1200);
-      await kerro("PALETIT", "Viiva pienentää paletin otsikoksi. Otsikkoa klikkaamalla se avautuu taas.");
-      const mn = pTil.querySelector(".tp-min"); if (mn) { await klikkaa(mn, { jalkeen: 1800 });
-        const ph = ws("tilanne") && ws("tilanne").querySelector(".tp-ph"); if (ph) { await liiku(ph); await odota(1400); await klikkaa(ph, { jalkeen: 1500 }); } }
-      await kerro("PALETIT", "Ruksi sulkee paletin, ja työkalupalkista sen saa takaisin. Palauta vie kaiken oletuspaikoille.");
-      const pal = rail('[data-tp="palauta"]'); if (pal) await klikkaa(pal, { jalkeen: 1800 });
-    }
-
-    // 4. LIVE
+    // 3. LIVE
     const m = typeof M !== "undefined" && M.home;
     const k1 = $$("#cards .card").find(nakyy), l1 = k1 && S.byId && S.byId[k1.dataset.id];
     if (m && typeof LV !== "undefined") {
-      await kerro("LIVE", "Live-kerros näyttää jokaisen bussin ja ratikan sijainnin noin sekunnin välein.");
-      const lv = rail('[data-ker="live"]'); if (lv && !LV.on) await klikkaa(lv, { jalkeen: 1200 }); else if (lv) { await liiku(lv); await odota(1200); }
+      const lv = rail('[data-ker="live"]'); if (lv && !LV.on) lv.click();
       const c = l1 && l1.geom && typeof centroid === "function" ? centroid(l1.geom) : null;
-      if (c) { m.flyTo(c, 16, { duration: 2.2 }); await odota(4200); }
-      await odotaEl(() => [...LV.veh.values()].some(v => keskelle(m, [v.lat, v.lon])), 9000);
-      await kerro("LIVE", "Sininen on bussi, vihreä ratikka. Keltainen reunus: auto on työmaan kohdalla juuri nyt. Harmaa auto seisoo, eikä sitä lasketa myöhästymiseksi.");
-      await odota(2500);
+      if (c) { m.flyTo(c, 16, { duration: 2 }); }
+      await kerro("LIVE", "Live: jokainen bussi (sininen) ja ratikka (vihreä) liikkuu kartalla. Keltainen reunus = auto on työmaalla juuri nyt, harmaa = seisoo.");
+      await odotaEl(() => [...LV.veh.values()].some(v => keskelle(m, [v.lat, v.lon])), 6000);
+      await odota(1500);
       const ehd = [...LV.veh.entries()].filter(([, v]) => keskelle(m, [v.lat, v.lon]) && typeof vTila === "function" && vTila(v).k !== "seis");
       const val = ehd.find(([, v]) => typeof nearSite === "function" && nearSite(v.lat, v.lon)) || ehd[0];
       if (val) {
         const [id, v] = val, p = ruutu(m, [v.lat, v.lon]);
-        await kerro("LIVE", "Klikkaa autoa: näet linjan, myöhästymisen ja työmaan, jonka kohdalla se on. Linjan reitti tulee kartalle.");
-        await liiku(p); korosta({ left: p.x - 16, top: p.y - 16, right: p.x + 16, bottom: p.y + 16, width: 32, height: 32 }); await odota(500);
+        await kerro("LIVE", "Klikkaa autoa: linja, myöhästyminen ja työmaa, jonka kohdalla se on.");
+        await liiku(p); korosta({ left: p.x - 16, top: p.y - 16, right: p.x + 16, bottom: p.y + 16, width: 32, height: 32 });
         kursori.classList.add("painuu"); const rr = document.createElement("div"); rr.className = "es-rengas"; rr.style.left = p.x + "px"; rr.style.top = p.y + "px";
         document.body.appendChild(rr); setTimeout(() => rr.remove(), 800); await odota(140); kursori.classList.remove("painuu");
-        if (typeof togglePin === "function") togglePin(id); poistaKorostus(); await odota(5200);
+        if (typeof togglePin === "function") togglePin(id); poistaKorostus(); await odota(3600);
         if (typeof togglePin === "function" && LV.pinned.has(id)) togglePin(id);
         if (typeof hLinjaPois === "function") hLinjaPois(true);
       }
     }
 
-    // 5. TYÖMAA
+    // 4. TYÖMAA
     if (l1 && typeof select === "function") {
-      await kerro("TYÖMAA", "Työmaat näkyvät kartalla alueina. Väri kertoo vaikutuksen: punainen hidastaa, harmaa ei, oranssi odottaa mittausta.");
       const c = typeof centroid === "function" ? centroid(l1.geom) : null;
-      if (c && m) { const p = ruutu(m, c); await liiku(p); await odota(700); kursori.classList.add("painuu"); await odota(140); kursori.classList.remove("painuu"); }
-      select(l1.lupa_id, false); await odota(1800);
+      if (c && m) { const p = ruutu(m, c); await liiku(p); kursori.classList.add("painuu"); await odota(140); kursori.classList.remove("painuu"); }
+      select(l1.lupa_id, false); await odota(1200);
       const f = await odotaEl(() => $$("#detail .facts > div").find(nakyy), 4000);
       if (f) { const im = typeof impact === "function" ? impact(l1) : null;
-        await kerro("TYÖMAA", im && im.tod ? "Lisäaika jokaista ohi ajavaa bussia tai ratikkaa kohden, mitattuna: sama katu ilman töitä vs. työn aikana."
-          : "Lisäaika jokaista ohi ajavaa bussia tai ratikkaa kohden. Harmaa luku on arvio, joka mitataan, kun työ päättyy.");
-        await liiku(f); await odota(3000); }
-      const alue = $$("#detail .alue").find(nakyy);
-      if (alue) { await kerro("TYÖMAA", "Jos samalla kohdalla on useita töitä, ne mitataan yhdessä. Tutka kertoo, milloin osuudet selviävät."); await liiku(alue); await odota(3000); }
-      const taulu = $$("#detail table.t").find(nakyy);
-      if (taulu) { await kerro("TYÖMAA", "Linjat työmaan kohdalla: ohitukset ja lisäaika suunnittain."); await liiku(taulu); await odota(3000); }
+        await kerro("TYÖMAA", "Klikkaa työmaata: lisäaika jokaista ohi ajavaa bussia kohden. " + (im && im.tod ? "Mitattu = sama katu ilman töitä vs. työn aikana." : "Harmaa luku on arvio, joka mitataan työn päätyttyä."));
+        await liiku(f); await odota(1800); }
       const siru = $$("#detail .lsiru").find(nakyy);
-      if (siru) { await kerro("TYÖMAA", "Linjan numerosta sen reitti ja kaikki reitin työmaat tulevat kartalle."); await klikkaa(siru, { jalkeen: 3200 });
-        if (typeof hLinjaPois === "function") hLinjaPois(true); await odota(600); }
+      if (siru) { await kerro("TYÖMAA", "Linjan numerosta reitti ja sen kaikki työmaat kartalle."); await klikkaa(siru, { jalkeen: 2200 });
+        if (typeof hLinjaPois === "function") hLinjaPois(true); }
     }
 
-    // 6. TÄNÄÄN JA TEKOÄLY
-    const tn = rail('[data-tp="tanaan"]');
-    // tilaa uudelle paletille: työmaan tiedot pienennetään otsikoksi
-    try { if (TPS.home && TPS.home.pal.tyomaa && TPS.home.pal.tyomaa.auki) { TPS.home.pal.tyomaa.min = true; tpPiirraWs("home"); await odota(500); } } catch (e) {}
-    if (tn) { await kerro("TÄNÄÄN", "Tänään huomioitavaa: alkavat työt, kasautumat ja työmaat, joista HSL:n tiedotteissa ei ole mainintaa.");
-      await klikkaa(tn, { jalkeen: 1600 }); const p = ws("tanaan"); if (p && nakyy(p)) { await liiku(p.querySelector(".tp-pb") || p); await odota(3400); } }
-    const ai = rail('[data-tp="ai"]');
-    if (ai) { await kerro("TEKOÄLY", "Tekoälykatsaus kirjoittaa tilanteesta tiivistelmän. Luvut lasketaan SQL:llä, kielimalli vain kirjoittaa, ja siltä voi kysyä omin sanoin.");
-      await klikkaa(ai, { jalkeen: 1600 }); const p = ws("ai"); if (p && nakyy(p)) { await liiku(p.querySelector(".tp-pb") || p); await odota(3600); } }
-
-    // 7. HAKU JA LINJA
+    // 5. LINJA
     const q = $("#omaQ");
     const linja = (l1 && typeof lines === "function" && lines(l1.linjat).find(n => !/N$/.test(n))) || "55";
     if (q && nakyy(q)) {
-      await kerro("HAKU", "Haku: kirjoita linjan numero, katu tai lupatunnus.");
-      await klikkaa(q, { jalkeen: 500 }); await kirjoita(q, linja); await odota(1600);
+      await kerro("LINJA", "Haku löytää linjat, kadut ja luvat.");
+      await klikkaa(q, { jalkeen: 300 }); await kirjoita(q, linja); await odota(900);
       const eka = await odotaEl(() => $$("#hakuDD .hk").find(nakyy), 3000);
-      if (eka) await klikkaa(eka, { alas: true, jalkeen: 2600 }); else { q.value = ""; location.hash = "#/linjat"; await odota(1800); }
+      if (eka) await klikkaa(eka, { alas: true, jalkeen: 1800 }); else { q.value = ""; location.hash = "#/linjat"; await odota(1500); }
     }
     if (location.hash.startsWith("#/linjat")) {
       const k = await odotaEl(() => $$("#lCock .lc-k").find(nakyy), 5000);
-      if (k) { await kerro("LINJA", "Linjan ohjaamo: tavallinen vuoro, huonoimmat 10 % vuoroista ja aikataulun viivevara, eli mahtuuko lisäaika aikatauluun.");
-        await liiku(k); await odota(2400);
-        const vv = $$("#lCock .lc-k").filter(nakyy)[2]; if (vv) { await liiku(vv); await odota(2400); } }
-      const nauha = $$("#lNauha").find(nakyy);
-      if (nauha) { await kerro("LINJA", "Reittinauha näyttää linjan pysäkit järjestyksessä ja missä kohtaa reittiä työmaat ovat."); await liiku(nauha); await odota(3000); }
-      const tabs = $$("#lTabs .ltab-h button").filter(nakyy);
-      if (tabs.length) { await kerro("LINJA", "Oikealla reitin työmaat, kellonajat ja ajantasausvälit."); await liiku(tabs[0]); await odota(1800);
-        const kello = tabs.find(b => /Kellonaj/.test(b.textContent)); if (kello) { await klikkaa(kello, { jalkeen: 2600 }); }
-        const sug = $$("#lTabs .ltab-h button").find(b => b.dataset.t === "sug" && nakyy(b));
-        if (sug) { await kerro("TEKOÄLYAGENTTI", "Agentti ehdottaa aikataulumuutosta mitattujen lukujen perusteella."); await klikkaa(sug, { jalkeen: 2200 });
-          const hyv = tekstinMukaan("#lTabs button", /^Hyväksy$/);
-          if (hyv) { await kerro("IHMINEN PÄÄTTÄÄ", "Agentti ei muuta aikatauluja itse. Suunnittelija hyväksyy tai hylkää, ja syy kirjataan."); await liiku(hyv); await odota(3000); } }
-        else { const eka = $$("#lTabs .ltab-h button").find(b => nakyy(b)); if (eka) eka.click(); }
-      }
+      if (k) { await kerro("LINJA", "Linjan ohjaamo: tavallinen vuoro, huonoimmat vuorot ja mahtuuko lisäaika aikataulun viivevaraan. Oikealla reitin työmaat.");
+        await liiku(k); await odota(1600); }
+      const sug = $$("#lTabs .ltab-h button").find(b => b.dataset.t === "sug" && nakyy(b));
+      if (sug) { await kerro("LINJA", "Tekoälyagentti ehdottaa aikataulumuutosta. Ihminen hyväksyy tai hylkää."); await klikkaa(sug, { jalkeen: 2200 }); }
     }
 
-    // 8. ENNAKOI
+    // 6. ENNAKOI
     const arv = rail('[data-nak="#/ennakko"]');
     if (arv) {
-      await kerro("ENNAKOI", "Ennakkoarvio: valitse alkava lupa tai piirrä työalue kartalle, niin tutka arvioi vaikutuksen etukäteen.");
-      await klikkaa(arv, { jalkeen: 2000 });
+      await kerro("ENNAKOI", "Ennakkoarvio: valitse alkava lupa tai piirrä työalue, niin tutka arvioi vaikutuksen etukäteen.");
+      await klikkaa(arv, { jalkeen: 1500 });
       if (typeof tpAvaaWs === "function") { tpAvaaWs("ennakko", "tyo"); tpAvaaWs("ennakko", "arvio"); }
       const sel = await odotaEl(() => { const x = $("#enLupa"); return x && x.options.length > 1 ? x : null; }, 6000);
       if (sel && nakyy(sel) && typeof valitseLupaEn === "function") {
-        await liiku(sel); await odota(700); sel.value = sel.options[1].value; valitseLupaEn(sel.value); await odota(3000);
-        const tulos = await odotaEl(() => $$("#enOut .enkp").find(nakyy), 6000);
-        if (tulos) { await kerro("ENNAKOI", "Tulos: paljonko työ lisää ajoaikaa vuorokaudessa ja koko työn aikana, ja mitkä linjat kärsivät."); await liiku(tulos); await odota(3200);
-          const rec = $$("#enOut .rec").find(nakyy); if (rec) { await kerro("ENNAKOI", "Suositus: mikä ajoitus haittaa joukkoliikennettä vähiten, ja muut työt samoilla linjoilla."); await liiku(rec); await odota(3200); } }
-        const aj = rail('[data-tp="ajo"]');
-        if (aj) { await kerro("ENNAKOI", "Ajoitus-paletti vertaa päivä-, ilta-, yö- ja kaksivuorotyötä."); await klikkaa(aj, { jalkeen: 1800 });
-          const t = $$("#haTaul table").find(nakyy); if (t) { await liiku(t); await odota(3200); } }
+        await liiku(sel); sel.value = sel.options[1].value; valitseLupaEn(sel.value); await odota(2200);
+        const rec = await odotaEl(() => $$("#enOut .rec").find(nakyy), 6000);
+        if (rec) { await kerro("ENNAKOI", "Tulos: lisäaika, kärsivät linjat ja ajoitus, joka haittaa joukkoliikennettä vähiten."); await liiku(rec); await odota(2000); }
       }
     }
 
-    // 9. VALVOMO JA TIETOA
+    // 7. VALVOMO
     const vm = tekstinMukaan(".top nav a", /^Valvomo/);
-    if (vm) { piilotaTeksti(); await klikkaa(vm, { jalkeen: 1600 });
-      await kerro("VALVOMO", "Valvomo: hälytykset, kun työmaa alkaa hidastaa liikennettä. Ne kuitataan, ja historia säilyy."); const r = $$("#hList .hrow").find(nakyy) || $$("#v-halytykset h2").find(nakyy); if (r) { await liiku(r); await odota(3200); } }
-    const tt = tekstinMukaan(".top nav a", /^Tietoa/);
-    if (tt) { piilotaTeksti(); await klikkaa(tt, { jalkeen: 1600 });
-      await kerro("TIETOA", "Tietoa-sivulla: miten tätä kokeiltaisiin HSL:ssä, mitä on jo löydetty ja miten tekoälyä valvotaan."); await vieri(500, 2600); await odota(2400); await vieri(0, 1200); }
-    piilotaTeksti(); await odota(300);
+    if (vm) { piilotaTeksti(); await klikkaa(vm, { jalkeen: 1200 });
+      await kerro("VALVOMO", "Valvomo hälyttää, kun työmaa alkaa hidastaa liikennettä. Tietoa-sivulla menetelmä ja miten tätä kokeiltaisiin HSL:ssä.");
+      const r = $$("#hList .hrow").find(nakyy); if (r) await liiku(r); await odota(1800); }
+    piilotaTeksti(); await odota(200);
 
-    await kortti("val", `${logo}<h1>Mittaa. Ennakoi. Ehdottaa.<br><em>Ihminen päättää.</em></h1><p>Avoin data · ei henkilötietoja · ${NIMI === "Työmaatutka" ? "konsepti, ei HSL:n eikä kaupungin virallinen palvelu" : "itsenäinen palvelu"}</p>`, 3600);
+    await kortti("val", `${logo}<h1>Mittaa. Ennakoi. Ehdottaa.<br><em>Ihminen päättää.</em></h1><p>Avoin data · ei henkilötietoja · ${NIMI === "Työmaatutka" ? "konsepti, ei HSL:n eikä kaupungin virallinen palvelu" : "itsenäinen palvelu"}</p>`, 3000);
     location.hash = "#/";
     lopeta();
   }
@@ -382,16 +328,18 @@
     if (document.documentElement.classList.contains("esitys")) return;
     seis = false;
     const suoja = document.createElement("div"); suoja.className = "es-suoja";
-    suoja.innerHTML = `<button type="button">Lopeta esittely ✕</button>`;
-    suoja.querySelector("button").onclick = () => { seis = true; };
+    suoja.innerHTML = `<div class="es-napit"><button type="button" class="es-seur">Seuraava ⏭</button><button type="button" class="es-lop">Lopeta ✕</button></div>`;
+    suoja.querySelector(".es-lop").onclick = () => { seis = true; };
+    suoja.querySelector(".es-seur").onclick = () => { ohita = true; };
     document.body.appendChild(suoja);
     try { await kierros(); } catch (e) { console.warn("Esittely:", e.message); lopeta(); if (location.hash !== "#/") location.hash = "#/"; }
     suoja.remove();
   };
-  addEventListener("keydown", e => { if (e.key === "Escape") seis = true; });
+  addEventListener("keydown", e => { if (e.key === "Escape") seis = true; if (e.key === "ArrowRight" && document.documentElement.classList.contains("esitys")) ohita = true; });
   const css2 = document.createElement("style");
   css2.textContent = `.es-suoja{position:fixed;inset:0;z-index:99990;cursor:default}
-  .es-suoja button{position:fixed;top:14px;right:16px;font:700 14px Nunito,system-ui,sans-serif;padding:9px 14px;border-radius:8px;border:0;background:#0F1B2D;color:#fff;cursor:pointer!important;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:100003}
+  .es-napit{position:fixed;top:14px;right:16px;display:flex;gap:8px;z-index:100003}
+  .es-suoja button{font:700 14px Nunito,system-ui,sans-serif;padding:9px 14px;border-radius:8px;border:0;background:#0F1B2D;color:#fff;cursor:pointer!important;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:100003}
   html.esitys .es-suoja button, html.esitys .es-suoja button *{cursor:pointer!important}`;
   document.head.appendChild(css2);
   if (!new URLSearchParams(location.search).has("demo")) return;
