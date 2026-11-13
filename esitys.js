@@ -5,7 +5,7 @@
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const TAHTI = 1.35;   // rauhallinen tahti: pitkät tauot pidemmiksi, jotta katsoja ehtii lukea ja katsoa
+  const TAHTI = 1.15;   // rauhallinen tahti: pitkät tauot pidemmiksi, jotta katsoja ehtii lukea ja katsoa
   const odota = ms => new Promise(r => setTimeout(r, ms >= 900 ? ms * TAHTI : ms));
   let seis = false;
   const tarkista = () => { if (seis) throw new Error("keskeytetty"); };
@@ -140,7 +140,7 @@
     const n = VAIHEET.findIndex(v => tag === v || (v === "NÄKYMÄ" && tag === "TYÖKALUT") || (v === "TÄNÄÄN" && tag === "TEKOÄLY") || (v === "LINJA" && /HAKU|AGENTTI|IHMINEN/.test(tag)) || (v === "VALVOMO" && tag === "TIETOA"));
     teksti.innerHTML = `<i>${tag}${n >= 0 ? `<small>${n + 1} / ${VAIHEET.length}</small>` : ""}</i><span>${t}</span>`;
     teksti.classList.add("on"); hamaru.classList.add("on"); sijoitaTeksti();
-    await odota(1400 + t.length * 38);   // lukuaika ennen kuin jotain tapahtuu
+    await odota(1100 + t.length * 34);   // lukuaika ennen kuin jotain tapahtuu
   }
   const piilotaTeksti = () => { teksti.classList.remove("on"); hamaru.classList.remove("on"); poistaKorostus(); };
   async function kortti(luokka, html, kesto) {
@@ -200,7 +200,7 @@
     const palauta = rail('[data-tp="palauta"]'); if (palauta) palauta.click();   // oletusasettelu
     await odota(500);
 
-    await kortti("sin", `${logo}<h1>Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1><p>Esittely noin neljässä minuutissa · oikea data tältä päivältä</p>`, 3200);
+    await kortti("sin", `${logo}<h1>Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1><p>Esittely noin viidessä minuutissa · oikea data tältä päivältä</p>`, 3200);
 
     // 1. NÄKYMÄ
     await kerro("NÄKYMÄ", "Tutka on yksi kartta, jonka päällä on siirrettäviä paletteja. Käydään ensin läpi, mistä löytyy mitäkin.");
@@ -343,11 +343,11 @@
 
     // 9. VALVOMO JA TIETOA
     const vm = tekstinMukaan(".top nav a", /^Valvomo/);
-    if (vm) { await kerro("VALVOMO", "Valvomo: hälytykset, kun työmaa alkaa hidastaa liikennettä. Ne kuitataan, ja historia säilyy.");
-      await klikkaa(vm, { jalkeen: 2200 }); const r = $$("#hList .hrow").find(nakyy) || $$("#v-halytykset h2").find(nakyy); if (r) { await liiku(r); await odota(3200); } }
+    if (vm) { piilotaTeksti(); await klikkaa(vm, { jalkeen: 1600 });
+      await kerro("VALVOMO", "Valvomo: hälytykset, kun työmaa alkaa hidastaa liikennettä. Ne kuitataan, ja historia säilyy."); const r = $$("#hList .hrow").find(nakyy) || $$("#v-halytykset h2").find(nakyy); if (r) { await liiku(r); await odota(3200); } }
     const tt = tekstinMukaan(".top nav a", /^Tietoa/);
-    if (tt) { await kerro("TIETOA", "Tietoa-sivulla: miten tätä kokeiltaisiin HSL:ssä, mitä on jo löydetty ja miten tekoälyä valvotaan.");
-      await klikkaa(tt, { jalkeen: 2000 }); await vieri(500, 2600); await odota(2400); await vieri(0, 1200); }
+    if (tt) { piilotaTeksti(); await klikkaa(tt, { jalkeen: 1600 });
+      await kerro("TIETOA", "Tietoa-sivulla: miten tätä kokeiltaisiin HSL:ssä, mitä on jo löydetty ja miten tekoälyä valvotaan."); await vieri(500, 2600); await odota(2400); await vieri(0, 1200); }
     piilotaTeksti(); await odota(300);
 
     await kortti("val", `${logo}<h1>Mittaa. Ennakoi. Ehdottaa.<br><em>Ihminen päättää.</em></h1><p>Avoin data · ei henkilötietoja · ${NIMI === "Työmaatutka" ? "konsepti, ei HSL:n eikä kaupungin virallinen palvelu" : "itsenäinen palvelu"}</p>`, 3600);

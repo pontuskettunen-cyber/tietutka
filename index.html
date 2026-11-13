@@ -4582,7 +4582,7 @@ addEventListener("DOMContentLoaded", function(){
   document.getElementById("ttmVideo").onclick = ()=>{ sulje();
     const aja = ()=>window.ttOpastus && window.ttOpastus();
     if(window.ttOpastus) return aja();
-    const es = document.createElement("script"); es.src = "esitys.js?v=10"; es.onload = aja; document.body.appendChild(es); };
+    const es = document.createElement("script"); es.src = "esitys.js?v=11"; es.onload = aja; document.body.appendChild(es); };
   m.addEventListener("mousedown", e=>{ if(e.target===m) sulje(); });
   addEventListener("keydown", e=>{ if(e.key==="Escape" && !m.hidden) sulje(); });
   help.onclick = ()=>auki(true);
@@ -5150,7 +5150,7 @@ route(); load(); loadAI();
 { const hk = ()=>{ if(!document.hidden && S.nakyma!=="halytykset") hRpc("halytykset_lista").then(hBell).catch(()=>{}); };
   document.getElementById("hBell").hidden = false; hk(); setInterval(hk, 60000); }
 // esitysajo videota varten (?demo): ladataan vain pyydettäessä
-try{ if(new URLSearchParams(location.search).has("demo")){ const es = document.createElement("script"); es.src = "esitys.js?v=10"; document.body.appendChild(es); } }catch(e){}
+try{ if(new URLSearchParams(location.search).has("demo")){ const es = document.createElement("script"); es.src = "esitys.js?v=11"; document.body.appendChild(es); } }catch(e){}
 setInterval(()=>{ if(!document.hidden) loadAI(); }, 600000);
 setInterval(()=>{ if(!document.hidden) load(); }, 120000);
 </script>
@@ -5163,7 +5163,7 @@ setInterval(()=>{ if(!document.hidden) load(); }, 120000);
     <button type="button" class="tt-video" id="ttmVideo" aria-label="Katso esittely: miten tutka toimii, noin minuutti">
       <span class="tv-tutka" aria-hidden="true"><i></i><i></i><i></i></span>
       <span class="tv-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></span>
-      <span class="tv-t"><b>Katso, miten tutka toimii</b><small>Esittely noin minuutissa · tutka näyttää itse oikealla datalla · Esc lopettaa</small></span>
+      <span class="tv-t"><b>Katso, miten tutka toimii</b><small>Koko tutka noin viidessä minuutissa · oikealla datalla · Esc lopettaa</small></span>
     </button>
     <h2 id="ttmH">Mitä katutyöt maksavat joukkoliikenteelle?</h2>
     <p class="tt-lead">Tietutka mittaa avoimesta datasta joka päivä, paljonko Helsingin katutyöt hidastavat busseja ja ratikoita. Se kertoo myös, mitä asialle kannattaisi tehdä.</p>
