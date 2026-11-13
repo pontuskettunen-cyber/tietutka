@@ -44,6 +44,12 @@ R('<b>Ajoitus ja kustannus</b>', '<b>Ajoitus</b>')
 R('["ajo","Ajoitus ja kustannus"]', '["ajo","Ajoitus"]')
 R(',["pdf","PDF: haitta-arvio liitteeksi"]', '')
 
+
+# Muutosmerkintä Tietoa-sivulle: hakemuksen jälkeen tehdyt parannukset
+lead_end = s.index("</p>", s.index("Työmaatutka on prototyyppi, ei valmis järjestelmä.")) + 4
+s = s[:lead_end] + """
+    <div class="paiv"><b>Päivitetty 14.11.2026.</b> Vaikutus mitataan nyt samalta kadulta ennen töitä ja työn aikana (todennettu tai alustava, vaihteluväleineen). Aiempi vertailu linjan muihin osuuksiin näkyy enää harmaana arviona, koska se antoi puolelle töistä negatiivisen luvun. Lisäksi: karttatyöpöytä siirrettävine paletteineen, yksi haku linjoille, kaduille ja luville, seisovat autot erotellaan livenäkymässä, sekä puhelin- ja saavutettavuuskorjaukset.</div>""" + s[lead_end:]
+
 TM = r'''
 <script>
 /* ===== Työmaatutka (HSL-haun demo): ei urakoitsijan kustannuslaskentaa eikä esittelypyyntöä =====
@@ -76,6 +82,7 @@ TM = r'''
 .tmlogo b{font-weight:800;color:#8CC8FF}
 .tt-brand .tmlogo{color:var(--i);font-size:28px}.tt-brand .tmlogo b{color:#1F5FBF}
 #haAvaa,#enOlet,.ha-esit,#haEsit{display:none!important}
+.paiv{background:#EEF6FF;border-left:3px solid #1F5FBF;padding:9px 12px;margin:4px 0 18px;font-size:14px;line-height:1.5;max-width:820px;border-radius:0 6px 6px 0}
 </style>
 '''
 R("</body>", TM + "</body>")
