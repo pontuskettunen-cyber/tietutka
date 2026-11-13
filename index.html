@@ -4579,10 +4579,17 @@ addEventListener("DOMContentLoaded", function(){
   const sulje = ()=>{ auki(false); try{ localStorage.setItem("tt_tervetuloa","1"); }catch(e){} };
   document.getElementById("ttmX").onclick = sulje; document.getElementById("ttmGo").onclick = sulje;
   // esittely: ladataan vasta pyydettäessä, ajetaan sivun omilla toiminnoilla oikealla datalla
-  document.getElementById("ttmVideo").onclick = ()=>{ sulje();
+  document.getElementById("ttmVideo").onclick = ()=>{
+    // aloituskortti heti klikkauksesta: sivu valmistellaan sen takana, eikä välissä näy mitään muuta
+    const nimi = /Työmaatutka/.test(document.title) ? "Työmaatutka" : "Tietutka", k = document.createElement("div"); k.id = "esKansi";
+    k.style.cssText = "position:fixed;inset:0;z-index:100003;background:#0F1B2D;color:#fff;display:flex;flex-direction:column;justify-content:center;padding:0 9vw;font-family:Nunito,system-ui,sans-serif;transition:opacity .7s;cursor:none";
+    k.innerHTML = `<div style="display:flex;align-items:center;gap:14px;font:800 34px Nunito,system-ui,sans-serif"><span style="width:44px;height:44px;border-radius:11px;display:grid;place-items:center;background:#fff"><b style="width:26px;height:26px;border-radius:50%;border:4px solid #1F5FBF;display:grid;place-items:center;box-sizing:border-box"><i style="width:8px;height:8px;border-radius:50%;background:#1F5FBF"></i></b></span>${nimi}</div>
+      <h1 style="font:800 clamp(40px,5.6vw,84px)/1.08 Nunito,system-ui,sans-serif;margin:34px 0 0;letter-spacing:-.01em">Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1>
+      <p style="font:400 clamp(17px,1.7vw,26px)/1.4 Nunito,system-ui,sans-serif;margin:26px 0 0;opacity:.9">Esittely noin kolmessa minuutissa · oikea data tältä päivältä</p>`;
+    document.body.appendChild(k); sulje();
     const aja = ()=>window.ttOpastus && window.ttOpastus();
     if(window.ttOpastus) return aja();
-    const es = document.createElement("script"); es.src = "esitys.js?v=13"; es.onload = aja; document.body.appendChild(es); };
+    const es = document.createElement("script"); es.src = "esitys.js?v=14"; es.onload = aja; document.body.appendChild(es); };
   m.addEventListener("mousedown", e=>{ if(e.target===m) sulje(); });
   addEventListener("keydown", e=>{ if(e.key==="Escape" && !m.hidden) sulje(); });
   help.onclick = ()=>auki(true);
@@ -5150,7 +5157,7 @@ route(); load(); loadAI();
 { const hk = ()=>{ if(!document.hidden && S.nakyma!=="halytykset") hRpc("halytykset_lista").then(hBell).catch(()=>{}); };
   document.getElementById("hBell").hidden = false; hk(); setInterval(hk, 60000); }
 // esitysajo videota varten (?demo): ladataan vain pyydettäessä
-try{ if(new URLSearchParams(location.search).has("demo")){ const es = document.createElement("script"); es.src = "esitys.js?v=13"; document.body.appendChild(es); } }catch(e){}
+try{ if(new URLSearchParams(location.search).has("demo")){ const es = document.createElement("script"); es.src = "esitys.js?v=14"; document.body.appendChild(es); } }catch(e){}
 setInterval(()=>{ if(!document.hidden) loadAI(); }, 600000);
 setInterval(()=>{ if(!document.hidden) load(); }, 120000);
 </script>

@@ -200,7 +200,7 @@
   const Y = {};   // kierroksen yhteiset tiedot (valittu työmaa ja linja)
   let pinnattu = null;
   function siivoa() {
-    piilotaTeksti(); poistaKorostus(); $$(".es-kortti").forEach(k => k.remove());
+    piilotaTeksti(); poistaKorostus(); $$(".es-kortti, #esKansi").forEach(k => k.remove());
     const q = $("#omaQ"), dd = $("#hakuDD"); if (q) { q.value = ""; q.blur(); } if (dd) dd.hidden = true;
     try { if (pinnattu && LV.pinned.has(pinnattu)) togglePin(pinnattu); } catch (e) {} pinnattu = null;
     try { if (typeof hLinjaPois === "function") hLinjaPois(true); } catch (e) {}
@@ -209,7 +209,7 @@
     { t: "TILANNE", nimi: "Tilanne nyt", s: 26, f: async () => {
       await naytto("#/");
       const palauta = rail('[data-tp="palauta"]'); if (palauta) palauta.click(); await odota(300);
-      await kortti("sin", `${logo}<h1>Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1><p>Esittely noin kolmessa minuutissa · oikea data tältä päivältä</p>`, 2600);
+      if (Y.kansi) Y.kansi = false; else await kortti("sin", `${logo}<h1>Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1><p>Esittely noin kolmessa minuutissa · oikea data tältä päivältä</p>`, 2600);
       const til = ws("tilanne");
       await kerro("TILANNE", "Tutka on yksi kartta ja sen päällä paletteja. Tilanne nyt kertoo, mikä työ hidastaa eniten ja paljonko lisäaikaa syntyy vuorokaudessa.");
       const kpi = til && til.querySelector("#kpis [data-bd]"); if (kpi) { await liiku(kpi); await odota(1800); }
@@ -306,6 +306,10 @@
     const k1 = $$("#cards .card").find(nakyy);
     Y.l1 = k1 && S.byId ? S.byId[k1.dataset.id] : null;
     Y.linja = (Y.l1 && typeof lines === "function" && lines(Y.l1.linjat).find(n => !/N$/.test(n))) || "55";
+    // aloituskortti näkyi jo klikkauksesta asti: valmistelut tehtiin sen takana, nyt se häivytetään
+    const kansi = $("#esKansi");
+    if (kansi) { if (alku === 0) { const p = $('.tp-rail [data-tp="palauta"]'); if (p) p.click(); Y.kansi = true; }
+      try { await odota(2200); kansi.style.opacity = "0"; await odota(700); } finally { kansi.remove(); } }
     luku = alku;
     while (luku < LUVUT.length) {
       lukuAlku = aika(); paivitaPalkki();
