@@ -2,11 +2,13 @@
 -- Uusi = välin päiväkeskiarvojen mediaani työn aikana (7 vrk) − mediaani päivinä, jolloin välillä ei ollut yhtään voimassa olevaa lupaa (±1 vrk).
 with nyk as (
   select lupa_id, lisa_ajo nyk_s, ohitukset from lupa_mitta where ikkuna = '7d' and jakso = 'kaikki' and ohitukset >= 30),
-lv as (
-  select distinct on (lupa_id) lupa_id, alkaa::date a, coalesce(paattyy::date, current_date + 1) p, osoite
-  from luvat_snapshot where snap_date > current_date - 60 and alkaa is not null order by lupa_id, snap_date desc),
 ls as (select s.lupa_id, s.from_stop, s.to_stop from lupa_segmentit s join nyk using (lupa_id)),
 segs as (select distinct from_stop, to_stop from ls),
+ids as (select distinct s.lupa_id from lupa_segmentit s join segs using (from_stop, to_stop)),
+lv as (  -- viimeisin tieto jokaisesta välin luvasta (myös päättyneistä), indeksin kautta
+  select i.lupa_id, x.alkaa::date a, coalesce(x.paattyy::date, current_date + 1) p, x.osoite
+  from ids i cross join lateral (select alkaa, paattyy, osoite from luvat_snapshot l
+    where l.lupa_id = i.lupa_id order by snap_date desc limit 1) x where x.alkaa is not null),
 kl as (select distinct s.from_stop, s.to_stop, lv.a, lv.p from lupa_segmentit s join segs using (from_stop, to_stop) join lv using (lupa_id)),
 pl as (
   select d.*, d.sum_lisa / d.n lisa,
