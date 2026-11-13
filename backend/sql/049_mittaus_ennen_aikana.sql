@@ -181,3 +181,7 @@ do $$ begin
 end $$;
 select cron.schedule('seg-paiva', '50 1 * * *', $$select seg_paiva_laske(current_date - 1); select seg_paiva_laske(current_date - 2); select seg_paiva_siivous()$$);
 select cron.schedule('seg-paiva-tanaan', '5 * * * *', $$select seg_paiva_laske(current_date)$$);
+
+-- näkymä laajennettiin uusilla sarakkeilla (select * jäädytetään luontihetkellä)
+create or replace view v_lupa_vaikutus with (security_invoker = false) as select * from lupa_vaikutus;
+grant select on v_lupa_vaikutus to anon, authenticated;
