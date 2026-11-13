@@ -1203,9 +1203,18 @@ a.lnk-linja:hover{color:var(--a)}
 .lpaluu[hidden]{display:none}
 
 /* ===== Työmaa-alue ===== */
+.leaflet-tooltip.tt-tyomaa{white-space:normal;width:max-content;max-width:300px;padding:8px 10px;border-radius:8px;border:1px solid var(--l);box-shadow:0 6px 20px rgba(15,27,45,.16);font:13px/1.4 "Inter",sans-serif;color:var(--i)}
+.tt-tyomaa .tt-h{font-weight:700;font-size:13.5px;line-height:1.3}
+.tt-tyomaa .tt-p{color:var(--i2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
+.tt-tyomaa .tt-m{margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tt-tyomaa .tt-m i{width:9px;height:9px;border-radius:2px;flex:none}
+.tt-tyomaa .tt-m span{color:var(--m);font-size:12px}
+.tt-tyomaa .tt-l{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}.tt-tyomaa .tt-l .lbadge{font-size:11px;padding:0 5px;min-width:0;height:19px}
+.tt-tyomaa .tt-x{font-size:11.5px;color:var(--m);align-self:center;margin-left:3px}
+.tt-tyomaa .tt-f{display:flex;justify-content:space-between;gap:10px;margin-top:6px;font-size:11.5px;color:var(--m)}.tt-tyomaa .tt-f:empty{display:none}
+.lsiru-x{font-size:12px;color:var(--m);align-self:center;margin-left:4px}
 .alue-n{flex:none;margin-left:6px;font-size:11.5px;font-weight:800;color:var(--a);background:var(--a-soft);border-radius:999px;padding:1px 7px}
 .alue{background:#F3F6FA;border:1px solid var(--l);border-radius:10px;padding:7px 10px;margin:0 0 10px;font-size:13px;line-height:1.45}
-.alue .k{font-size:12.5px}.alue .al{margin:3px 0 4px;padding-left:16px}.alue .al li{margin:1px 0}.alue .al a{font-weight:700}
+.alue .k{font-size:12.5px}.alue .al{margin:4px 0 2px;padding:0;list-style:none}.alue .al li{display:flex;justify-content:space-between;gap:10px;padding:2px 0;border-top:1px solid var(--l2)}.alue .al li:first-child{border-top:0}.alue .al li span{color:var(--m);white-space:nowrap;font-size:12px}.alue .al a{font-weight:600}
 .alue .note{font-size:12px}
 
 #v-halytykset h2 .h-alaots{font-size:14px;font-weight:600;color:var(--m);margin-left:6px}
@@ -2380,7 +2389,7 @@ function segCtl(st){
 const SITE = {
   hidastaa: {c:"#B42318", t:"Hidastaa (mitattu)"},
   ei:       {c:"#5B6770", t:"Ei mitattua haittaa"},
-  kesken:   {c:"#D97706", t:"Mittaus kesken"}
+  kesken:   {c:"#D97706", t:"Vaikutusta ei vielä mitattu"}
 };
 /* Mittauksen varmuus ihmiskielellä: mitä luku on ja milloin se tarkentuu */
 function varmuus(l){
@@ -3188,6 +3197,7 @@ function tiivis(l, im, ml){
   const ph = phase(l).k, ls = lines(l.linjat).filter(n=>!/N$/.test(n));
   if(!onRoute(l)) return `<p class="tiivis">Kohdalla ei kulje bussi- tai ratikkareittejä.</p>`;
   if(ph==="tulossa") return `<p class="tiivis">Työ alkaa <b>${fmtDate(l.alkaa)}</b> ja osuu ${ls.length} linjan reitille (${esc(ls.slice(0,5).join(", "))}${ls.length>5?"…":""}). Vaikutus mitataan heti työn alettua.</p>`;
+  if(im && im.eiArv) return `<p class="tiivis">Työ on käynnissä ${ls.length} linjan reitillä. Samaa katua ei ole vielä mitattu ilman töitä, joten vaikutus mitataan, kun työ päättyy${l.paattyy?` (${fmtDate(l.paattyy)})`:""}.</p>`;
   if(!im || im.s==null) return `<p class="tiivis">Työ on käynnissä ${ls.length} linjan reitillä. Ohituksia ei vielä tarpeeksi luotettavaan lukuun.</p>`;
   const top = im.tod ? (ml||[]).filter(r=>r.ohitukset>=MIN_N && r.lisa_ajo>10).sort((a,b)=>b.lisa_ajo-a.lisa_ajo)[0] : null;
   const verbi = im.s > 10 ? `hidastaa: bussi tai ratikka on kohdalla keskimäärin <b>${minuutteina(im.s)}</b> pidempään kuin ${im.tod?"samalla kadulla ilman töitä":"muualla linjalla"}` : `ei hidasta merkittävästi: alle 10 sekuntia ohitusta kohden`;
@@ -3196,6 +3206,18 @@ function tiivis(l, im, ml){
   const kartta = im.s <= 10 && nSlow ? ` Kartalla punaisena ${nSlow} pysäkkiväliä, joilla hidastus on selvä.` : "";
   return `<p class="tiivis">Työ ${verbi}${im.tod?"":" (arvio)"}.${ero}${kartta}</p>`;
 }
+/* Kartan työmaavihje: lyhyt otsikko, tarkoitus kahdella rivillä, vaikutus yhdellä rivillä ja linjat merkkeinä */
+function tyomaaTip(l, vihje){
+  const r = onRoute(l), im = r ? impact(l) : null, k = SITE[siteKind(l)];
+  const ls = lines(l.linjat), paiva = ls.filter(n=>!/N$/.test(n)), yo = ls.length - paiva.length, MAXL = 10;
+  const vaik = !r ? "" : im && im.kind==="v2" && im.s!=null
+    ? `<div class="tt-m"><i style="background:${k.c}"></i>${im.s>10?"Hidastaa":"Ei merkittävää hidastusta"} <b>${sgn(im.s)}</b> / ohitus <span>${mitTxt(im)}</span></div>`
+    : `<div class="tt-m"><i style="background:${k.c}"></i>${esc(k.t)}</div>`;
+  const lin = r && ls.length ? `<div class="tt-l">${paiva.slice(0,MAXL).map(n=>`<span class="lbadge ${TRAM.has(n)?"tram":""}">${esc(n)}</span>`).join("")}${paiva.length>MAXL?`<span class="tt-x">+${paiva.length-MAXL}</span>`:""}${yo?`<span class="tt-x">${yo} yölinja${yo>1?"a":""}</span>`:""}</div>` : "";
+  const aika = l.alkaa||l.paattyy ? `<span class="tt-d">${l.alkaa?fmtShort(l.alkaa):""}–${l.paattyy?fmtShort(l.paattyy):""}</span>` : "";
+  return `<div class="tt-h">${esc(title(l))}</div><div class="tt-p">${esc(purpose(l))}</div>${vaik}${lin}<div class="tt-f">${aika}${vihje?`<span>${esc(vihje)}</span>`:""}</div>`;
+}
+const TT_OPT = {sticky:true, className:"tt-tyomaa", direction:"top", offset:[0,-8]};
 function siteKind(l){ const im = impact(l); if(!im || im.kind!=="v2" || im.s==null) return "kesken"; return im.s > 10 ? "hidastaa" : "ei"; }
 function renderHomeMap(){
   if(!M.home){
@@ -3214,7 +3236,7 @@ function renderHomeMap(){
         <div class="mleg-c"><div class="mleg-g">Työmaat</div>
         <div>${sw("background:rgba(180,35,24,.35);border:1.5px solid #B42318")}Hidastaa busseja ja ratikoita</div>
         <div>${sw("background:rgba(91,103,112,.3);border:1.5px solid #5B6770")}Ei mitattua haittaa</div>
-        <div>${sw("background:rgba(217,119,6,.3);border:1.5px solid #D97706")}Mittaus kesken</div>
+        <div>${sw("background:rgba(217,119,6,.3);border:1.5px solid #D97706")}Ei vielä mitattu</div>
         <div>${sw("width:8px;height:8px;border-radius:50%;background:#A3A99F;margin:0 5px")}Muu katutyö, ei reitillä</div>
         <div>${sw("width:13px;height:13px;border-radius:50%;border:2.5px solid #14181C;background:transparent;margin:0 2px")}Valittu työmaa</div></div>
         <div class="mleg-c" id="legSeg"><div class="mleg-g">Valitun työmaan pysäkkivälit</div>
@@ -3245,7 +3267,7 @@ function renderHomeMap(){
       layer = L.geoJSON(l.geom,{style:{color: sel ? "#14181C" : k.c, weight: sel ? 2.5 : 1.2, fillColor:k.c, fillOpacity: sel ? .38 : .22}});
     } else { const c = centroid(l.geom); if(!c) return; layer = L.circleMarker(c,{radius:3,weight:0,fillColor:"#A3A99F",fillOpacity:.75}); }
     const im = r ? impact(l) : null;
-    layer.bindTooltip(`<b>${esc(title(l))}</b><br>${esc(purpose(l))}${r?`<br>${esc(SITE[siteKind(l)].t)}${im&&im.kind==="v2"?` · ${sgn(im.s)} per ohitus`:""}<br>Linjat: ${esc(lines(l.linjat).join(", "))}`:""}`,{sticky:true});
+    layer.bindTooltip(tyomaaTip(l), TT_OPT);
     layer.on("click",()=>select(l.lupa_id,false));
     layer.addTo(Lhome);
   });
@@ -3653,7 +3675,7 @@ function renderTyot(){
     const c0 = centroid(l.geom); if(!c0) return; pts.push(c0);
     if(r){ layer = L.featureGroup([L.geoJSON(l.geom,{style:{color:col,weight:1.5,fillColor:col,fillOpacity:.3}}), L.circleMarker(c0,{radius:6,weight:2,color:"#fff",fillColor:col,fillOpacity:1})]); }
     else layer = L.circleMarker(c0,{radius:3.5,weight:0,fillColor:"#9AA097",fillOpacity:.8});
-    layer.bindTooltip(`<b>${esc(title(l))}</b><br>${esc(purpose(l))}<br>${l.alkaa?fmtShort(l.alkaa):""}–${l.paattyy?fmtShort(l.paattyy):""}${r?`<br>Linjat: ${esc(lines(l.linjat).join(", "))}`:""}<br><span style="color:#6B737B">Klikkaa: avaa tilannekuvassa</span>`,{sticky:true});
+    layer.bindTooltip(tyomaaTip(l, "Klikkaa: avaa tilannekuvassa"), TT_OPT);
     layer.on("click",()=>{ location.hash = "#/?l="+encodeURIComponent(l.lupa_id); });
     layer.addTo(L2);
   });
@@ -4651,9 +4673,9 @@ function alueLaatikko(l){
   const eka = paattyy[0], toka = paattyy[1];
   const porras = eka && toka && +new Date(eka.paattyy) < +new Date(toka.paattyy) - DAY
     ? ` Osuudet selviävät, kun <b>${esc(shortStreet(eka))}</b> päättyy ${fmtDate(eka.paattyy)}: jos yhteisten välien hidastus silloin pienenee, pudotus on sen osuus.` : "";
-  return `<div class="alue"><div class="k"><b>Sama mittaus · ${kaikki.length} lupaa</b> mittaavat valtaosin samoja pysäkkivälejä</div>
-    <ul class="al">${[l, ...m].slice(0,6).map(x=>`<li>${x===l ? `<b>${esc(shortStreet(x))}</b>` : `<a href="#/?l=${encodeURIComponent(x.lupa_id)}">${esc(shortStreet(x))}</a>`} · ${esc(purpose(x).replace(/\.$/,""))}${x.paattyy ? ` · ${fmtShort(x.paattyy)} asti` : ""}</li>`).join("")}</ul>
-    <div class="note">Hidastus mitataan pysäkkiväleittäin, joten samanaikaisten töiden osuuksia ei voi vielä erottaa. Lisäaika on yksi mittaus: se näkyy kärkilistassa kerran ja lasketaan kokonaislukuun kerran.${porras}</div></div>`;
+  return `<div class="alue"><div class="k"><b>Samalla kohdalla ${kaikki.length} työtä</b> · vaikutus mitataan yhdessä</div>
+    <ul class="al">${[l, ...m].slice(0,6).map(x=>`<li title="${esc(purpose(x))}">${x===l ? `<b>${esc(shortStreet(x))}</b>` : `<a href="#/?l=${encodeURIComponent(x.lupa_id)}">${esc(shortStreet(x))}</a>`}<span>${x.paattyy ? `${fmtShort(x.paattyy)} asti` : ""}</span></li>`).join("")}</ul>
+    ${porras ? `<div class="note">${porras.trim()}</div>` : ""}</div>`;
 }
 /* ================= Työmaa ↔ linja: linjasirut, linja Tilannekuvan kartalla (testissä ?tiivis) ja paluupolku ================= */
 const HLay = {g:null, vilk:[], r:null, rengas:null};
@@ -4666,9 +4688,10 @@ function linjaSirut(l, ml){
   const mitattu = (ml||[]).filter(r=>r.ohitukset>=MIN_N).map(r=>({n:ln(r.route), s:r.lisa_ajo}));
   const per = new Map(); mitattu.forEach(x=>{ if(!per.has(x.n) || x.s > per.get(x.n)) per.set(x.n, x.s); });
   lines(l.linjat).filter(n=>!/N$/.test(n)).forEach(n=>{ if(!per.has(n)) per.set(n, null); });
-  const rivit = [...per.entries()].filter(([n])=>idx.has(n)).sort((a,b)=>(b[1]??-1e9)-(a[1]??-1e9)).slice(0,10);
+  const kaikki = [...per.entries()].filter(([n])=>idx.has(n)).sort((a,b)=> tod ? (b[1]??-1e9)-(a[1]??-1e9) : parseInt(a[0])-parseInt(b[0]) || a[0].localeCompare(b[0]));
+  const rivit = kaikki.slice(0,8), muita = kaikki.length - rivit.length;
   if(!rivit.length) return "";
-  return `<div class="lsirut"><span class="k">${kompakti() ? "Näytä linja kartalla:" : "Avaa linja:"}</span>${rivit.map(([n,s])=>`<button type="button" class="lsiru ${S.hLinja===n?"on":""}" data-linja="${esc(n)}" title="${kompakti()?"Näytä linjan reitti ja muut työmaat kartalla":"Avaa linja Linjat-näkymässä"}"><span class="lbadge ${TRAM.has(n)?"tram":""}">${esc(n)}</span>${s!=null && s >= 10 ? `<small class="${tod?"slow":"arv"}">${sgn(s)}</small>` : ""}</button>`).join("")}</div>`;
+  return `<div class="lsirut"><span class="k">${kompakti() ? "Näytä linja kartalla:" : "Avaa linja:"}</span>${rivit.map(([n,s])=>`<button type="button" class="lsiru ${S.hLinja===n?"on":""}" data-linja="${esc(n)}" title="${kompakti()?"Näytä linjan reitti ja muut työmaat kartalla":"Avaa linja Linjat-näkymässä"}"><span class="lbadge ${TRAM.has(n)?"tram":""}">${esc(n)}</span>${tod && s!=null && s >= 10 ? `<small class="slow">${sgn(s)}</small>` : ""}</button>`).join("")}${muita?`<span class="lsiru-x">+${muita} linjaa</span>`:""}</div>`;
 }
 /* Linjan avaus mistä tahansa: nollaa edellisen linjan valinnat, ettei toisen linjan työmaa jää näkyviin */
 function lAvaa(n){ Object.assign(S, {lSel:n, lSite:null, lVali:null, lReitti:false, lDir:null, lPaluu:null, lQ:""}); const q = document.getElementById("lQ"); if(q) q.value = ""; }
