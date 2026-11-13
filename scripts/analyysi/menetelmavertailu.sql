@@ -9,11 +9,15 @@ lv as (  -- viimeisin tieto jokaisesta välin luvasta (myös päättyneistä), i
   select i.lupa_id, x.alkaa::date a, coalesce(x.paattyy::date, current_date + 1) p, x.osoite
   from ids i cross join lateral (select alkaa, paattyy, osoite from luvat_snapshot l
     where l.lupa_id = i.lupa_id order by snap_date desc limit 1) x where x.alkaa is not null),
-kl as (select distinct s.from_stop, s.to_stop, lv.a, lv.p from lupa_segmentit s join segs using (from_stop, to_stop) join lv using (lupa_id)),
+kl as (  -- välit × päivät, joina jokin lupa oli voimassa (±1 vrk)
+  select distinct s.from_stop, s.to_stop, g::date pv
+  from lupa_segmentit s join segs using (from_stop, to_stop) join lv using (lupa_id)
+  cross join generate_series(greatest(lv.a - 1, current_date - 30), least(lv.p + 1, current_date), interval '1 day') g),
 pl as (
-  select d.*, d.sum_lisa / d.n lisa,
-    exists (select 1 from kl where kl.from_stop = d.from_stop and kl.to_stop = d.to_stop and d.pv between kl.a - 1 and kl.p + 1) tyossa
-  from seg_paiva d join segs using (from_stop, to_stop) where d.n >= 2),
+  select d.*, d.sum_lisa / d.n lisa, (k.pv is not null) tyossa
+  from seg_paiva d join segs using (from_stop, to_stop)
+  left join kl k on k.from_stop = d.from_stop and k.to_stop = d.to_stop and k.pv = d.pv
+  where d.n >= 2),
 pohja as (
   select from_stop, to_stop, route, dir, jakso, count(*) pv_n, percentile_cont(0.5) within group (order by lisa) med
   from pl where not tyossa group by 1,2,3,4,5 having count(*) >= 3),
