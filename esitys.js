@@ -6,16 +6,19 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const TAHTI = 0.9;   // rauhallinen tahti: pitkät tauot pidemmiksi, jotta katsoja ehtii lukea ja katsoa
-  let ohita = false;
-  const odota = ms => ohita ? Promise.resolve() : new Promise(r => setTimeout(r, ms >= 900 ? ms * TAHTI : ms));
-  let seis = false;
-  const tarkista = () => { if (seis) throw new Error("keskeytetty"); };
+  // Esityksen oma kello: pysähtyy tauon ajaksi. Hyppy (toiseen kohtaan) ja Lopeta keskeyttävät odotukset.
+  let seis = false, hyppy = null, tauko = false, taukoAlku = 0, taukoYht = 0;
+  const aika = () => performance.now() - taukoYht - (tauko ? performance.now() - taukoAlku : 0);
+  const kesken = () => seis || hyppy !== null;
+  const tarkista = () => { if (seis) throw new Error("keskeytetty"); if (hyppy !== null) throw new Error("hyppy"); };
+  async function odota(ms) { const kesto = ms >= 900 ? ms * TAHTI : ms, t0 = aika();
+    while (aika() - t0 < kesto) { tarkista(); await new Promise(r => setTimeout(r, 40)); } tarkista(); }
   const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
   /* ---------- tyylit ja peite-elementit ---------- */
   const css = document.createElement("style");
   css.textContent = `
-  html.esitys, html.esitys *{cursor:none !important}
+  html.esitys.es-hiljaa, html.esitys.es-hiljaa *{cursor:none !important}
   html.esitys #ttModal, html.esitys #intro, html.esitys #ttHelp{display:none !important}
   .es-kursori{position:fixed;left:0;top:0;z-index:100000;pointer-events:none;width:30px;height:30px;transform:translate(-100px,-100px);
     filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));transition:scale .12s}
@@ -77,7 +80,7 @@
   // tekstitys alas, paitsi jos se peittäisi korostetun kohdan (tai kursorin): silloin ylös
   function sijoitaTeksti() {
     if (!teksti.classList.contains("on")) return;
-    const h = teksti.offsetHeight || 90, ala = innerHeight - 34 - h - 12;
+    const pohja = (!palkki || document.documentElement.classList.contains("es-hiljaa")) ? 34 : 84, h = teksti.offsetHeight || 90, ala = innerHeight - pohja - h - 12;
     const peittaa = r => r && r.bottom > ala && r.top < innerHeight;
     const yla = peittaa(fokus) || (ky > ala - 20);
     teksti.classList.toggle("ylos", !!yla); }
@@ -98,8 +101,8 @@
     const x0 = kx, y0 = ky, dx = p.x - x0, dy = p.y - y0, d = Math.hypot(dx, dy);
     kesto = kesto || Math.min(1800, Math.max(800, d * 1.6));
     const kaari = Math.min(70, d * .12), nx = -dy / (d || 1), ny = dx / (d || 1);   // pieni kaari, ei suoraa viivaa
-    return new Promise(res => { const t0 = performance.now();
-      const askel = t => { const q = Math.min(1, (t - t0) / kesto), e = ease(q), b = Math.sin(Math.PI * e) * kaari;
+    return new Promise(res => { const t0 = aika();
+      const askel = t => { if (kesken()) return res(); const q = Math.min(1, (aika() - t0) / kesto), e = ease(q), b = Math.sin(Math.PI * e) * kaari;
         aseta(x0 + dx * e + nx * b, y0 + dy * e + ny * b); if (q === 1) sijoitaTeksti();
         q < 1 ? requestAnimationFrame(askel) : res(); };
       requestAnimationFrame(askel); });
@@ -125,8 +128,8 @@
     tarkista();
     const kohde = el || document.scrollingElement, y0 = kohde.scrollTop, dy = Math.max(0, y) - y0;
     if (Math.abs(dy) < 4) return;
-    return new Promise(res => { const t0 = performance.now();
-      const askel = t => { const q = Math.min(1, (t - t0) / kesto); kohde.scrollTop = y0 + dy * ease(q); q < 1 ? requestAnimationFrame(askel) : res(); };
+    return new Promise(res => { const t0 = aika();
+      const askel = t => { if (kesken()) return res(); const q = Math.min(1, (aika() - t0) / kesto); kohde.scrollTop = y0 + dy * ease(q); q < 1 ? requestAnimationFrame(askel) : res(); };
       requestAnimationFrame(askel); });
   }
   const sisaY = (kont, el, vara = 20) => kont.scrollTop + el.getBoundingClientRect().top - kont.getBoundingClientRect().top - vara;
@@ -135,20 +138,17 @@
   const tekstinMukaan = (sel, re) => $$(sel).find(e => re.test(e.textContent.trim()) && e.getBoundingClientRect().height > 0);
 
   /* ---------- kuvatekstit ja kortit ---------- */
-  const VAIHEET = ["TILANNE", "PALETIT", "LIVE", "TYÖMAA", "LINJA", "ENNAKOI", "VALVOMO"];
-  let edTag = "";
   async function kerro(tag, t, ylos = false) {
-    if (tag !== edTag) { ohita = false; edTag = tag; }
     if (teksti.classList.contains("on")) { teksti.classList.remove("on"); await odota(450); }
-    const n = VAIHEET.indexOf(tag);
-    teksti.innerHTML = `<i>${tag}${n >= 0 ? `<small>${n + 1} / ${VAIHEET.length}</small>` : ""}</i><span>${t}</span>`;
+    const n = LUVUT.findIndex(l => l.t === tag);
+    teksti.innerHTML = `<i>${tag}${n >= 0 ? `<small>${n + 1} / ${LUVUT.length}</small>` : ""}</i><span>${t}</span>`;
     teksti.classList.add("on"); hamaru.classList.add("on"); sijoitaTeksti();
-    await odota(700 + t.length * 30);   // lukuaika ennen kuin jotain tapahtuu
+    await odota(800 + t.length * 30);   // lukuaika ennen kuin jotain tapahtuu
   }
   const piilotaTeksti = () => { teksti.classList.remove("on"); hamaru.classList.remove("on"); poistaKorostus(); };
   async function kortti(luokka, html, kesto) {
     const k = document.createElement("div"); k.className = "es-kortti " + luokka; k.innerHTML = html; document.body.appendChild(k);
-    await odota(30); k.classList.add("on"); await odota(kesto); k.classList.remove("on"); await odota(750); k.remove();
+    try { await odota(30); k.classList.add("on"); await odota(kesto); k.classList.remove("on"); await odota(750); } finally { k.remove(); }
   }
   const NIMI = /Työmaatutka/.test(document.title) ? "Työmaatutka" : "Tietutka";
   const logo = `<div class="lg"><span><b></b></span>${NIMI}</div>`;
@@ -169,8 +169,8 @@
     kursori.classList.add("painuu"); el.classList.add("raahaa");
     const x0 = b.left - el.parentElement.getBoundingClientRect().left, y0 = b.top - el.parentElement.getBoundingClientRect().top, kx0 = kx, ky0 = ky;
     el.style.right = el.style.bottom = "";
-    await new Promise(res => { const t0 = performance.now(), kesto = 1300;
-      const askel = t => { const q = Math.min(1, (t - t0) / kesto), e = ease(q);
+    await new Promise(res => { const t0 = aika(), kesto = 1300;
+      const askel = t => { if (kesken()) return res(); const q = Math.min(1, (aika() - t0) / kesto), e = ease(q);
         el.style.left = (x0 + dx * e) + "px"; el.style.top = (y0 + dy * e) + "px"; aseta(kx0 + dx * e, ky0 + dy * e);
         q < 1 ? requestAnimationFrame(askel) : res(); }; requestAnimationFrame(askel); });
     el.classList.remove("raahaa"); kursori.classList.remove("painuu");
@@ -180,8 +180,8 @@
     const b = el.getBoundingClientRect();
     await liiku({ x: b.right - 8, y: b.bottom - 8 }); await odota(300); kursori.classList.add("painuu");
     const w0 = el.offsetWidth, h0 = el.offsetHeight, kx0 = kx, ky0 = ky;
-    await new Promise(res => { const t0 = performance.now(), kesto = 1200;
-      const askel = t => { const q = Math.min(1, (t - t0) / kesto), e = ease(q);
+    await new Promise(res => { const t0 = aika(), kesto = 1200;
+      const askel = t => { if (kesken()) return res(); const q = Math.min(1, (aika() - t0) / kesto), e = ease(q);
         el.style.width = (w0 + dw * e) + "px"; el.style.height = (h0 + dh * e) + "px"; aseta(kx0 + dw * e, ky0 + dh * e);
         q < 1 ? requestAnimationFrame(askel) : res(); }; requestAnimationFrame(askel); });
     kursori.classList.remove("painuu");
@@ -195,108 +195,123 @@
     try { if (typeof TPS !== "undefined" && typeof tpLue === "function") ["home", "linjat", "ennakko"].forEach(w => { if (TPS[w]) { TPS[w] = tpLue(w); if (typeof tpPiirraWs === "function") tpPiirraWs(w); } }); } catch (e) {}
   }
 
-  async function kierros() {
-    document.documentElement.classList.add("esitys");
-    tallennaAsettelu();
-    await odotaEl(() => typeof S !== "undefined" && S.loaded, 30000);
-    if (location.hash !== "#/") { location.hash = "#/"; await odota(900); }
-    const palauta = rail('[data-tp="palauta"]'); if (palauta) palauta.click();
-    await odota(400);
-
-    await kortti("sin", `${logo}<h1>Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1><p>Esittely noin kolmessa minuutissa · oikea data tältä päivältä</p>`, 2600);
-
-    // 1. TILANNE
-    const til = ws("tilanne");
-    await kerro("TILANNE", "Tutka on yksi kartta ja sen päällä paletteja. Tilanne nyt kertoo, mikä työ hidastaa eniten ja paljonko lisäaikaa syntyy vuorokaudessa.");
-    const kpi = til && til.querySelector("#kpis [data-bd]"); if (kpi) { await liiku(kpi); await odota(1800); }
-    const r0 = $$(".tp-rail").find(nakyy);
-    if (r0) { await kerro("TILANNE", "Vasemmasta työkalupalkista vaihdetaan näkymää, avataan paletteja ja kytketään karttatasoja."); await liiku(r0); await odota(1600); }
-
-    // 2. PALETIT
-    if (til && nakyy(til)) {
+  /* ---------- luvut: jokainen alkaa omasta lähtötilastaan, joten niihin voi hypätä ---------- */
+  async function naytto(h) { if (location.hash !== h) { location.hash = h; await odota(1000); } }
+  const Y = {};   // kierroksen yhteiset tiedot (valittu työmaa ja linja)
+  let pinnattu = null;
+  function siivoa() {
+    piilotaTeksti(); poistaKorostus(); $$(".es-kortti").forEach(k => k.remove());
+    const q = $("#omaQ"), dd = $("#hakuDD"); if (q) { q.value = ""; q.blur(); } if (dd) dd.hidden = true;
+    try { if (pinnattu && LV.pinned.has(pinnattu)) togglePin(pinnattu); } catch (e) {} pinnattu = null;
+    try { if (typeof hLinjaPois === "function") hLinjaPois(true); } catch (e) {}
+  }
+  const LUVUT = [
+    { t: "TILANNE", nimi: "Tilanne nyt", s: 26, f: async () => {
+      await naytto("#/");
+      const palauta = rail('[data-tp="palauta"]'); if (palauta) palauta.click(); await odota(300);
+      await kortti("sin", `${logo}<h1>Mitä katutyöt maksavat<br>joukkoliikenteelle?</h1><p>Esittely noin kolmessa minuutissa · oikea data tältä päivältä</p>`, 2600);
+      const til = ws("tilanne");
+      await kerro("TILANNE", "Tutka on yksi kartta ja sen päällä paletteja. Tilanne nyt kertoo, mikä työ hidastaa eniten ja paljonko lisäaikaa syntyy vuorokaudessa.");
+      const kpi = til && til.querySelector("#kpis [data-bd]"); if (kpi) { await liiku(kpi); await odota(1800); }
+      const r0 = $$(".tp-rail").find(nakyy);
+      if (r0) { await kerro("TILANNE", "Vasemmasta työkalupalkista vaihdetaan näkymää, avataan paletteja ja kytketään karttatasoja."); await liiku(r0); await odota(1600); }
+    } },
+    { t: "PALETIT", nimi: "Paletit", s: 22, f: async () => {
+      await naytto("#/");
+      const til = ws("tilanne"); if (!til || !nakyy(til)) return;
       await kerro("PALETIT", "Paletin voi raahata otsikosta, venyttää kulmasta ja pienentää viivasta. Palauta vie kaiken takaisin.");
       await raahaa(til, 200, 50); await venyta(til, 80, -110);
       const mn = til.querySelector(".tp-min"); if (mn) { await klikkaa(mn, { jalkeen: 900 }); const ph = ws("tilanne") && ws("tilanne").querySelector(".tp-ph"); if (ph) await klikkaa(ph, { jalkeen: 900 }); }
       const pal = rail('[data-tp="palauta"]'); if (pal) await klikkaa(pal, { jalkeen: 1200 });
-    }
-
-    // 3. LIVE
-    const m = typeof M !== "undefined" && M.home;
-    const k1 = $$("#cards .card").find(nakyy), l1 = k1 && S.byId && S.byId[k1.dataset.id];
-    if (m && typeof LV !== "undefined") {
+    } },
+    { t: "LIVE", nimi: "Live", s: 28, f: async () => {
+      await naytto("#/");
+      const m = typeof M !== "undefined" && M.home; if (!m || typeof LV === "undefined") return;
       const lv = rail('[data-ker="live"]'); if (lv && !LV.on) lv.click();
-      const c = l1 && l1.geom && typeof centroid === "function" ? centroid(l1.geom) : null;
-      if (c) { m.flyTo(c, 16, { duration: 2 }); }
+      const c = Y.l1 && Y.l1.geom && typeof centroid === "function" ? centroid(Y.l1.geom) : null;
+      if (c) m.flyTo(c, 16, { duration: 2 });
       await kerro("LIVE", "Live: jokainen bussi (sininen) ja ratikka (vihreä) liikkuu kartalla. Keltainen reunus = auto on työmaalla juuri nyt, harmaa = seisoo.");
       await odotaEl(() => [...LV.veh.values()].some(v => keskelle(m, [v.lat, v.lon])), 6000);
       await odota(1500);
       const ehd = [...LV.veh.entries()].filter(([, v]) => keskelle(m, [v.lat, v.lon]) && typeof vTila === "function" && vTila(v).k !== "seis");
       const val = ehd.find(([, v]) => typeof nearSite === "function" && nearSite(v.lat, v.lon)) || ehd[0];
-      if (val) {
-        const [id, v] = val, p = ruutu(m, [v.lat, v.lon]);
-        await kerro("LIVE", "Klikkaa autoa: linja, myöhästyminen ja työmaa, jonka kohdalla se on.");
-        await liiku(p); korosta({ left: p.x - 16, top: p.y - 16, right: p.x + 16, bottom: p.y + 16, width: 32, height: 32 });
-        kursori.classList.add("painuu"); const rr = document.createElement("div"); rr.className = "es-rengas"; rr.style.left = p.x + "px"; rr.style.top = p.y + "px";
-        document.body.appendChild(rr); setTimeout(() => rr.remove(), 800); await odota(140); kursori.classList.remove("painuu");
-        if (typeof togglePin === "function") togglePin(id); poistaKorostus(); await odota(3600);
-        if (typeof togglePin === "function" && LV.pinned.has(id)) togglePin(id);
-        if (typeof hLinjaPois === "function") hLinjaPois(true);
-      }
-    }
-
-    // 4. TYÖMAA
-    if (l1 && typeof select === "function") {
+      if (!val) return;
+      const [id, v] = val, p = ruutu(m, [v.lat, v.lon]);
+      await kerro("LIVE", "Klikkaa autoa: linja, myöhästyminen ja työmaa, jonka kohdalla se on.");
+      await liiku(p); korosta({ left: p.x - 16, top: p.y - 16, right: p.x + 16, bottom: p.y + 16, width: 32, height: 32 });
+      kursori.classList.add("painuu"); const rr = document.createElement("div"); rr.className = "es-rengas"; rr.style.left = p.x + "px"; rr.style.top = p.y + "px";
+      document.body.appendChild(rr); setTimeout(() => rr.remove(), 800); await odota(140); kursori.classList.remove("painuu");
+      if (typeof togglePin === "function") { togglePin(id); pinnattu = id; } poistaKorostus(); await odota(3600);
+      siivoa();
+    } },
+    { t: "TYÖMAA", nimi: "Työmaa", s: 22, f: async () => {
+      await naytto("#/");
+      const l1 = Y.l1, m = typeof M !== "undefined" && M.home; if (!l1 || typeof select !== "function") return;
       const c = typeof centroid === "function" ? centroid(l1.geom) : null;
-      if (c && m) { const p = ruutu(m, c); await liiku(p); kursori.classList.add("painuu"); await odota(140); kursori.classList.remove("painuu"); }
+      if (c && m) { m.setView(c, Math.max(m.getZoom(), 14)); await odota(300); const p = ruutu(m, c); await liiku(p); kursori.classList.add("painuu"); await odota(140); kursori.classList.remove("painuu"); }
       select(l1.lupa_id, false); await odota(1200);
       const f = await odotaEl(() => $$("#detail .facts > div").find(nakyy), 4000);
       if (f) { const im = typeof impact === "function" ? impact(l1) : null;
         await kerro("TYÖMAA", "Klikkaa työmaata: lisäaika jokaista ohi ajavaa bussia kohden. " + (im && im.tod ? "Mitattu = sama katu ilman töitä vs. työn aikana." : "Harmaa luku on arvio, joka mitataan työn päätyttyä."));
         await liiku(f); await odota(1800); }
       const siru = $$("#detail .lsiru").find(nakyy);
-      if (siru) { await kerro("TYÖMAA", "Linjan numerosta reitti ja sen kaikki työmaat kartalle."); await klikkaa(siru, { jalkeen: 2200 });
-        if (typeof hLinjaPois === "function") hLinjaPois(true); }
-    }
-
-    // 5. LINJA
-    const q = $("#omaQ");
-    const linja = (l1 && typeof lines === "function" && lines(l1.linjat).find(n => !/N$/.test(n))) || "55";
-    if (q && nakyy(q)) {
-      await kerro("LINJA", "Haku löytää linjat, kadut ja luvat.");
-      await klikkaa(q, { jalkeen: 300 }); await kirjoita(q, linja); await odota(900);
-      const eka = await odotaEl(() => $$("#hakuDD .hk").find(nakyy), 3000);
-      if (eka) await klikkaa(eka, { alas: true, jalkeen: 1800 }); else { q.value = ""; location.hash = "#/linjat"; await odota(1500); }
-    }
-    if (location.hash.startsWith("#/linjat")) {
+      if (siru) { await kerro("TYÖMAA", "Linjan numerosta reitti ja sen kaikki työmaat kartalle."); await klikkaa(siru, { jalkeen: 2200 }); siivoa(); }
+    } },
+    { t: "LINJA", nimi: "Linja", s: 28, f: async () => {
+      await naytto("#/");
+      const q = $("#omaQ");
+      if (q && nakyy(q)) {
+        await kerro("LINJA", "Haku löytää linjat, kadut ja luvat.");
+        await klikkaa(q, { jalkeen: 300 }); await kirjoita(q, Y.linja); await odota(900);
+        const eka = await odotaEl(() => $$("#hakuDD .hk").find(nakyy), 3000);
+        if (eka) await klikkaa(eka, { alas: true, jalkeen: 1800 }); else { q.value = ""; await naytto("#/linjat"); }
+      }
+      if (!location.hash.startsWith("#/linjat")) return;
       const k = await odotaEl(() => $$("#lCock .lc-k").find(nakyy), 5000);
       if (k) { await kerro("LINJA", "Linjan ohjaamo: tavallinen vuoro, huonoimmat vuorot ja mahtuuko lisäaika aikataulun viivevaraan. Oikealla reitin työmaat.");
         await liiku(k); await odota(1600); }
       const sug = $$("#lTabs .ltab-h button").find(b => b.dataset.t === "sug" && nakyy(b));
       if (sug) { await kerro("LINJA", "Tekoälyagentti ehdottaa aikataulumuutosta. Ihminen hyväksyy tai hylkää."); await klikkaa(sug, { jalkeen: 2200 }); }
-    }
-
-    // 6. ENNAKOI
-    const arv = rail('[data-nak="#/ennakko"]');
-    if (arv) {
+    } },
+    { t: "ENNAKOI", nimi: "Ennakkoarvio", s: 25, f: async () => {
+      if (!$$(".tp-rail").find(nakyy)) await naytto("#/");
+      const arv = rail('[data-nak="#/ennakko"]'); if (!arv) return;
       await kerro("ENNAKOI", "Ennakkoarvio: valitse alkava lupa tai piirrä työalue, niin tutka arvioi vaikutuksen etukäteen.");
       await klikkaa(arv, { jalkeen: 1500 });
       if (typeof tpAvaaWs === "function") { tpAvaaWs("ennakko", "tyo"); tpAvaaWs("ennakko", "arvio"); }
       const sel = await odotaEl(() => { const x = $("#enLupa"); return x && x.options.length > 1 ? x : null; }, 6000);
-      if (sel && nakyy(sel) && typeof valitseLupaEn === "function") {
-        await liiku(sel); sel.value = sel.options[1].value; valitseLupaEn(sel.value); await odota(2200);
-        const rec = await odotaEl(() => $$("#enOut .rec").find(nakyy), 6000);
-        if (rec) { await kerro("ENNAKOI", "Tulos: lisäaika, kärsivät linjat ja ajoitus, joka haittaa joukkoliikennettä vähiten."); await liiku(rec); await odota(2000); }
-      }
+      if (!(sel && nakyy(sel) && typeof valitseLupaEn === "function")) return;
+      await liiku(sel); sel.value = sel.options[1].value; valitseLupaEn(sel.value); await odota(2200);
+      const rec = await odotaEl(() => $$("#enOut .rec").find(nakyy), 6000);
+      if (rec) { await kerro("ENNAKOI", "Tulos: lisäaika, kärsivät linjat ja ajoitus, joka haittaa joukkoliikennettä vähiten."); await liiku(rec); await odota(2000); }
+    } },
+    { t: "VALVOMO", nimi: "Valvomo", s: 20, f: async () => {
+      const vm = tekstinMukaan(".top nav a", /^Valvomo/);
+      if (vm) { piilotaTeksti(); await klikkaa(vm, { jalkeen: 1200 });
+        await kerro("VALVOMO", "Valvomo hälyttää, kun työmaa alkaa hidastaa liikennettä. Tietoa-sivulla menetelmä ja miten tätä kokeiltaisiin HSL:ssä.");
+        const r = $$("#hList .hrow").find(nakyy); if (r) await liiku(r); await odota(1800); }
+      piilotaTeksti(); await odota(200);
+      await kortti("val", `${logo}<h1>Mittaa. Ennakoi. Ehdottaa.<br><em>Ihminen päättää.</em></h1><p>Avoin data · ei henkilötietoja · ${NIMI === "Työmaatutka" ? "konsepti, ei HSL:n eikä kaupungin virallinen palvelu" : "itsenäinen palvelu"}</p>`, 3000);
+    } },
+  ];
+  const VAIHEET = LUVUT.map(l => l.t);
+  const KOKO = LUVUT.reduce((a, l) => a + l.s, 0);
+  let luku = 0, lukuAlku = 0;
+
+  async function kierros(alku = 0) {
+    document.documentElement.classList.add("esitys");
+    tallennaAsettelu();
+    await odotaEl(() => typeof S !== "undefined" && S.loaded, 30000);
+    await naytto("#/"); await odota(300);
+    const k1 = $$("#cards .card").find(nakyy);
+    Y.l1 = k1 && S.byId ? S.byId[k1.dataset.id] : null;
+    Y.linja = (Y.l1 && typeof lines === "function" && lines(Y.l1.linjat).find(n => !/N$/.test(n))) || "55";
+    luku = alku;
+    while (luku < LUVUT.length) {
+      lukuAlku = aika(); paivitaPalkki();
+      try { await LUVUT[luku].f(); luku++; }
+      catch (e) { if (e.message !== "hyppy") throw e; const k = hyppy; hyppy = null; siivoa(); luku = Math.max(0, Math.min(LUVUT.length - 1, k)); }
     }
-
-    // 7. VALVOMO
-    const vm = tekstinMukaan(".top nav a", /^Valvomo/);
-    if (vm) { piilotaTeksti(); await klikkaa(vm, { jalkeen: 1200 });
-      await kerro("VALVOMO", "Valvomo hälyttää, kun työmaa alkaa hidastaa liikennettä. Tietoa-sivulla menetelmä ja miten tätä kokeiltaisiin HSL:ssä.");
-      const r = $$("#hList .hrow").find(nakyy); if (r) await liiku(r); await odota(1800); }
-    piilotaTeksti(); await odota(200);
-
-    await kortti("val", `${logo}<h1>Mittaa. Ennakoi. Ehdottaa.<br><em>Ihminen päättää.</em></h1><p>Avoin data · ei henkilötietoja · ${NIMI === "Työmaatutka" ? "konsepti, ei HSL:n eikä kaupungin virallinen palvelu" : "itsenäinen palvelu"}</p>`, 3000);
     location.hash = "#/";
     lopeta();
   }
@@ -322,36 +337,102 @@
   function lopeta() { try { palautaAsettelu(); } catch (e) {} const q = $("#omaQ"), dd = $("#hakuDD"); if (q) { q.value = ""; q.blur(); } if (dd) dd.hidden = true;
     piilotaTeksti(); kursori.style.transform = "translate(-100px,-100px)"; document.documentElement.classList.remove("esitys"); }
 
-  /* ---------- käynnistys ---------- */
-  // Opastus tervetuloikkunasta: läpinäkyvä suoja estää vahinkoklikkaukset, Lopeta-nappi ja Esc keskeyttävät.
+  /* ---------- soitinpalkki: edistyminen kohdittain, tauko, kelaus kohtaan, lopetus ---------- */
+  const mmss = sek => `${Math.floor(sek / 60)}:${String(Math.floor(sek % 60)).padStart(2, "0")}`;
+  let palkki = null, pallo = null, vihje = null, hiiriAjastin = 0;
+  function paivitaPalkki() {
+    if (!palkki) return;
+    const kulunut = Math.min(LUVUT[luku] ? LUVUT[luku].s : 0, Math.max(0, (aika() - lukuAlku) / 1000));
+    LUVUT.forEach((l, i) => { const t = palkki.querySelector(`.es-seg[data-i="${i}"] b`); if (t) t.style.width = (i < luku ? 100 : i > luku ? 0 : Math.min(100, kulunut / l.s * 100)) + "%"; });
+    const ennen = LUVUT.slice(0, luku).reduce((a, l) => a + l.s, 0) + kulunut;
+    if (!palkki.classList.contains("raahaa")) pallo.style.left = (ennen / KOKO * 100) + "%";
+    palkki.querySelector(".es-aika").textContent = `${mmss(ennen)} / ${mmss(KOKO)}`;
+    palkki.querySelector(".es-luku").textContent = LUVUT[luku] ? `${LUVUT[luku].nimi} · ${luku + 1}/${LUVUT.length}` : "";
+    palkki.querySelector(".es-play").innerHTML = tauko ? "▶" : "❚❚";
+    palkki.querySelector(".es-play").setAttribute("aria-label", tauko ? "Jatka" : "Tauko");
+  }
+  const kohtaan = x => { const r = palkki.querySelector(".es-rata").getBoundingClientRect(), f = Math.max(0, Math.min(.999, (x - r.left) / r.width));
+    let kertyma = 0; for (let i = 0; i < LUVUT.length; i++) { kertyma += LUVUT[i].s; if (f * KOKO < kertyma) return { i, f }; } return { i: LUVUT.length - 1, f }; };
+  const hyppaa = i => { if (i < 0 || i >= LUVUT.length) return; if (tauko) asetaTauko(false); hyppy = i; };
+  function asetaTauko(on) { if (on === tauko) return; if (on) taukoAlku = performance.now(); else taukoYht += performance.now() - taukoAlku; tauko = on;
+    document.documentElement.classList.toggle("es-tauolla", on); paivitaPalkki(); }
+  function hiiriLiikkui() { document.documentElement.classList.remove("es-hiljaa"); clearTimeout(hiiriAjastin);
+    hiiriAjastin = setTimeout(() => { if (!tauko && !(palkki && palkki.matches(":hover"))) document.documentElement.classList.add("es-hiljaa"); }, 2600); }
+  function luoPalkki() {
+    palkki = document.createElement("div"); palkki.className = "es-palkki";
+    palkki.innerHTML = `<div class="es-rata" role="slider" aria-label="Esittelyn kohta" tabindex="0">${LUVUT.map((l, i) => `<div class="es-seg" data-i="${i}" style="flex:${l.s}"><b></b></div>`).join("")}<span class="es-pallo"></span><span class="es-vihje" hidden></span></div>
+      <div class="es-ohj"><button type="button" class="es-play" aria-label="Tauko">❚❚</button><button type="button" class="es-ed" aria-label="Edellinen kohta">⏮</button><button type="button" class="es-seur" aria-label="Seuraava kohta">⏭</button>
+      <span class="es-aika"></span><span class="es-luku"></span><span class="es-tyhja"></span><button type="button" class="es-lop">Lopeta ✕</button></div>`;
+    document.body.appendChild(palkki);
+    pallo = palkki.querySelector(".es-pallo"); vihje = palkki.querySelector(".es-vihje");
+    palkki.querySelector(".es-play").onclick = () => asetaTauko(!tauko);
+    palkki.querySelector(".es-ed").onclick = () => hyppaa((aika() - lukuAlku > 4000) ? luku : luku - 1);
+    palkki.querySelector(".es-seur").onclick = () => hyppaa(luku + 1);
+    palkki.querySelector(".es-lop").onclick = () => { seis = true; asetaTauko(false); };
+    const rata = palkki.querySelector(".es-rata");
+    const nayta = e => { const k = kohtaan(e.clientX), r = rata.getBoundingClientRect(); vihje.hidden = false; vihje.textContent = `${k.i + 1}. ${LUVUT[k.i].nimi}`; vihje.style.left = (e.clientX - r.left) + "px"; return k; };
+    rata.addEventListener("pointermove", e => { nayta(e); if (palkki.classList.contains("raahaa")) pallo.style.left = (kohtaan(e.clientX).f * 100) + "%"; });
+    rata.addEventListener("pointerleave", () => { if (!palkki.classList.contains("raahaa")) vihje.hidden = true; });
+    rata.addEventListener("pointerdown", e => { e.preventDefault(); try { rata.setPointerCapture(e.pointerId); } catch (x) {} palkki.classList.add("raahaa"); pallo.style.left = (kohtaan(e.clientX).f * 100) + "%"; nayta(e); });
+    rata.addEventListener("pointerup", e => { if (!palkki.classList.contains("raahaa")) return; palkki.classList.remove("raahaa"); vihje.hidden = true; const k = kohtaan(e.clientX); if (k.i !== luku || aika() - lukuAlku > 3000) hyppaa(k.i); else paivitaPalkki(); });
+    rata.addEventListener("keydown", e => { if (e.key === "ArrowRight") { e.preventDefault(); hyppaa(luku + 1); } if (e.key === "ArrowLeft") { e.preventDefault(); hyppaa(luku - 1); } });
+  }
+  const css2 = document.createElement("style");
+  css2.textContent = `.es-suoja{position:fixed;inset:0;z-index:99990}
+  html.esitys.es-hiljaa .es-suoja, html.esitys.es-hiljaa .es-suoja *{cursor:none!important}
+  html.esitys:not(.es-hiljaa) .es-suoja{cursor:default!important}
+  .es-palkki{position:fixed;left:0;right:0;bottom:0;z-index:100004;padding:10px 18px 10px;background:linear-gradient(to top,rgba(8,14,26,.92),rgba(8,14,26,.78));color:#fff;font:600 14px Nunito,system-ui,sans-serif;transition:transform .35s, opacity .35s}
+  .es-palkki, .es-palkki *{cursor:pointer!important}
+  .es-rata{position:relative;display:flex;gap:3px;height:16px;align-items:center;margin:0 0 6px;outline:none}
+  .es-seg{position:relative;height:4px;background:rgba(255,255,255,.28);border-radius:1px;transition:height .15s}
+  .es-seg b{position:absolute;left:0;top:0;bottom:0;width:0;background:#E5322D;border-radius:1px}
+  .es-rata:hover .es-seg, .es-palkki.raahaa .es-seg{height:7px}
+  .es-pallo{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#E5322D;transform:scale(0);transition:transform .15s}
+  .es-rata:hover .es-pallo, .es-palkki.raahaa .es-pallo{transform:scale(1)}
+  .es-vihje{position:absolute;bottom:22px;transform:translateX(-50%);white-space:nowrap;background:#0F1B2D;border:1px solid rgba(255,255,255,.15);padding:5px 9px;border-radius:6px;font:700 13px Nunito,system-ui;pointer-events:none}
+  .es-ohj{display:flex;align-items:center;gap:6px}
+  .es-ohj button{background:none;border:0;color:#fff;font:700 16px Nunito,system-ui;padding:4px 9px;border-radius:6px;min-width:36px}
+  .es-ohj button:hover{background:rgba(255,255,255,.12)}
+  .es-ohj .es-lop{font-size:14px}
+  .es-aika{margin-left:8px;font-variant-numeric:tabular-nums;opacity:.9}.es-luku{margin-left:14px;opacity:.75}.es-tyhja{flex:1}
+  html.es-hiljaa .es-palkki{transform:translateY(calc(100% - 6px));background:transparent}
+  html.es-hiljaa .es-palkki .es-ohj{opacity:0}
+  html.esitys .es-teksti{bottom:84px} html.esitys .es-teksti.ylos{bottom:auto}
+  html.es-hiljaa .es-teksti{bottom:34px} html.es-hiljaa .es-teksti.ylos{bottom:auto}`;
+  document.head.appendChild(css2);
+
+  // Opastus tervetuloikkunasta: läpinäkyvä suoja estää vahinkoklikkaukset sivulla; ohjaus palkista tai näppäimillä.
   window.ttOpastus = async () => {
     if (document.documentElement.classList.contains("esitys")) return;
-    seis = false;
+    seis = false; hyppy = null; tauko = false; taukoYht = 0;
     const suoja = document.createElement("div"); suoja.className = "es-suoja";
-    suoja.innerHTML = `<div class="es-napit"><button type="button" class="es-seur">Seuraava ⏭</button><button type="button" class="es-lop">Lopeta ✕</button></div>`;
-    suoja.querySelector(".es-lop").onclick = () => { seis = true; };
-    suoja.querySelector(".es-seur").onclick = () => { ohita = true; };
-    document.body.appendChild(suoja);
-    try { await kierros(); } catch (e) { console.warn("Esittely:", e.message); lopeta(); if (location.hash !== "#/") location.hash = "#/"; }
-    suoja.remove();
+    suoja.addEventListener("click", () => asetaTauko(!tauko));   // klikkaus kuvaan = tauko, kuten videossa
+    document.body.appendChild(suoja); luoPalkki();
+    addEventListener("mousemove", hiiriLiikkui); hiiriLiikkui();
+    const ajastin = setInterval(paivitaPalkki, 250);
+    try { await kierros(); } catch (e) { if (e.message !== "keskeytetty") console.warn("Esittely:", e.message); siivoa(); lopeta(); if (location.hash !== "#/") location.hash = "#/"; }
+    clearInterval(ajastin); removeEventListener("mousemove", hiiriLiikkui);
+    suoja.remove(); if (palkki) { palkki.remove(); palkki = null; }
+    document.documentElement.classList.remove("es-hiljaa", "es-tauolla");
   };
-  addEventListener("keydown", e => { if (e.key === "Escape") seis = true; if (e.key === "ArrowRight" && document.documentElement.classList.contains("esitys")) ohita = true; });
-  const css2 = document.createElement("style");
-  css2.textContent = `.es-suoja{position:fixed;inset:0;z-index:99990;cursor:default}
-  .es-napit{position:fixed;top:14px;right:16px;display:flex;gap:8px;z-index:100003}
-  .es-suoja button{font:700 14px Nunito,system-ui,sans-serif;padding:9px 14px;border-radius:8px;border:0;background:#0F1B2D;color:#fff;cursor:pointer!important;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:100003}
-  html.esitys .es-suoja button, html.esitys .es-suoja button *{cursor:pointer!important}`;
-  document.head.appendChild(css2);
+  addEventListener("keydown", e => {
+    if (!document.documentElement.classList.contains("esitys") || !palkki) return;
+    if (e.key === "Escape") { seis = true; asetaTauko(false); }
+    else if (e.key === " " || e.code === "Space") { e.preventDefault(); asetaTauko(!tauko); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); hyppaa(luku + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); hyppaa((aika() - lukuAlku > 4000) ? luku : luku - 1); }
+  });
   if (!new URLSearchParams(location.search).has("demo")) return;
 
+  // ?demo: tallennustila ilman palkkia (näytöntallennusta varten)
   const alku = document.createElement("div"); alku.className = "es-alku";
   alku.innerHTML = `<div><button type="button" disabled>Ladataan tietoja…</button><p>Käynnistä ensin näytöntallennus. Älä liikuta hiirtä esityksen aikana. Välilyönti käynnistää, Esc keskeyttää.</p></div>`;
   document.body.appendChild(alku);
   let valmis = false;
-  (async () => { while (!(typeof S !== "undefined" && S.loaded)) await odota(200); await odota(1500); valmis = true;
+  (async () => { while (!(typeof S !== "undefined" && S.loaded)) await new Promise(r => setTimeout(r, 200)); await new Promise(r => setTimeout(r, 1500)); valmis = true;
     const b = alku.querySelector("button"); b.disabled = false; b.textContent = "▶ Käynnistä esitys"; })();
-  const kaynnista = async () => { if (!alku.isConnected || !valmis) return; alku.remove(); await odota(400);
+  const kaynnista = async () => { if (!alku.isConnected || !valmis) return; alku.remove(); document.documentElement.classList.add("es-hiljaa"); await new Promise(r => setTimeout(r, 400));
     try { await kierros(); } catch (e) { console.warn("Esitys:", e.message); lopeta(); } };
   alku.querySelector("button").onclick = kaynnista;
-  addEventListener("keydown", e => { if (e.code === "Space" && alku.isConnected) { e.preventDefault(); kaynnista(); } });
+  addEventListener("keydown", e => { if (e.code === "Space" && alku.isConnected) { e.preventDefault(); kaynnista(); } if (e.key === "Escape") seis = true; });
 })();
