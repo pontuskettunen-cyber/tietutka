@@ -5,7 +5,7 @@
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const TAHTI = 0.85;   // pitkät tauot hieman lyhyemmiksi; liikkeet ja klikkaukset ennallaan
+  const TAHTI = 1.35;   // rauhallinen tahti: pitkät tauot pidemmiksi, jotta katsoja ehtii lukea ja katsoa
   const odota = ms => new Promise(r => setTimeout(r, ms >= 900 ? ms * TAHTI : ms));
   let seis = false;
   const tarkista = () => { if (seis) throw new Error("keskeytetty"); };
@@ -22,13 +22,21 @@
   .es-rengas{position:fixed;z-index:99999;pointer-events:none;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
     border:3px solid #1F5FBF;background:rgba(31,95,191,.25);animation:esRengas .7s ease-out forwards}
   @keyframes esRengas{to{transform:scale(4.2);opacity:0}}
-  .es-teksti{position:fixed;left:50%;bottom:26px;z-index:99998;pointer-events:none;transform:translate(-50%,16px);opacity:0;
-    display:flex;align-items:center;gap:14px;max-width:min(980px,calc(100vw - 60px));padding:14px 22px 14px 16px;background:#fff;
-    border-radius:14px;box-shadow:0 10px 34px rgba(0,30,55,.22),0 0 0 1px rgba(0,0,0,.04);font:600 19px/1.35 Nunito,system-ui,sans-serif;color:#003456;
-    transition:opacity .45s, transform .45s}
+  .es-teksti{position:fixed;left:50%;bottom:34px;z-index:99998;pointer-events:none;transform:translate(-50%,18px);opacity:0;
+    display:flex;align-items:center;gap:18px;width:min(940px,calc(100vw - 80px));padding:20px 28px 20px 20px;background:#0F1B2D;
+    border-radius:12px;box-shadow:0 18px 50px rgba(5,12,25,.45),0 0 0 1px rgba(255,255,255,.08);font:700 23px/1.4 Nunito,system-ui,sans-serif;color:#fff;
+    transition:opacity .6s, transform .6s}
+  .es-teksti span{text-wrap:balance}
+  .es-hamaru{position:fixed;left:0;right:0;bottom:0;height:220px;z-index:99997;pointer-events:none;opacity:0;transition:opacity .6s;
+    background:linear-gradient(to top,rgba(10,18,32,.45),rgba(10,18,32,0))}
+  .es-hamaru.on{opacity:1}
+  .es-kohde{position:fixed;z-index:99996;pointer-events:none;border:3px solid #F5A524;border-radius:10px;box-shadow:0 0 0 6px rgba(245,165,36,.22),0 0 0 9999px rgba(10,18,32,.18);
+    opacity:0;transition:opacity .5s, left .6s, top .6s, width .6s, height .6s}
+  .es-kohde.on{opacity:1}
   .es-teksti.on{opacity:1;transform:translate(-50%,0)}
   .es-teksti.ylos{bottom:auto;top:84px}
-  .es-teksti i{font-style:normal;flex:none;background:#1F5FBF;color:#fff;font:800 13px Nunito,system-ui;letter-spacing:.06em;padding:6px 10px;border-radius:4px}
+  .es-teksti i{font-style:normal;flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;background:#F5A524;color:#0F1B2D;font:800 14px Nunito,system-ui;letter-spacing:.06em;padding:8px 12px;border-radius:6px}
+  .es-teksti i small{font:700 11px Nunito,system-ui;letter-spacing:.04em;opacity:.75}
   .es-kortti{position:fixed;inset:0;z-index:100001;display:flex;flex-direction:column;justify-content:center;padding:0 9vw;
     font-family:Nunito,system-ui,sans-serif;opacity:0;transition:opacity .7s;pointer-events:none}
   .es-kortti.on{opacity:1}
@@ -53,7 +61,15 @@
   kursori.className = "es-kursori";
   kursori.innerHTML = `<svg viewBox="0 0 24 24" width="30" height="30"><path d="M3 2.5v17.2l4.6-4.3 3 6.9 3.2-1.4-3-6.8h6.3z" fill="#14181D" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
   const teksti = document.createElement("div"); teksti.className = "es-teksti";
-  document.body.append(kursori, teksti);
+  const hamaru = document.createElement("div"); hamaru.className = "es-hamaru";
+  const kohde = document.createElement("div"); kohde.className = "es-kohde";
+  document.body.append(hamaru, kohde, kursori, teksti);
+  // korostus: kehys kohteen ympärille ja muu näkymä hieman himmeämmäksi
+  function korosta(el) { if (!el || !el.getBoundingClientRect) { kohde.classList.remove("on"); return; }
+    const b = el.getBoundingClientRect(), v = 8;
+    Object.assign(kohde.style, { left: (b.left - v) + "px", top: (b.top - v) + "px", width: (b.width + 2 * v) + "px", height: (b.height + 2 * v) + "px" });
+    kohde.classList.add("on"); }
+  const poistaKorostus = () => kohde.classList.remove("on");
 
   /* ---------- liike ---------- */
   let kx = innerWidth * .55, ky = innerHeight * .55;
@@ -62,9 +78,10 @@
   const keski = el => { const b = el.getBoundingClientRect(); return { x: b.left + b.width / 2, y: b.top + b.height / 2 }; };
   function liiku(kohde, kesto) {
     tarkista();
+    if (kohde instanceof Element) korosta(kohde); else poistaKorostus();
     const p = kohde instanceof Element ? keski(kohde) : kohde;
     const x0 = kx, y0 = ky, dx = p.x - x0, dy = p.y - y0, d = Math.hypot(dx, dy);
-    kesto = kesto || Math.min(1300, Math.max(520, d * 1.15));
+    kesto = kesto || Math.min(1800, Math.max(800, d * 1.6));
     const kaari = Math.min(70, d * .12), nx = -dy / (d || 1), ny = dx / (d || 1);   // pieni kaari, ei suoraa viivaa
     return new Promise(res => { const t0 = performance.now();
       const askel = t => { const q = Math.min(1, (t - t0) / kesto), e = ease(q), b = Math.sin(Math.PI * e) * kaari;
@@ -86,6 +103,7 @@
     } else if (opts.alas) el.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, clientX: kx, clientY: ky, button: 0 }));
     else if (typeof el.click === "function") el.click();
     else el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, clientX: kx, clientY: ky }));   // SVG-elementit
+    poistaKorostus();
     await odota(opts.jalkeen ?? 700);
   }
   async function vieri(y, kesto = 1400, el = null) {
@@ -102,12 +120,16 @@
   const tekstinMukaan = (sel, re) => $$(sel).find(e => re.test(e.textContent.trim()) && e.getBoundingClientRect().height > 0);
 
   /* ---------- kuvatekstit ja kortit ---------- */
+  const VAIHEET = ["MITTAA", "TYÖMAA", "HAKU", "LINJA", "ENNAKOI"];
   async function kerro(tag, t, ylos = false) {
-    if (teksti.classList.contains("on")) { teksti.classList.remove("on"); await odota(380); }
+    if (teksti.classList.contains("on")) { teksti.classList.remove("on"); await odota(450); }
     teksti.classList.toggle("ylos", ylos);
-    teksti.innerHTML = `<i>${tag}</i><span>${t}</span>`; teksti.classList.add("on");
+    const n = VAIHEET.findIndex(v => tag.startsWith(v) || (v === "LINJA" && /TEKOÄLY|IHMINEN/.test(tag)) || (v === "TYÖMAA" && tag === "KARTTA"));
+    teksti.innerHTML = `<i>${tag}${n >= 0 ? `<small>${n + 1} / ${VAIHEET.length}</small>` : ""}</i><span>${t}</span>`;
+    teksti.classList.add("on"); hamaru.classList.add("on");
+    await odota(1400 + t.length * 38);   // lukuaika ennen kuin jotain tapahtuu
   }
-  const piilotaTeksti = () => teksti.classList.remove("on");
+  const piilotaTeksti = () => { teksti.classList.remove("on"); hamaru.classList.remove("on"); poistaKorostus(); };
   async function kortti(luokka, html, kesto) {
     const k = document.createElement("div"); k.className = "es-kortti " + luokka; k.innerHTML = html; document.body.appendChild(k);
     await odota(30); k.classList.add("on"); await odota(kesto); k.classList.remove("on"); await odota(750); k.remove();
@@ -120,7 +142,7 @@
   const ws = k => document.querySelector(`.tp-pal[data-pal="${k}"]`);
   const nakyy = el => el && el.getBoundingClientRect().height > 0 && el.getBoundingClientRect().width > 0;
   async function kirjoita(input, txt) { input.focus(); input.value = "";
-    for (const c of txt) { tarkista(); input.value += c; input.dispatchEvent(new Event("input", { bubbles: true })); await odota(230); } }
+    for (const c of txt) { tarkista(); input.value += c; input.dispatchEvent(new Event("input", { bubbles: true })); await odota(420); } }
   async function kierros() {
     document.documentElement.classList.add("esitys");
     await odotaEl(() => typeof S !== "undefined" && S.loaded, 30000);
