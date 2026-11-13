@@ -4582,7 +4582,7 @@ addEventListener("DOMContentLoaded", function(){
   document.getElementById("ttmVideo").onclick = ()=>{ sulje();
     const aja = ()=>window.ttOpastus && window.ttOpastus();
     if(window.ttOpastus) return aja();
-    const es = document.createElement("script"); es.src = "esitys.js?v=7"; es.onload = aja; document.body.appendChild(es); };
+    const es = document.createElement("script"); es.src = "esitys.js?v=8"; es.onload = aja; document.body.appendChild(es); };
   m.addEventListener("mousedown", e=>{ if(e.target===m) sulje(); });
   addEventListener("keydown", e=>{ if(e.key==="Escape" && !m.hidden) sulje(); });
   help.onclick = ()=>auki(true);
@@ -5150,7 +5150,7 @@ route(); load(); loadAI();
 { const hk = ()=>{ if(!document.hidden && S.nakyma!=="halytykset") hRpc("halytykset_lista").then(hBell).catch(()=>{}); };
   document.getElementById("hBell").hidden = false; hk(); setInterval(hk, 60000); }
 // esitysajo videota varten (?demo): ladataan vain pyydettäessä
-try{ if(new URLSearchParams(location.search).has("demo")){ const es = document.createElement("script"); es.src = "esitys.js?v=7"; document.body.appendChild(es); } }catch(e){}
+try{ if(new URLSearchParams(location.search).has("demo")){ const es = document.createElement("script"); es.src = "esitys.js?v=8"; document.body.appendChild(es); } }catch(e){}
 setInterval(()=>{ if(!document.hidden) loadAI(); }, 600000);
 setInterval(()=>{ if(!document.hidden) load(); }, 120000);
 </script>

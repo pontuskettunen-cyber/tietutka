@@ -138,12 +138,17 @@
     if (kpi) { await liiku(kpi); await odota(2200); }
 
     // 2. TYÖMAA
-    const kortti1 = $$("#cards .card").find(nakyy);
+    // mieluiten työ, jolle on mitattu tulos (sama katu ilman töitä vs. työn aikana)
+    const kortit = $$("#cards .card").filter(nakyy);
+    const mitattu = kortit.find(c => { const l = S.byId && S.byId[c.dataset.id]; const im = l && typeof impact === "function" ? impact(l) : null; return im && im.tod && im.s != null; });
+    const kortti1 = mitattu || kortit[0];
     if (kortti1) {
-      await kerro("TYÖMAA", "Lista näyttää työt, jotka aiheuttavat eniten lisäaikaa. Klikkaa työmaata.");
+      await kerro("TYÖMAA", "Lista näyttää työt, jotka vaikuttavat eniten. Klikkaa työmaata.");
       await klikkaa(kortti1, { jalkeen: 1600 });
       const f = await odotaEl(() => $$("#detail .facts > div").find(nakyy), 4000);
-      if (f) { await kerro("TYÖMAA", "Lisäaika jokaista ohi ajavaa bussia tai ratikkaa kohden. Mitattu = sama katu ilman töitä vs. työn aikana.");
+      if (f) { await kerro("TYÖMAA", mitattu
+          ? "Lisäaika jokaista ohi ajavaa bussia tai ratikkaa kohden, mitattuna: sama katu ilman töitä vs. työn aikana."
+          : "Lisäaika jokaista ohi ajavaa bussia tai ratikkaa kohden. Harmaa luku on arvio, joka mitataan, kun työ päättyy.");
         await liiku(f); await odota(2600); }
       const siru = $$("#detail .lsiru").find(nakyy);
       if (siru) { await kerro("KARTTA", "Linjan numerosta reitti ja sen työmaat tulevat kartalle.");
