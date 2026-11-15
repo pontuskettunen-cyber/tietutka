@@ -846,6 +846,24 @@ html:root #v-home .tp-pal .card.sel{background:#FFF6E5!important;box-shadow:inse
 html.hsl .top .omalinja{margin-left:10px!important}
 @media(max-width:1250px){.top .saa-top .saa-pill-l{display:none}}
 
+
+/* Tilanne nyt tiiviinä (11/2026): yksi tunnuslukurivi, päätösrivi ja yksiriviset työmaat */
+html:root #v-home .tp-pal .strip.s3 .tile.tbtn{grid-template-columns:auto 1fr auto!important}
+html:root #v-home .tp-pal .strip.s3 .tile.tbtn .tmore{grid-column:3!important;grid-row:1;justify-self:end;font-size:11.5px}
+html:root #v-home .tp-pal .strip.s3 .tile.tbtn b{font-size:22px!important;white-space:nowrap}
+html:root #v-home .tp-pal .strip.s3 .tile.odottaa.yksi{display:flex!important;align-items:baseline;gap:8px;padding:6px 0!important}
+html:root #v-home .tp-pal .strip.s3 .tile.odottaa.yksi b{font-size:15px!important;min-width:0}
+html:root #v-home .tp-pal .strip.s3 .tile.odottaa.yksi small{font-size:12px}
+html:root #v-home .tp-pal .card.rivi{display:grid!important;grid-template-columns:18px minmax(0,1fr) auto 44px!important;grid-template-areas:none!important;gap:0 8px;padding:5px 4px!important;align-items:center}
+#v-home .tp-pal .card.rivi .num{width:18px;height:18px;font-size:10.5px}
+#v-home .tp-pal .card.rivi .t{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-home .tp-pal .card.rivi .ln{font-size:11px;color:var(--m);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+#v-home .tp-pal .card.rivi .hh{font-size:13.5px;font-weight:700;color:#C62828;text-align:right;white-space:nowrap}
+#v-home .tp-pal .card.rivi .hh.arv{color:#C62828}
+#v-home .tp-pal .card.rivi .lisa{display:none;grid-column:2/-1;font-size:11.5px;color:var(--m);padding-top:2px;line-height:1.35}
+#v-home .tp-pal .card.rivi.sel .lisa{display:block}
+@media(hover:hover){#v-home .tp-pal .card.rivi:hover .lisa{display:block}}
+#v-home .tp-pal .tp-olot{margin-top:8px}
 /* Ei pillereitä paleteissa */
 .tp-ph .seg{border-radius:6px!important;padding:2px!important;border:1px solid var(--l)!important;background:var(--p)!important}
 .tp-ph .seg button{border-radius:4px!important}
@@ -2306,6 +2324,7 @@ function renderBrief(){
     if(S.uusi && t.i.vehH) head = `<em>${esc(shortStreet(t.l))}</em> aiheuttaa eniten lisäaikaa: ${nf(t.i.vehH,1)} h vuorokaudessa.${t.i.kind==="v2"&&!t.i.tod?' <span class="hnote">arvio</span>':""}`; }
   else head = `${nf(runR.length)} katutyötä bussi- ja ratikkareittien varrella. Vaikutusmittaus käynnistyy.`;
   document.getElementById("brief").innerHTML = head;
+  document.getElementById("brief").style.display = S.uusi && rH.length ? "none" : "";   // lista näyttää saman ykkösenä
   // Kolme signaalia: suurin vaikutus, seuraavaksi alkava, kasautumat
   const sig = [];
   if(r[1]) sig.push(`<a class="sig" href="#/?l=${encodeURIComponent(r[1].l.lupa_id)}"><small>Toiseksi suurin</small><b>${esc(shortStreet(r[1].l))}</b><span>${r[1].i.s!=null?sgn(r[1].i.s)+" per ohitus · ":""}${esc(lines(r[1].l.linjat).slice(0,4).join(", "))}</span></a>`);
@@ -2337,9 +2356,12 @@ function renderBrief(){
   const merkittava = (()=>{ const w = (S.saa||[]).filter(x=>+new Date(x.bucket) >= Date.now()-4*3600e3); return vNyt.length || w.some(x=>(+x.sade_mm||0) >= 1 || /lumi|räntä|jäätävä|rankka/.test(x.luokka||"")); })();
   const ol = document.getElementById("olot"); if(ol){ ol.innerHTML = (!S.uusi || merkittava) ? olosuhteetHTML() : ""; wireInfo(ol); }
   document.getElementById("kpis").innerHTML =
-    tile(nf(vehH,1)+" h" + (tr ? ` <span class="trend ${tr.cls}">${tr.txt}</span>` : ""), (per.full ? `kaikkien bussien ja ratikoiden lisäaika yhteensä vuorokaudessa${S.ik==="7d"?" (keskimäärin)":""}` : `kaikkien bussien ja ratikoiden lisäaika yhteensä ${per.dur} aikana`) + `<span class="tsub">${(()=>{ const pv = S.ik==="7d" ? Math.max(1, Math.min(7, (Date.now()-+new Date(S.tila.havainto_alkoi||Date.now()))/DAY)) : 1, n = bd.sites.reduce((a,x)=>a+(x.n||0),0)/pv; return n ? `${nf(Math.round(n/100)*100)} työmaan ohitusta${pv>1?" / vrk":""} × keskimäärin ${Math.round(vehH*3600/n)} s` : ""; })()} · ${bd.nTod ? `mitattu ${nf(bd.totTod,1)} h, loput arviota` : "arvio"}</span>`, "menetetty", "bd") +
+    (S.uusi ? (()=>{ const pv = S.ik==="7d" ? Math.max(1, Math.min(7, (Date.now()-+new Date(S.tila.havainto_alkoi||Date.now()))/DAY)) : 1, n = bd.sites.reduce((a,x)=>a+(x.n||0),0)/pv;
+        const kaava = (n ? `${nf(Math.round(n/100)*100)} työmaan ohitusta${pv>1?" / vrk":""} × keskimäärin ${Math.round(vehH*3600/n)} s · ` : "") + (bd.nTod ? `mitattu ${nf(bd.totTod,1)} h, loput arviota` : "arvio");
+        return tile(nf(vehH,1)+" h" + (tr ? ` <span class="trend ${tr.cls}">${tr.txt}</span>` : ""), `lisäaikaa / vrk${S.ik==="7d"?" (ka.)":""}<span class="tsub" title="${esc(kaava)}">${nf(runR.length)} työmaata reiteillä · ${nf(lineSet.size)} linjaa</span>`, "menetetty", "bd"); })() :
+    tile(nf(vehH,1)+" h" + (tr ? ` <span class="trend ${tr.cls}">${tr.txt}</span>` : ""), (per.full ? `kaikkien bussien ja ratikoiden lisäaika yhteensä vuorokaudessa${S.ik==="7d"?" (keskimäärin)":""}` : `kaikkien bussien ja ratikoiden lisäaika yhteensä ${per.dur} aikana`) + `<span class="tsub">${(()=>{ const pv = S.ik==="7d" ? Math.max(1, Math.min(7, (Date.now()-+new Date(S.tila.havainto_alkoi||Date.now()))/DAY)) : 1, n = bd.sites.reduce((a,x)=>a+(x.n||0),0)/pv; return n ? `${nf(Math.round(n/100)*100)} työmaan ohitusta${pv>1?" / vrk":""} × keskimäärin ${Math.round(vehH*3600/n)} s` : ""; })()} · ${bd.nTod ? `mitattu ${nf(bd.totTod,1)} h, loput arviota` : "arvio"}</span>`, "menetetty", "bd")) +
     (S.uusi ? (()=>{ const sa = (S.sug||[]).filter(x=>!x.paatos).length, T = typeof tarkistettavat==="function" ? tarkistettavat() : null, ta = T ? T.filter(x=>!x.k).length : 0;
-        return `<div class="tile odottaa"><b>${nf(sa+ta)}</b><small>odottaa suunnittelijan päätöstä<span class="tsub"><a href="#/linjat" onclick="S.sugAuki=true">${nf(sa)} aikatauluehdotusta</a> · <a href="#/tyot" onclick="setTimeout(()=>document.getElementById('tark')?.scrollIntoView({block:'center'}),400)">${nf(ta)} tarkistettavaa työmaata</a></span><span class="tsub">${nf(runR.length)} työmaata bussi- tai ratikkareitillä · ${nf(lineSet.size)} linjaa</span></small></div>`; })() : "") +
+        return `<div class="tile odottaa yksi"><b>${nf(sa+ta)}</b><small>odottaa päätöstä · <a href="#/linjat" onclick="S.sugAuki=true">${nf(sa)} aikataulua</a> · <a href="#/tyot" onclick="setTimeout(()=>document.getElementById('tark')?.scrollIntoView({block:'center'}),400)">${nf(ta)} tarkistettavaa</a></small></div>`; })() : "") +
     (S.uusi ? "" : tile(nf(runR.length), `katutyötä bussi- tai ratikkareitillä<span class="tsub">${nf(run.length)} käynnissä kaikkiaan · ${nf(lineSet.size)} linjaa</span>`, "reitilla", null, "#/tyot")) +
     (S.uusi ? "" : (S.sug||[]).filter(x=>!x.paatos).length ? `<a class="tile" href="#/linjat"><b>${S.sug.filter(x=>!x.paatos).length}</b><small>aikatauluagentin ${S.sug.filter(x=>!x.paatos).length===1?"ehdotus":"ehdotusta"}<span class="tsub">odottaa suunnittelijan arviota</span></small></a>`
       : tile(nf(up7.length), `katutyötä alkaa viikon sisällä<span class="tsub">${nf(up7R.length)} bussi- tai ratikkareitillä · mitataan jo ennen alkua</span>`, "alkaa", null, "#/tyot"));
@@ -2357,11 +2379,11 @@ function renderBrief(){
   renderBreakdown();
 }
 function renderCards(){
-  const rk = ranked().slice(0,6), items = rk.map(x=>x.l), muut = new Map(rk.map(x=>[x.l.lupa_id, x.muut||[]]));
+  const rk = ranked().slice(0,S.uusi?10:6), items = rk.map(x=>x.l), muut = new Map(rk.map(x=>[x.l.lupa_id, x.muut||[]]));
   const titleEl = document.getElementById("cardsTitle");
   const anyImpact = items.some(l=>impact(l)?.vehH > 0.05);
   const anyTod = items.some(l=>impact(l)?.tod);
-  titleEl.textContent = S.uusi ? (anyImpact ? `Eniten lisäaikaa aiheuttavat työt${anyTod?"":" (arvio)"}` : "Vilkkaimpien reittien työt nyt") : anyImpact ? `Eniten vaikuttavat työt nyt · paljonko jokainen ohi ajava bussi tai ratikka hidastuu${anyTod?"":" (arvio)"}` : "Vilkkaimpien reittien työt nyt";
+  titleEl.textContent = S.uusi ? (anyImpact ? `Eniten lisäaikaa${anyTod?"":" · arvio"}` : "Vilkkaimpien reittien työt nyt") : anyImpact ? `Eniten vaikuttavat työt nyt · paljonko jokainen ohi ajava bussi tai ratikka hidastuu${anyTod?"":" (arvio)"}` : "Vilkkaimpien reittien työt nyt";
   const el = document.getElementById("cards");
   el.innerHTML = items.map((l,i)=>{
     const ph = phase(l), im = impact(l);
@@ -2369,6 +2391,11 @@ function renderCards(){
     if(im && im.s != null) big = `<b class="${!im.tod?"arv":im.s>10?"slow":""}" title="${im.tod?`Mitattu: sama väli työn aikana vs. ${vertTxt(im.vert)}`:"Arvio: väliä verrataan linjan muihin osuuksiin, koska samaa katua ei ole mitattu ilman työtä"}${im.n?" ("+nf(im.n)+" ohitusta)":""}">${sgn(im.s)}<small class="cunit">/ ohitus</small></b><span class="vchip ${im.tod&&!im.alust?"tod":""}">${mitTxt(im)}</span>`;
     if(S.uusi && im && im.vehH > 0.05) big = `<b class="slow" title="Lisäaika yhteensä kaikille ohi ajaneille busseille ja ratikoille">${nf(im.vehH,1)} h<small class="cunit"> yht. · ${sgn(im.s)} / ohitus</small></b>`;
     else if(!(im && im.s != null)) big = `<b title="ajoa / vrk ohi työmaan">${nf(l.ajoja_vrk)}<small style="font-size:11px;color:var(--m)"> ajoa</small></b>`;
+    if(S.uusi){ const ls = lines(l.linjat).filter(r=>!/N$/.test(r)), mu = muut.get(l.lupa_id)||[];
+      const arvo = im && im.vehH > 0.05 ? nf(im.vehH,1) : im && im.s != null ? sgn(im.s) : nf(l.ajoja_vrk);
+      const yks = im && im.vehH > 0.05 ? "h / vrk" : im && im.s != null ? "/ ohitus" : "ajoa / vrk";
+      const lisa = [im && im.vehH > 0.05 && im.s != null ? `${sgn(im.s)} / ohitus` : "", im && im.n ? `${nf(im.n)} ohitusta` : "", mu.length ? `samalla kohdalla ${mu.length} muuta työtä` : "", purpose(l)].filter(Boolean).join(" · ");
+      return `<button class="card rivi ${S.sel===l.lupa_id?"sel":""}" data-id="${esc(l.lupa_id)}" title="${esc(shortStreet(l))}: ${esc(arvo+" "+yks)}"><span class="num">${i+1}</span><span class="t">${esc(shortStreet(l))}</span><span class="ln">${esc(ls.slice(0,3).join(" · "))}${ls.length>3?` +${ls.length-3}`:""}</span><span class="hh ${im&&im.tod?"":"arv"}">${arvo}</span><span class="lisa">${esc(lisa)}</span></button>`; }
     return `<button class="card ${S.sel===l.lupa_id?"sel":""}" data-id="${esc(l.lupa_id)}">
       <div class="hd"><span class="num">${i+1}</span><span class="t">${esc(shortStreet(l))}</span>${(muut.get(l.lupa_id)||[]).length ? `<span class="alue-n" title="${esc("Sama mittaus kuin: "+muut.get(l.lupa_id).map(x=>shortStreet(x)).join(", "))}">+${muut.get(l.lupa_id).length}</span>` : ""}</div>
       <div class="w">${esc(purpose(l))}</div>
@@ -2961,7 +2988,7 @@ const TP_WS = {
     tyomaa: {auki:false, r:16, b:16, w:460},
     agentti:{auki:false, l:88, b:16, w:520}}},
   home: {sec:"v-home", avain:"tt_tp_home", def:{
-    tilanne:{auki:true,  l:88, t:16, w:430},
+    tilanne:{auki:true,  l:88, t:16, w:380},
     tyomaa: {auki:true,  r:16, t:16, w:450},
     tanaan: {auki:false, l:88, b:16, w:560},
     ai:     {auki:false, r:16, b:16, w:540}}},
@@ -3111,7 +3138,7 @@ function tpRakennaHome(){
   if(ik && tph) tph.after(ik);
   // Sään vaikutus avattavaksi osioksi, ettei se vie tilaa
   const olot = document.getElementById("olot");
-  if(olot){ const d = document.createElement("details"); d.className = "tp-lisa tp-olot"; d.innerHTML = "<summary>Sään vaikutus liikenteeseen</summary>"; olot.before(d); d.appendChild(olot); }
+  if(olot){ const d = document.createElement("details"); d.className = "tp-lisa tp-olot"; d.innerHTML = "<summary>Sään vaikutus liikenteeseen</summary>"; olot.before(d); d.appendChild(olot); const pb = h.querySelector('.tp-pal[data-pal="tilanne"] .tp-pb'); if(pb) pb.appendChild(d); }
   [split, q(".layer-k"), q(".subnav"), document.getElementById("intro")].forEach(x=>x && x.remove());
   tpInitWs("home", [["tilanne","Tilanne nyt"],["tyomaa","Työmaa: valitun työmaan tiedot"],["tanaan","Tänään huomioitavaa"],["ai","Tekoäly: katsaus ja kysy"]], [["live","Live: bussit ja ratikat livenä"]]);
   // Työmaan valinta avaa Työmaa-paletin
