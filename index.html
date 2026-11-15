@@ -2987,7 +2987,7 @@ const TP_WS = {
     tyot:   {auki:true,  r:16, t:16, w:540},
     tyomaa: {auki:false, r:16, b:16, w:460},
     agentti:{auki:false, l:88, b:16, w:520}}},
-  home: {sec:"v-home", avain:"tt_tp_home", def:{
+  home: {sec:"v-home", avain:"tt_tp_home", ver:2, nollaa:["tilanne"], def:{
     tilanne:{auki:true,  l:88, t:16, w:380},
     tyomaa: {auki:true,  r:16, t:16, w:450},
     tanaan: {auki:false, l:88, b:16, w:560},
@@ -2999,13 +2999,15 @@ const tpMax = () => innerWidth >= 1700 ? 3 : 2;   // yhtä aikaa auki olevat pal
 function tpLue(ws){ const d = TP_WS[ws].def; let o = {}; try{ o = JSON.parse(localStorage.getItem(TP_WS[ws].avain)||"{}"); }catch(e){}
   if(!o || typeof o !== "object") o = {};
   const tal = (o.pal && typeof o.pal === "object") ? o.pal : {};
+  // asettelun versio: kun paletin sisältö muuttuu, sen vanha leveys ja korkeus unohdetaan kerran (paikka säilyy)
+  if(TP_WS[ws].ver && o.ver !== TP_WS[ws].ver) (TP_WS[ws].nollaa||[]).forEach(k=>{ if(tal[k]){ delete tal[k].w; delete tal[k].h; } });
   const r = {pal:{}, jarj:[]}; Object.keys(d).forEach(k=>{ const t = tal[k] && typeof tal[k] === "object" ? tal[k] : {}; r.pal[k] = {...d[k], ...t}; });
   r.jarj = (Array.isArray(o.jarj) ? o.jarj : []).filter(k=>r.pal[k] && r.pal[k].auki);
   Object.keys(d).forEach(k=>{ if(r.pal[k].auki && !r.jarj.includes(k)) r.jarj.push(k); });
   // vanhan version tila voi sisältää liian monta avointa palettia: suljetaan vanhimmat
   while(r.jarj.filter(k=>!r.pal[k].min).length > tpMax()){ const v = r.jarj.find(k=>!r.pal[k].min); r.pal[v].auki = false; r.jarj = r.jarj.filter(k=>k!==v); }
   return r; }
-function tpTallenna(ws){ try{ localStorage.setItem(TP_WS[ws].avain, JSON.stringify(TPS[ws])); }catch(e){} }
+function tpTallenna(ws){ try{ localStorage.setItem(TP_WS[ws].avain, JSON.stringify({...TPS[ws], ver:TP_WS[ws].ver})); }catch(e){} }
 function tpPaikka(el, st){
   const pw = el.parentElement.clientWidth, ph = el.parentElement.clientHeight; el.style.width = (pw > 400 ? Math.min(st.w, pw - 104) : st.w) + "px";
   // tallennettu koko ja paikka rajataan näkyvään alueeseen (ikkuna voi olla pienempi kuin tallennettaessa)
@@ -3059,7 +3061,7 @@ function tpInitWs(ws, paletit, kerrokset){
   const sec = document.getElementById(TP_WS[ws].sec); if(!sec || sec.dataset.tp) return; sec.dataset.tp = "1";
   // kiinteä työpöytä ei saa vieriä sivuttain (esim. kun kohdistus siirtyy reunan yli menevään kenttään)
   sec.addEventListener("scroll", ()=>{ if(!tpMobiili() && (sec.scrollLeft || sec.scrollTop)){ sec.scrollLeft = 0; sec.scrollTop = 0; } });
-  sec.classList.add("tp-ws"); TPS[ws] = tpLue(ws);
+  sec.classList.add("tp-ws"); TPS[ws] = tpLue(ws); if(TP_WS[ws].ver) tpTallenna(ws);
   const vanha = sec.querySelector(":scope > .tp-rail"); if(vanha) vanha.remove();
   sec.insertAdjacentHTML("beforeend", tpRail(ws, paletit, kerrokset));
   sec.querySelectorAll(".tp-rail [data-nak]").forEach(b=>b.onclick = ()=>{ S.karttaNakyma = tpKarttaNyt(); location.hash = b.dataset.nak; });
