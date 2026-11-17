@@ -25,6 +25,7 @@ s = re.sub(r'<meta name="description" content="[^"]*">',
            '<meta name="description" content="Työmaatutka mittaa, paljonko Helsingin katutyöt hidastavat busseja ja ratikoita, ja varoittaa etukäteen töistä, jotka osuvat joukkoliikenteen reiteille.">', s, count=1)
 s = re.sub(r'<link rel="canonical" href="[^"]*">', '<link rel="canonical" href="https://pontuskettunen-cyber.github.io/tyomaatutka/">', s, count=1)
 s = re.sub(r'<meta property="og:title" content="[^"]*">', '<meta property="og:title" content="Työmaatutka · katutöiden vaikutus joukkoliikenteeseen">', s, count=1)
+s = re.sub(r'\n<meta (property="og:image[^"]*"|name="twitter:card") content="[^"]*">', '', s)  # Tietutkan linkkikuva ei Työmaatutkaan
 s = re.sub(r'<meta property="og:url" content="[^"]*">', '<meta property="og:url" content="https://pontuskettunen-cyber.github.io/tyomaatutka/">', s, count=1)
 R('<meta name="robots" content="noindex,nofollow">',
   '<meta name="robots" content="index,follow">\n<meta name="msvalidate.01" content="BF64DF159C58EAE6C980EEA07254E5FF" />')
